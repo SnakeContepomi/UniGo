@@ -40,19 +40,17 @@
             android:paddingTop="12dp"
             android:textSize="20sp" />
 
-        <!-- ToDo: Terminare bottone material (raised button), click + ombre -->
         <Button
             android:id="@+id/btnLogin"
             android:layout_width="300dp"
-            android:layout_height="36dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:layout_weight="1"
-            android:background="@drawable/round_shape_btn"
-            android:fontFamily="sans-serif"
+            android:onClick="onClick"
             android:text="@string/login"
-            android:textColor="@color/colorWhite"
-            android:textSize="14sp" />
+            android:textSize="16sp"
+            android:theme="@style/AppTheme.Button" />
 
         <TextView
             android:id="@+id/txtSignUp"
@@ -61,8 +59,9 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:fontFamily="sans-serif"
-            android:paddingTop="12dp"
+            android:paddingTop="8dp"
             android:text="@string/register"
             android:textSize="12sp" />
     </LinearLayout>
+
 </LinearLayout>
