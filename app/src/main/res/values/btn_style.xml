@@ -1,7 +1,0 @@
-<resources>
-    <style name="AppTheme.Button" parent="Widget.AppCompat.Button.Colored">
-        <item name="colorButtonNormal">@color/colorPrimaryDark</item>
-        <item name="android:textColor">@color/colorWhite</item>
-        <item name="android:fontFamily">sans-serif</item>
-    </style>
-</resources>

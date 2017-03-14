@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "396189354124",
+    "firebase_url": "https://unigo-569da.firebaseio.com",
+    "project_id": "unigo-569da",
+    "storage_bucket": "unigo-569da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:396189354124:android:0472289993459170",
+        "android_client_info": {
+          "package_name": "it.unibo.studio.unigo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "396189354124-l08jhihklisurbmeb7djajdkb7kulo7e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.unibo.studio.unigo",
+            "certificate_hash": "d5a93735c2049cdb3f60d210e6f5926e2bff0d82"
+          }
+        },
+        {
+          "client_id": "396189354124-kkhqhqfvq503sta2veirvg0j16ni4qv8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAONhOZSwhxcmzdCd3sS4BnFh0BtKtl5_4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "396189354124-kkhqhqfvq503sta2veirvg0j16ni4qv8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
