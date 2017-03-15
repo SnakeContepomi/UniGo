@@ -7,9 +7,23 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="RaisedButton" parent="Widget.AppCompat.Button.Colored">
+    <!-- RaisedButton layout -->
+    <style name="RaisedButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/colorPrimaryDarkest</item>
         <item name="colorButtonNormal">@color/colorPrimaryDark</item>
         <item name="android:textColor">@color/colorWhite</item>
-        <item name="android:fontFamily">sans-serif</item>
     </style>
+
+    <!-- Sinup Toolbar -->
+    <style name="SignupToolbar">
+        <item name="theme">@style/ThemeOverlay.AppCompat.Dark</item>
+        <item name="navigationIcon">@drawable/ic_arrow_back_white_24px</item>
+        <item name="android:background">?colorPrimary</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+
+    <style name="ToolbarTextAppearance">
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
+
 </resources>

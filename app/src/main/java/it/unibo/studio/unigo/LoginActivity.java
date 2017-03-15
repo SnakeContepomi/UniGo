@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -16,10 +17,16 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import it.unibo.studio.unigo.main.MainActivity;
+import it.unibo.studio.unigo.signup.SignupActivity;
+
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener
 {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    private enum Error {EMAIL, PASS, LOGIN};
+
     private TextInputLayout inEmail, inPass;
     private Button btnLogin;
     private TextView txtSignUp;
@@ -46,7 +53,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     // User is signed in
                     if (user.isEmailVerified())
                     {
-                        //ToDo:
+                        //ToDo: Snackbar!!!
                         //Toast.makeText(getApplicationContext(), "User logged in: " + user.getEmail(), Toast.LENGTH_SHORT).show();
                         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(myIntent);
@@ -62,6 +69,34 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         };
+
+        inEmail.getEditText().setOnKeyListener(new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
+                if (inEmail.isErrorEnabled())
+                {
+                    inEmail.setError(null);
+                    inEmail.setErrorEnabled(false);
+                }
+                return false;
+            }
+        });
+
+        inPass.getEditText().setOnKeyListener(new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
+                if (inPass.isErrorEnabled())
+                {
+                    inPass.setError(null);
+                    inPass.setErrorEnabled(false);
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -88,6 +123,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 login(inEmail.getEditText().getText().toString(), inPass.getEditText().getText().toString());
                 break;
             case R.id.txtSignUp:
+                startActivity(new Intent(LoginActivity.this, SignupActivity.class));
                 break;
         }
     }
@@ -102,6 +138,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void login(String email, String password)
     {
+        boolean emptyField = false;
+
         /*mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
                 {
@@ -131,24 +169,58 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         }
                     }
                 });*/
+        if (inEmail.getEditText().getText().toString().equals(""))
+        {
+            errorHandler(Error.EMAIL);
+            emptyField = true;
+        }
 
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
-                {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task)
+        if (inPass.getEditText().getText().toString().equals(""))
+        {
+            errorHandler(Error.PASS);
+            emptyField = true;
+        }
+        if (emptyField == false)
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
                     {
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful())
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task)
                         {
-                            Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_SHORT).show();
-
-                            inPass.setErrorEnabled(true);
-                            inPass.setError(getResources().getString(R.string.error_login));
+                            // Credenziali errate
+                            if (!task.isSuccessful())
+                            {
+                                Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_SHORT).show();
+                                errorHandler(Error.LOGIN);
+                            }
                         }
-                    }
-                });
+                    });
+    }
+
+    private void errorHandler(Error e)
+    {
+        switch (e)
+        {
+            case EMAIL:
+                inEmail.setErrorEnabled(true);
+                inEmail.setError(getResources().getString(R.string.error_email));
+                break;
+            case PASS:
+                inPass.setErrorEnabled(true);
+                inPass.setError(getResources().getString(R.string.error_pass));
+                break;
+            case LOGIN:
+                inPass.setErrorEnabled(true);
+                inPass.setError(getResources().getString(R.string.error_login));
+                inPass.getEditText().setText("");
+                break;
+        }
+    }
+
+    private void resetGUI(TextInputLayout layout)
+    {
+        layout.setErrorEnabled(false);
+        layout.setError(null);
+        layout.getEditText().setText("");
     }
 }

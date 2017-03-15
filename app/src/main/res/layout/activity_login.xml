@@ -2,62 +2,53 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/colorLightGray"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="@color/colorLightGray"
     tools:context="it.unibo.studio.unigo.LoginActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/inEmail"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_marginTop="200dp"
+        android:layout_gravity="center" >
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress" />
+    </android.support.design.widget.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/inEmail"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="200dp"
-            android:layout_gravity="center" >
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="@string/email" />
-        </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/inPass"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" >
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="@string/password"
+            android:inputType="textPassword" />
+    </android.support.design.widget.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/inPass"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" >
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="@string/password" />
-        </android.support.design.widget.TextInputLayout>
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:onClick="onClick"
+        android:text="@string/login"
+        android:theme="@style/RaisedButton" />
 
-        <Button
-            android:id="@+id/btnLogin"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:layout_weight="1"
-            android:onClick="onClick"
-            android:text="@string/login"
-            android:textSize="16sp"
-            android:theme="@style/RaisedButton" />
-
-        <TextView
-            android:id="@+id/txtSignUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif"
-            android:paddingTop="8dp"
-            android:text="@string/register"
-            android:textSize="14sp" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/txtSignUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="sans-serif"
+        android:onClick="onClick"
+        android:paddingTop="8dp"
+        android:text="@string/register" />
 
 </LinearLayout>
