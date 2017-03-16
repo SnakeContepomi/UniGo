@@ -1,7 +1,9 @@
 package it.unibo.studio.unigo.signup;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -9,6 +11,8 @@ import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
 
 import it.unibo.studio.unigo.R;
+
+import static android.R.attr.enabled;
 
 public class SignupActivity extends AppCompatActivity implements StepperLayout.StepperListener
 {
@@ -22,10 +26,10 @@ public class SignupActivity extends AppCompatActivity implements StepperLayout.S
 
         mStepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
         mStepperLayout.setAdapter(new StepAdapter(getSupportFragmentManager(), this));
+        mStepperLayout.setListener(this);
 
-        /*
-        mStepperLayout.setNextButtonVerificationFailed(!enabled);
-        mStepperLayout.setCompleteButtonVerificationFailed(!enabled); */
+       // mStepperLayout.setNextButtonVerificationFailed(true);
+        //mStepperLayout.setCompleteButtonVerificationFailed(!enabled);
     }
 
     @Override

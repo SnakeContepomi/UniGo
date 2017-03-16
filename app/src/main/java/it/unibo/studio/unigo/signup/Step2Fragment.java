@@ -38,4 +38,9 @@ public class Step2Fragment extends Fragment implements Step
     public void onError(@NonNull VerificationError error) {
         //handle error inside of the fragment, e.g. show error on EditText
     }
+
+    private void validateInfo()
+    {
+
+    }
 }

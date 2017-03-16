@@ -5,12 +5,16 @@ import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.stepstone.stepper.Step;
 import com.stepstone.stepper.adapter.AbstractFragmentStepAdapter;
 import com.stepstone.stepper.viewmodel.StepViewModel;
 
 import it.unibo.studio.unigo.R;
+
+import static android.os.Build.VERSION_CODES.M;
 
 public class StepAdapter extends AbstractFragmentStepAdapter
 {
@@ -22,25 +26,46 @@ public class StepAdapter extends AbstractFragmentStepAdapter
     }
 
     @Override
-    public Step createStep(int position) {
-        final Step1Fragment step = new Step1Fragment();
-        Bundle b = new Bundle();
-        b.putInt(CURRENT_STEP_POSITION_KEY, position);
-        step.setArguments(b);
-        return step;
+    public Step createStep(int position)
+    {
+       switch(position)
+       {
+           case 0:
+               return new Step1Fragment();
+           case 1:
+               return new Step2Fragment();
+           case 2:
+               return new Step3Fragment();
+           default:
+               throw new IllegalArgumentException("Errore");
+       }
     }
 
     @Override
     public int getCount() {
-        return 2;
+        return 3;
     }
 
     @NonNull
     @Override
     public StepViewModel getViewModel(@IntRange(from = 0) int position) {
         //Override this method to set Step title for the Tabs, not necessary for other stepper types
-        return new StepViewModel.Builder(context)
-                .setTitle(R.string.app_name) //can be a CharSequence instead
-                .create();
+
+        StepViewModel.Builder builder = new StepViewModel.Builder(context);
+
+        switch (position)
+        {
+            case 0:
+                builder.setTitle(R.string.step1_title);
+                break;
+            case 1:
+                builder.setTitle(R.string.step2_title);
+                break;
+            case 2:
+                builder.setTitle(R.string.step3_title);
+                break;
+        }
+
+        return builder.create();
     }
 }

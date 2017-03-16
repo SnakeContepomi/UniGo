@@ -1,10 +1,25 @@
 <resources>
     <string name="app_name">UniGo</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
+
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
     <string name="login">Accedi</string>
     <string name="register">Nuovo utente? Registrati ora</string>
     <string name="error_email">Inserire l\'email</string>
     <string name="error_pass">Inserire la password</string>
     <string name="error_login">Email o Password non validi</string>
+
+    <string name="signup_toolbar">Nuovo utente</string>
+    <string name="step1_title">Login</string>
+    <string name="step2_title">Profilo</string>
+    <string name="step3_title">Università</string>
+    <string name="step_back">Indietro</string>
+    <string name="step_next">Avanti</string>
+    <string name="step_complete">Fine</string>
+    <string name="signup_password">Conferma Password</string>
+    <string name="signup_name">Nome</string>
+    <string name="signup_lastName">Cognome</string>
+    <string name="signup_phone">Telefono</string>
+    <string name="signup_city">Città</string>
+
 </resources>

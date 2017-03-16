@@ -16,7 +16,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="@string/email"
+            android:hint="@string/login_email"
             android:inputType="textEmailAddress" />
     </android.support.design.widget.TextInputLayout>
 
@@ -28,7 +28,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="@string/password"
+            android:hint="@string/login_password"
             android:inputType="textPassword" />
     </android.support.design.widget.TextInputLayout>
 

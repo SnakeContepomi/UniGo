@@ -2,23 +2,22 @@ package it.unibo.studio.unigo.signup;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.stepstone.stepper.Step;
 import com.stepstone.stepper.VerificationError;
 
 import it.unibo.studio.unigo.R;
 
-public class Step1Fragment extends Fragment implements Step
+public class Step3Fragment extends Fragment implements Step
 {
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        View v = inflater.inflate(R.layout.fragment_step1, container, false);
+        View v = inflater.inflate(R.layout.fragment_step3, container, false);
 
         //initialize your UI
 
@@ -28,7 +27,6 @@ public class Step1Fragment extends Fragment implements Step
     @Override
     public VerificationError verifyStep() {
         //return null if the user can go to the next step, create a new VerificationError instance otherwise
-       // return new VerificationError("Capra");
         return null;
     }
 
@@ -40,10 +38,5 @@ public class Step1Fragment extends Fragment implements Step
     @Override
     public void onError(@NonNull VerificationError error) {
         //handle error inside of the fragment, e.g. show error on EditText
-    }
-
-    private void validateInfo()
-    {
-
     }
 }
