@@ -27,9 +27,6 @@ public class SignupActivity extends AppCompatActivity implements StepperLayout.S
         mStepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
         mStepperLayout.setAdapter(new StepAdapter(getSupportFragmentManager(), this));
         mStepperLayout.setListener(this);
-
-       // mStepperLayout.setNextButtonVerificationFailed(true);
-        //mStepperLayout.setCompleteButtonVerificationFailed(!enabled);
     }
 
     @Override

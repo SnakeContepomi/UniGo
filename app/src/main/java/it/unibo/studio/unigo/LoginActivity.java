@@ -16,16 +16,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.signup.SignupActivity;
+import it.unibo.studio.unigo.utils.Error;
+
+import static it.unibo.studio.unigo.utils.Error.Type.PASS;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener
 {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-    private enum Error {EMAIL, PASS, LOGIN};
+
 
     private TextInputLayout inEmail, inPass;
     private Button btnLogin;
@@ -77,8 +79,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             {
                 if (inEmail.isErrorEnabled())
                 {
-                    inEmail.setError(null);
-                    inEmail.setErrorEnabled(false);
+                    resetGUI(inEmail);
                 }
                 return false;
             }
@@ -91,8 +92,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             {
                 if (inPass.isErrorEnabled())
                 {
-                    inPass.setError(null);
-                    inPass.setErrorEnabled(false);
+                    resetGUI(inPass);
                 }
                 return false;
             }
@@ -171,13 +171,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 });*/
         if (inEmail.getEditText().getText().toString().equals(""))
         {
-            errorHandler(Error.EMAIL);
+            errorHandler(Error.Type.EMAIL);
             emptyField = true;
         }
 
         if (inPass.getEditText().getText().toString().equals(""))
         {
-            errorHandler(Error.PASS);
+            errorHandler(Error.Type.PASS);
             emptyField = true;
         }
         if (emptyField == false)
@@ -191,13 +191,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             if (!task.isSuccessful())
                             {
                                 Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_SHORT).show();
-                                errorHandler(Error.LOGIN);
+                                errorHandler(Error.Type.LOGIN);
                             }
                         }
                     });
     }
 
-    private void errorHandler(Error e)
+    private void errorHandler(Error.Type e)
     {
         switch (e)
         {
