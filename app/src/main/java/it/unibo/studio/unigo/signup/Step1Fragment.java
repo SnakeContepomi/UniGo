@@ -8,14 +8,14 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.ProviderQueryResult;
-import com.stepstone.stepper.Step;
+import com.stepstone.stepper.BlockingStep;
+import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
@@ -23,10 +23,10 @@ import it.unibo.studio.unigo.utils.Error;
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
 
-public class Step1Fragment extends Fragment implements Step
+public class Step1Fragment extends Fragment implements BlockingStep
 {
-    private FirebaseAuth mAuth;
     private boolean isValid;
+    private FirebaseAuth mAuth;
     private MaterialDialog dialog;
     private TextInputLayout inRegEmail, inRegPass, inRegPassConfirm;
 
@@ -38,7 +38,6 @@ public class Step1Fragment extends Fragment implements Step
 
         mAuth = FirebaseAuth.getInstance();
 
-
         return v;
     }
 
@@ -46,21 +45,62 @@ public class Step1Fragment extends Fragment implements Step
     @Override
     public VerificationError verifyStep()
     {
-        if (isValid())
-            return null;
+        return null;
+    }
+
+    @Override
+    public void onNextClicked(final StepperLayout.OnNextClickedCallback callback)
+    {
+        isValid = true;
+        validatePassword();
+        if (inRegEmail.getEditText().getText().toString().equals(""))
+        {
+            errorHandler(Error.Type.EMAIL_IS_EMPTY);
+            isValid = false;
+            callback.getStepperLayout().updateErrorState(true);
+        }
         else
-            return new VerificationError(getResources().getString(R.string.error_step_1));
+        {
+            dialog.show();
+            mAuth.fetchProvidersForEmail(inRegEmail.getEditText().getText().toString()).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
+                @Override
+                public void onComplete(@NonNull Task<ProviderQueryResult> task) {
+                    if(task.isSuccessful())
+                    {
+                        ///////// getProviders() will return size 1. if email ID is available.
+                        if (task.getResult().getProviders().size() == 1)
+                        {
+                            errorHandler(Error.Type.EMAIL_ALREADY_IN_USE);
+                            isValid = false;
+                        }
+                        if (isValid)
+                            callback.goToNextStep();
+                        else
+                            callback.getStepperLayout().updateErrorState(true);
+                    }
+                    else
+                    {
+                        errorHandler(Error.Type.EMAIL_INVALID);
+                        isValid = false;
+                        callback.getStepperLayout().updateErrorState(true);
+                    }
+                    dialog.dismiss();
+                }
+            });
+        }
     }
 
     @Override
-    public void onSelected() {
-        //update UI when selected
-    }
+    public void onSelected(){ }
 
     @Override
-    public void onError(@NonNull VerificationError error) {
-        //handle error inside of the fragment, e.g. show error on EditText
-    }
+    public void onError(@NonNull VerificationError error) { }
+
+    @Override
+    public void onCompleteClicked(StepperLayout.OnCompleteClickedCallback callback) { }
+
+    @Override
+    public void onBackClicked(StepperLayout.OnBackClickedCallback callback) { }
 
     private void initializeComponents(View v)
     {
@@ -77,6 +117,7 @@ public class Step1Fragment extends Fragment implements Step
                 return false;
             }
         });
+
         inRegPass.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
@@ -93,46 +134,17 @@ public class Step1Fragment extends Fragment implements Step
                 return false;
             }
         });
+
         dialog = new MaterialDialog.Builder(getContext())
-                .title("Titolo")
-                .content("Attendere")
+                .title("Verifica email")
+                .content("Attendere prego")
                 .progress(true, 0)
                 .build();
     }
 
     // Controllo validità dei campi
-    private boolean isValid()
+    private void validatePassword()
     {
-        isValid = true;
-        dialog.show();
-
-        // Controllo campo EMAIL
-        if (inRegEmail.getEditText().getText().toString().equals(""))
-        {
-            errorHandler(Error.Type.EMAIL_IS_EMPTY);
-            isValid = false;
-        }
-        else
-            mAuth.fetchProvidersForEmail(inRegEmail.getEditText().getText().toString()).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
-                @Override
-                public void onComplete(@NonNull Task<ProviderQueryResult> task) {
-                    if(task.isSuccessful()){
-                        ///////// getProviders() will return size 1. if email ID is available.
-                        if (task.getResult().getProviders().size() == 1)
-                        {
-                            errorHandler(Error.Type.EMAIL_ALREADY_IN_USE);
-                            isValid = false;
-                        }
-                    }
-                    else
-                    {
-                        errorHandler(Error.Type.EMAIL_INVALID);
-                        isValid = false;
-                    }
-                    dialog.dismiss();
-                }
-            });
-
         // Controllo campi PASSWORD
         if (inRegPass.getEditText().getText().toString().equals(""))
         {
@@ -149,8 +161,6 @@ public class Step1Fragment extends Fragment implements Step
             errorHandler(Error.Type.PASSWORD_MISMATCH);
             isValid = false;
         }
-
-        return isValid;
     }
 
     private void errorHandler(Error.Type e)
