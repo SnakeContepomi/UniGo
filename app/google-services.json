@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "396189354124-h4t1ibs1h4ka9gto3mckokbb0k40o0on.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.unibo.studio.unigo",
+            "certificate_hash": "8d044701cb4e827a8f2a69f6595139891219733e"
+          }
+        },
+        {
           "client_id": "396189354124-l08jhihklisurbmeb7djajdkb7kulo7e.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
