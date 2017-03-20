@@ -20,15 +20,12 @@ import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.signup.SignupActivity;
 import it.unibo.studio.unigo.utils.Error;
 
-import static it.unibo.studio.unigo.utils.Error.Type.PASS;
+import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener
 {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-
-
-
     private TextInputLayout inEmail, inPass;
     private Button btnLogin;
     private TextView txtSignUp;
@@ -42,61 +39,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
         initComponents();
-
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener()
-        {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
-            {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null)
-                {
-                    // User is signed in
-                    if (user.isEmailVerified())
-                    {
-                        //ToDo: Snackbar!!!
-                        //Toast.makeText(getApplicationContext(), "User logged in: " + user.getEmail(), Toast.LENGTH_SHORT).show();
-                        Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(myIntent);
-                    }
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(), "Email not verified", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                else
-                {
-                    // User is signed out
-                }
-            }
-        };
-
-        inEmail.getEditText().setOnKeyListener(new View.OnKeyListener()
-        {
-            @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent)
-            {
-                if (inEmail.isErrorEnabled())
-                {
-                    resetGUI(inEmail);
-                }
-                return false;
-            }
-        });
-
-        inPass.getEditText().setOnKeyListener(new View.OnKeyListener()
-        {
-            @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent)
-            {
-                if (inPass.isErrorEnabled())
-                {
-                    resetGUI(inPass);
-                }
-                return false;
-            }
-        });
     }
 
     @Override
@@ -134,6 +76,57 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         inPass = (TextInputLayout) findViewById(R.id.inPass);
         btnLogin = (Button) findViewById(R.id.btnLogin);
         txtSignUp = (TextView) findViewById(R.id.txtSignUp);
+
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener()
+        {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+            {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null)
+                {
+                    // User is signed in
+                    if (user.isEmailVerified())
+                    {
+                        //ToDo: Snackbar!!!
+                        //Toast.makeText(getApplicationContext(), "User logged in: " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                        Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(myIntent);
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(), "Email not verified", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else
+                {
+                    // User is signed out
+                }
+            }
+        };
+
+        inEmail.getEditText().setOnKeyListener(new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
+                if (inEmail.isErrorEnabled())
+                    resetError(inEmail);
+                return false;
+            }
+        });
+
+        inPass.getEditText().setOnKeyListener(new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
+                if (inPass.isErrorEnabled())
+                    resetError(inPass);
+                return false;
+            }
+        });
     }
 
     private void login(String email, String password)
@@ -171,13 +164,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 });*/
         if (inEmail.getEditText().getText().toString().equals(""))
         {
-            errorHandler(Error.Type.EMAIL);
+            errorHandler(Error.Type.EMAIL_IS_EMPTY);
             emptyField = true;
         }
-
         if (inPass.getEditText().getText().toString().equals(""))
         {
-            errorHandler(Error.Type.PASS);
+            errorHandler(Error.Type.PASSWORD_IS_EMPTY);
             emptyField = true;
         }
         if (emptyField == false)
@@ -189,10 +181,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         {
                             // Credenziali errate
                             if (!task.isSuccessful())
-                            {
-                                Toast.makeText(getApplicationContext(), "login failed", Toast.LENGTH_SHORT).show();
-                                errorHandler(Error.Type.LOGIN);
-                            }
+                                errorHandler(Error.Type.INVALID_CREDENTIALS);
                         }
                     });
     }
@@ -201,26 +190,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     {
         switch (e)
         {
-            case EMAIL:
+            case EMAIL_IS_EMPTY:
                 inEmail.setErrorEnabled(true);
-                inEmail.setError(getResources().getString(R.string.error_email));
+                inEmail.setError(getResources().getString(R.string.error_email_is_empty));
                 break;
-            case PASS:
+            case PASSWORD_IS_EMPTY:
                 inPass.setErrorEnabled(true);
-                inPass.setError(getResources().getString(R.string.error_pass));
+                inPass.setError(getResources().getString(R.string.error_password_is_empty));
                 break;
-            case LOGIN:
+            case INVALID_CREDENTIALS:
                 inPass.setErrorEnabled(true);
-                inPass.setError(getResources().getString(R.string.error_login));
+                inPass.setError(getResources().getString(R.string.error_invalid_credentials));
                 inPass.getEditText().setText("");
                 break;
         }
-    }
-
-    private void resetGUI(TextInputLayout layout)
-    {
-        layout.setErrorEnabled(false);
-        layout.setError(null);
-        layout.getEditText().setText("");
     }
 }

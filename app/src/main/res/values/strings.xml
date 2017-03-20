@@ -5,9 +5,14 @@
     <string name="login_password">Password</string>
     <string name="login">Accedi</string>
     <string name="register">Nuovo utente? Registrati ora</string>
-    <string name="error_email">Inserire l\'email</string>
-    <string name="error_pass">Inserire la password</string>
-    <string name="error_login">Email o Password non validi</string>
+
+    <string name="error_invalid_credentials">Email o Password non validi</string>
+    <string name="error_email_is_empty">Inserire l\'email</string>
+    <string name="error_email_already_in_use">Email già in uso</string>
+    <string name="error_email_invalid">Email non valida</string>
+    <string name="error_password_is_empty">Inserire la password</string>
+    <string name="error_password_mismatch">Le password non coincidono</string>
+    <string name="error_step_1">Errore Step 1</string>
 
     <string name="signup_toolbar">Nuovo utente</string>
     <string name="step1_title">Login</string>
