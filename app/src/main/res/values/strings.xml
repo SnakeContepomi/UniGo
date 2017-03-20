@@ -14,6 +14,9 @@
     <string name="error_password_mismatch">Le password non coincidono</string>
     <string name="error_step_1">Errore Step 1</string>
 
+    <string name="alert_dialog_step1_title">Verifica Email</string>
+    <string name="alert_dialog_step1_content">Attendere prego</string>
+
     <string name="signup_toolbar">Nuovo utente</string>
     <string name="step1_title">Login</string>
     <string name="step2_title">Profilo</string>

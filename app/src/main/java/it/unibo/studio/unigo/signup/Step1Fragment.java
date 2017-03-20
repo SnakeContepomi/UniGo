@@ -19,6 +19,7 @@ import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
+import it.unibo.studio.unigo.utils.SignupData;
 
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
@@ -40,24 +41,32 @@ public class Step1Fragment extends Fragment implements BlockingStep
         return v;
     }
 
-    //return null if the user can go to the next step, create a new VerificationError instance otherwise
+    // Ritornare null per procedere allo step successivo, VerificationErrore(string) altrimenti
     @Override
     public VerificationError verifyStep()
     {
         return null;
     }
 
+    // Metodo richiamato al click del pulsante Next
+    // Se i campi sono stati compilati correttamente si procede allo step successivo, altrimenti viene visualizzato
+    // un errore
     @Override
     public void onNextClicked(final StepperLayout.OnNextClickedCallback callback)
     {
+        // Variabile che indica la validità dei campi
         isValid = true;
+
+        // Se vi sono degli errori sui campi password, is valid viene settato a false
         validatePassword();
+        // Se il campo email è vuoto, is valid viene settato a false
         if (inRegEmail.getEditText().getText().toString().equals(""))
         {
             errorHandler(Error.Type.EMAIL_IS_EMPTY);
             isValid = false;
             callback.getStepperLayout().updateErrorState(true);
         }
+        // Controllo di validità sul campo email
         else
         {
             dialog.show();
@@ -66,17 +75,28 @@ public class Step1Fragment extends Fragment implements BlockingStep
                 public void onComplete(@NonNull Task<ProviderQueryResult> task) {
                     if(task.isSuccessful())
                     {
-                        ///////// getProviders() will return size 1. if email ID is available.
+                        // Se get providers contiene 1 solo elemento, la mail inserita è già stata utilizzata
+                        // e is valid viene settato a false
                         if (task.getResult().getProviders().size() == 1)
                         {
                             errorHandler(Error.Type.EMAIL_ALREADY_IN_USE);
                             isValid = false;
                         }
+
+                        // Se la mail inserita è corretta e non è gia in uso e i campi password sono stati
+                        // compilati correttamente, vengono memorizzate le informazioni relative all'account
+                        // e si procede allo step successivo
                         if (isValid)
+                        {
+                            SignupData.setEmail(inRegEmail.getEditText().getText().toString());
+                            SignupData.setPassword(inRegPass.getEditText().getText().toString());
                             callback.goToNextStep();
+                        }
                         else
                             callback.getStepperLayout().updateErrorState(true);
                     }
+                    // Se viene generata un eccezione, significa che la mail inserita non è valida
+                    // e is valid viene settato a false
                     else
                     {
                         errorHandler(Error.Type.EMAIL_INVALID);
@@ -101,11 +121,22 @@ public class Step1Fragment extends Fragment implements BlockingStep
     @Override
     public void onBackClicked(StepperLayout.OnBackClickedCallback callback) { }
 
+    // Inizializzazione dei componenti
     private void initializeComponents(View v)
     {
         inRegEmail = (TextInputLayout) v.findViewById(R.id.inRegEmail);
         inRegPass = (TextInputLayout) v.findViewById(R.id.inRegPass);
         inRegPassConfirm = (TextInputLayout) v.findViewById(R.id.inRegPassConfirm);
+
+        // Se i campi sono già stati compilati correttamente in precedenza,
+        // verranno caricati negli appositi spazi
+        if (SignupData.getEmail() != null)
+            inRegEmail.getEditText().setText(SignupData.getEmail());
+        if (SignupData.getPassword()!= null)
+        {
+            inRegPass.getEditText().setText(SignupData.getPassword());
+            inRegPassConfirm.getEditText().setText(SignupData.getPassword());
+        }
 
         inRegEmail.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -135,26 +166,28 @@ public class Step1Fragment extends Fragment implements BlockingStep
         });
 
         dialog = new MaterialDialog.Builder(getContext())
-                .title("Verifica email")
-                .content("Attendere prego")
+                .title(getResources().getString(R.string.alert_dialog_step1_title))
+                .content(getResources().getString(R.string.alert_dialog_step1_content))
                 .progress(true, 0)
                 .build();
     }
 
-    // Controllo validità dei campi
+    // Controllo validità dei campi password
     private void validatePassword()
     {
-        // Controllo campi PASSWORD
+        // Password vuota
         if (inRegPass.getEditText().getText().toString().equals(""))
         {
             errorHandler(Error.Type.PASSWORD_IS_EMPTY);
             isValid = false;
         }
+        // Conferma password vuota
         if (inRegPassConfirm.getEditText().getText().toString().equals(""))
         {
             errorHandler(Error.Type.PASSWORD_CONFIRM_IS_EMPTY);
             isValid = false;
         }
+        // Le password non coincidono
         if (!inRegPass.getEditText().getText().toString().equals(inRegPassConfirm.getEditText().getText().toString()))
         {
             errorHandler(Error.Type.PASSWORD_MISMATCH);
@@ -162,6 +195,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
         }
     }
 
+    // Metodo per evidenziare gli errori nella GUI
     private void errorHandler(Error.Type e)
     {
         switch (e)
