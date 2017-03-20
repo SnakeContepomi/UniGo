@@ -22,7 +22,6 @@ import it.unibo.studio.unigo.utils.Error;
 
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
-
 public class Step1Fragment extends Fragment implements BlockingStep
 {
     private boolean isValid;
