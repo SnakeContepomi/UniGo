@@ -13,6 +13,10 @@
     <string name="error_password_is_empty">Inserire la password</string>
     <string name="error_password_mismatch">Le password non coincidono</string>
     <string name="error_step_1">Errore Step 1</string>
+    <string name="error_step_2">Errore Step 2</string>
+    <string name="error_name_is_empty">Inserire il nome</string>
+    <string name="error_lastname_is_empty">Inserire il cognome</string>
+    <string name="error_phone">Numero telefonico non valido</string>
 
     <string name="alert_dialog_step1_title">Verifica Email</string>
     <string name="alert_dialog_step1_content">Attendere prego</string>

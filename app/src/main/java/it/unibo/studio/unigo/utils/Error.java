@@ -11,7 +11,10 @@ public class Error
         INVALID_CREDENTIALS,
         EMAIL_ALREADY_IN_USE,
         EMAIL_INVALID,
-        PASSWORD_MISMATCH };
+        PASSWORD_MISMATCH,
+        NAME_IS_EMPTY,
+        LASTNAME_IS_EMPTY,
+        PHONE_INCORRECT };
 
     public static void resetError(TextInputLayout layout)
     {
