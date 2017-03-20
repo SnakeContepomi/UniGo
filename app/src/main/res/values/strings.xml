@@ -1,6 +1,29 @@
 <resources>
     <string name="app_name">UniGo</string>
 
+    <string-array name="regions">
+        <item>Abruzzo</item>
+        <item>Basilicata</item>
+        <item>Calabria</item>
+        <item>Campania</item>
+        <item>Emilia Romagna</item>
+        <item>Friuli Venezia Giulia</item>
+        <item>Lazio</item>
+        <item>Liguria</item>
+        <item>Lombardia</item>
+        <item>Marche</item>
+        <item>Molise</item>
+        <item>Piemonte</item>
+        <item>Puglia</item>
+        <item>Sardegna</item>
+        <item>Sicilia</item>
+        <item>Toscana</item>
+        <item>Trentino Alto Adige</item>
+        <item>Umbria</item>
+        <item>Valle D\'Aosta</item>
+        <item>Veneto</item>
+    </string-array>
+
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login">Accedi</string>
@@ -33,5 +56,10 @@
     <string name="signup_lastName">Cognome</string>
     <string name="signup_phone">Telefono</string>
     <string name="signup_city">Città</string>
+    <string name="spinner_region_hint">Regione</string>
+    <string name="spinner_uni_hint">Univerità</string>
+    <string name="spinner_school_hint">Corso</string>
+
+
 
 </resources>
