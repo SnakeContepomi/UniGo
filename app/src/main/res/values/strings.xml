@@ -57,8 +57,8 @@
     <string name="signup_phone">Telefono</string>
     <string name="signup_city">Città</string>
     <string name="spinner_region_hint">Regione</string>
-    <string name="spinner_uni_hint">Univerità</string>
-    <string name="spinner_school_hint">Corso</string>
+    <string name="spinner_uni_hint">Università</string>
+    <string name="spinner_school_hint">Scuola</string>
 
 
 

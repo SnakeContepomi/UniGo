@@ -11,6 +11,7 @@ import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
 
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.utils.SignupData;
 
 import static android.R.attr.enabled;
 
@@ -23,6 +24,8 @@ public class SignupActivity extends AppCompatActivity implements StepperLayout.S
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        SignupData.clear();
 
         mStepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
         mStepperLayout.setAdapter(new StepAdapter(getSupportFragmentManager(), this));

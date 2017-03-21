@@ -6,7 +6,6 @@ public class University
 {
     public String name;
     public String region;
-    public Map<String, Boolean> schools;
 
     public University()
     {    }
