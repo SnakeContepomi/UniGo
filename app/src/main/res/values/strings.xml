@@ -60,6 +60,7 @@
     <string name="spinner_uni_hint">Università</string>
     <string name="spinner_school_hint">Scuola</string>
 
-
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
 
 </resources>
