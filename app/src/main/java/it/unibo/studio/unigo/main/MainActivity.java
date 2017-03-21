@@ -212,47 +212,36 @@ public class MainActivity extends AppCompatActivity
         String key;
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Agraria e Medicina Veterinaria"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Agraria e Medicina Veterinaria", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Economia, Management e Statistica"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Economia, Management e Statistica", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Farmacia, Biotecnologie e Scienze motorie"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Farmacia, Biotecnologie e Scienze motorie", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Giurisprudenza"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Giurisprudenza", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Ingegneria e Architettura"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Ingegneria e Architettura", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Lettere e Beni culturali"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Lettere e Beni culturali", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Lingue e Letterature, Traduzione e Interpretazione"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Lingue e Letterature, Traduzione e Interpretazione", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Medicina e Chirurgia"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Medicina e Chirurgia", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Psicologia e Scienze della Formazione"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Psicologia e Scienze della Formazione", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Scienze"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Scienze", "-KfgKbZcCGX6mjaTO6qD"));
 
         key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Scienze politiche"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
+        database.child("School").child(key).setValue(new School("Scuola di Scienze politiche", "-KfgKbZcCGX6mjaTO6qD"));
     }
 }
