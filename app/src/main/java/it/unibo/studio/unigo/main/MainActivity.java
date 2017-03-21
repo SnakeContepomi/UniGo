@@ -1,10 +1,18 @@
 package it.unibo.studio.unigo.main;
 
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.University;
@@ -12,6 +20,8 @@ import it.unibo.studio.unigo.utils.University;
 public class MainActivity extends AppCompatActivity
 {
     private DatabaseReference database;
+    private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -19,8 +29,60 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         database = FirebaseDatabase.getInstance().getReference();
+        toolbar = (Toolbar) findViewById(R.id.toolbarMain);
+        setSupportActionBar(toolbar);
+        initNavigationDrawer();
         //fillUniversity();
         //fillSchool();
+    }
+    private void initNavigationDrawer()
+    {
+        NavigationView navigationView = (NavigationView)findViewById(R.id.nav_drawer);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                int id = menuItem.getItemId();
+
+                switch (id)
+                {
+                    case R.id.navItemHome:
+                        Toast.makeText(getApplicationContext(),"Home",Toast.LENGTH_SHORT).show();
+                        drawerLayout.closeDrawers();
+                        break;
+                    case R.id.navItemSettings:
+                        Toast.makeText(getApplicationContext(),"Settings",Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.navItemTrash:
+                        Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
+                        drawerLayout.closeDrawers();
+                        break;
+                    case R.id.navItemLogout:
+                        finish();
+                }
+                return true;
+            }
+        });
+        View header = navigationView.getHeaderView(0);
+        TextView txtNavUser = (TextView)header.findViewById(R.id.txtNavUser);
+        TextView txtNavMail = (TextView)header.findViewById(R.id.txtNavMail);
+        txtNavUser.setText("Carlo Console");
+        txtNavMail.setText("carlo.console@studio.unibo.it");
+        drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
+
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.drawer_open,R.string.drawer_close)
+        {
+            @Override
+            public void onDrawerClosed(View v){
+                super.onDrawerClosed(v);
+            }
+
+            @Override
+            public void onDrawerOpened(View v) {
+                super.onDrawerOpened(v);
+            }
+        };
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
     }
 
     private void fillUniversity()
@@ -148,10 +210,6 @@ public class MainActivity extends AppCompatActivity
     private void fillSchool()
     {
         String key;
-
-        key = database.child("School").push().getKey();
-        database.child("School").child(key).setValue(new School("Scuola di Agraria e Medicina Veterinaria"));
-        database.child("University").child("-KfgKbZcCGX6mjaTO6qD").child("schools").child(key).setValue(true);
 
         key = database.child("School").push().getKey();
         database.child("School").child(key).setValue(new School("Scuola di Agraria e Medicina Veterinaria"));
