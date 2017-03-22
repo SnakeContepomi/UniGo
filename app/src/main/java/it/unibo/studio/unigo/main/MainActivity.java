@@ -1,5 +1,6 @@
 package it.unibo.studio.unigo.main;
 
+import android.net.Uri;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -8,9 +9,12 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import it.unibo.studio.unigo.R;
@@ -20,6 +24,7 @@ import it.unibo.studio.unigo.utils.University;
 
 public class MainActivity extends AppCompatActivity
 {
+    private FirebaseUser user;
     private DatabaseReference database;
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
@@ -29,6 +34,8 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance().getReference();
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbar);
@@ -37,8 +44,11 @@ public class MainActivity extends AppCompatActivity
         //fillSchool();
         //fillCourse();
     }
+
+    // Inizializzazione menu laterale
     private void initNavigationDrawer()
     {
+        // Elementi del menu
         NavigationView navigationView = (NavigationView)findViewById(R.id.nav_drawer);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -47,30 +57,53 @@ public class MainActivity extends AppCompatActivity
 
                 switch (id)
                 {
-                    case R.id.navItemHome:
+                    case R.id.navItemPrincipale:
                         Toast.makeText(getApplicationContext(),"Home",Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.navItemSettings:
+                    case R.id.navItemDomande:
                         Toast.makeText(getApplicationContext(),"Settings",Toast.LENGTH_SHORT).show();
                         break;
-                    case R.id.navItemTrash:
+                    case R.id.navItemPreferiti:
                         Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.navItemLogout:
+                    case R.id.navItemSocial:
+                        finish();
+                    case R.id.navItemImpostazioni:
+                        finish();
+                    case R.id.navItemInfo:
                         finish();
                 }
                 return true;
             }
         });
+
+        // Header del menu con dati relativi all'utente attualmente connesso
         View header = navigationView.getHeaderView(0);
+        ImageView imgNav = (ImageView)header.findViewById(R.id.imgNav);
         TextView txtNavUser = (TextView)header.findViewById(R.id.txtNavUser);
         TextView txtNavMail = (TextView)header.findViewById(R.id.txtNavMail);
-        txtNavUser.setText("Carlo Console");
-        txtNavMail.setText("carlo.console@studio.unibo.it");
-        drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
 
+        // Cliccando l'icona del profilo verrà aperta l'Activity relativa alla modifica dei dati personali
+        imgNav.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //ToDo: open EditProfileActivity
+                Toast.makeText(getApplicationContext(), "Goto -> MyProfile", Toast.LENGTH_SHORT).show();
+                drawerLayout.closeDrawers();
+            }
+        });
+        //ToDo: recuperare foto dal server
+        if (user != null)
+        {
+            txtNavUser.setText(user.getDisplayName());
+            txtNavMail.setText(user.getEmail());
+            //ImageView imgNav --> Uri photoUrl = user.getPhotoUrl();
+        }
+
+
+        drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.drawer_open,R.string.drawer_close)
         {
             @Override

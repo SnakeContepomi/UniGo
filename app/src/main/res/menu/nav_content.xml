@@ -1,22 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/menu_first_section"
+        android:checkableBehavior="single">
         <item
-            android:id="@+id/navItemHome"
-            android:title="Home"
-            android:icon="@drawable/ic_home_black_24dp"/>
+            android:id="@+id/navItemSocial"
+            android:title="@string/drawer_social"
+            android:icon="@drawable/ic_group_black_24dp"/>
+    </group>
+    <group
+        android:id="@+id/menu_second_section"
+        android:checkableBehavior="single">
         <item
-            android:id="@+id/navItemSettings"
-            android:title="Settings"
-            android:icon="@drawable/ic_lock_black_24dp"/>
+            android:id="@+id/navItemPrincipale"
+            android:title="@string/drawer_principale"
+            android:icon="@drawable/ic_inbox_black_24dp"/>
         <item
-            android:id="@+id/navItemTrash"
-            android:title="Trash"
-            android:icon="@drawable/met_ic_clear"/>
+            android:id="@+id/navItemDomande"
+            android:title="@string/drawer_domande"
+            android:icon="@drawable/ic_label_black_24dp"/>
         <item
-            android:id="@+id/navItemLogout"
-            android:title="Logout"
-            android:icon="@drawable/ic_email_black_24dp"/>
+            android:id="@+id/navItemPreferiti"
+            android:title="@string/drawer_preferiti"
+            android:icon="@drawable/ic_star_black_24dp"/>
+    </group>
+    <group
+        android:id="@+id/menu_third_section"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/navItemImpostazioni"
+            android:title="@string/drawer_impostazioni"
+            android:icon="@drawable/ic_settings_black_24dp"/>
+        <item
+            android:id="@+id/navItemInfo"
+            android:title="@string/drawer_guida"
+            android:icon="@drawable/ic_info_black_24dp"/>
     </group>
 </menu>
