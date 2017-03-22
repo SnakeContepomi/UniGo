@@ -2,7 +2,7 @@ package it.unibo.studio.unigo.utils;
 
 public class SignupData
 {
-    private static String email, password, name, lastName, phone, city, school_key;
+    private static String email, password, name, lastName, phone, city, course_key;
 
     public static String getEmail()
     {
@@ -34,9 +34,9 @@ public class SignupData
         return city;
     }
 
-    public static String getSchoolKey()
+    public static String getCourseKey()
     {
-        return school_key;
+        return course_key;
     }
 
     public static void setEmail(String s_email)
@@ -69,9 +69,9 @@ public class SignupData
         city = s_city;
     }
 
-    public static void setSchoolKey(String s_key)
+    public static void setCourseKey(String s_key)
     {
-        school_key = s_key;
+        course_key = s_key;
     }
 
     public static void clear()
@@ -82,6 +82,6 @@ public class SignupData
         lastName = null;
         phone = null;
         city = null;
-        school_key = null;
+        course_key = null;
     }
 }

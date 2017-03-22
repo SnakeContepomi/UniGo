@@ -133,35 +133,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     {
         boolean emptyField = false;
 
-        /*mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
-                {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task)
-                    {
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        if (user != null) {
-                            user.sendEmailVerification()
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful())
-                                            {
-                                                Log.d("INFO", "Email sent.");
-                                            }}
-                                    });
-                        }
-                        Toast.makeText(getApplicationContext(), "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful())
-                        {
-                            Toast.makeText(getApplicationContext(), "registration failed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });*/
         if (inEmail.getEditText().getText().toString().equals(""))
         {
             errorHandler(Error.Type.EMAIL_IS_EMPTY);
