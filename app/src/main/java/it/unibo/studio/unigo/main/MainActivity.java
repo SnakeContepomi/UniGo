@@ -47,18 +47,22 @@ public class MainActivity extends AppCompatActivity
 
                 switch (id)
                 {
-                    case R.id.navItemHome:
+                    case R.id.navItemPrincipale:
                         Toast.makeText(getApplicationContext(),"Home",Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.navItemSettings:
+                    case R.id.navItemDomande:
                         Toast.makeText(getApplicationContext(),"Settings",Toast.LENGTH_SHORT).show();
                         break;
-                    case R.id.navItemTrash:
+                    case R.id.navItemPreferiti:
                         Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.navItemLogout:
+                    case R.id.navItemSocial:
+                        finish();
+                    case R.id.navItemImpostazioni:
+                        finish();
+                    case R.id.navItemInfo:
                         finish();
                 }
                 return true;
