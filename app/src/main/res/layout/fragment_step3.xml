@@ -68,6 +68,16 @@
                 android:textColorHint="@color/colorLightGray"
                 app:met_floatingLabel="highlight"
                 app:met_primaryColor="@color/colorAccent"/>
+            <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
+                android:id="@+id/spinner_course"
+                android:layout_width="300dp"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:hint="@string/spinner_course_hint"
+                android:textColorHint="@color/colorLightGray"
+                app:met_floatingLabel="highlight"
+                app:met_primaryColor="@color/colorAccent"/>
         </LinearLayout>
     </LinearLayout>
 

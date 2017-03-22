@@ -86,6 +86,7 @@ public class Step3Fragment extends Fragment implements Step
                 spSchool.setEnabled(false);
                 spSchool.setClickable(false);
                 spUni.getText().clear();
+                spSchool.getText().clear();
                 refreshUni();
             }
         });
