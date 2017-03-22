@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.University;
 
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity
         initNavigationDrawer();
         //fillUniversity();
         //fillSchool();
+        //fillCourse();
     }
     private void initNavigationDrawer()
     {
@@ -243,5 +245,58 @@ public class MainActivity extends AppCompatActivity
 
         key = database.child("School").push().getKey();
         database.child("School").child(key).setValue(new School("Scuola di Scienze politiche", "-KfgKbZcCGX6mjaTO6qD"));
+    }
+
+    private void fillCourse()
+    {
+        String key;
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria aerospaziale", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria biomedica", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria chimica e biochimica", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria civile", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria dei processi e dei sistemi edilizi", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria dell'automazione", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria dell'energia elettrica", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria e scienze informatiche", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria edile", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria elettronica e telecomunicazioni", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria elettronica per l'energia e l'informazione", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria energetica", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria gestionale", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria informatica", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria meccanica", "-KflQTKu20u6hE6taLsE"));
+
+        key = database.child("Course").push().getKey();
+        database.child("Course").child(key).setValue(new Course("Ingegneria per l'ambiente e il territorio", "-KflQTKu20u6hE6taLsE"));
     }
 }
