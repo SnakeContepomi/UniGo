@@ -1,5 +1,7 @@
 package it.unibo.studio.unigo.main;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -22,27 +24,37 @@ import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.University;
 
+import static android.R.attr.fragment;
+
 public class MainActivity extends AppCompatActivity
 {
     private FirebaseUser user;
     private DatabaseReference database;
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
+    private FragmentManager fragmentManager;
+    FragmentTransaction fragmentTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        database = FirebaseDatabase.getInstance().getReference();
-        toolbar = (Toolbar) findViewById(R.id.toolbarMain);
-        setSupportActionBar(toolbar);
+        initComponents();
         initNavigationDrawer();
         //fillUniversity();
         //fillSchool();
         //fillCourse();
+    }
+
+    private void initComponents()
+    {
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        database = FirebaseDatabase.getInstance().getReference();
+        toolbar = (Toolbar) findViewById(R.id.toolbarMain);
+        setSupportActionBar(toolbar);
+        fragmentManager = getFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
     }
 
     // Inizializzazione menu laterale
@@ -88,12 +100,17 @@ public class MainActivity extends AppCompatActivity
         // Cliccando l'icona del profilo verrà aperta l'Activity relativa alla modifica dei dati personali
         imgNav.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                //ToDo: open EditProfileActivity
-                Toast.makeText(getApplicationContext(), "Goto -> MyProfile", Toast.LENGTH_SHORT).show();
+            public void onClick(View view)
+            {
+                //Toast.makeText(getApplicationContext(), "Goto -> MyProfile", Toast.LENGTH_SHORT).show();
+                ProfileFragment fragment = new ProfileFragment();
+                fragmentTransaction.add(R.id.fragment_container, fragment);
+                fragmentTransaction.commit();
+
                 drawerLayout.closeDrawers();
             }
         });
+
         //ToDo: recuperare foto dal server
         if (user != null)
         {
