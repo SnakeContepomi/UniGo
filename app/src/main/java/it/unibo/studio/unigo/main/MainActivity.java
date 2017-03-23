@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity
 
                 switch (id)
                 {
+                    case R.id.navItemSocial:
+                        finish();
                     case R.id.navItemPrincipale:
                         Toast.makeText(getApplicationContext(),"Home",Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
@@ -80,8 +82,6 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.navItemSocial:
-                        finish();
                     case R.id.navItemImpostazioni:
                         finish();
                     case R.id.navItemInfo:
