@@ -31,7 +31,7 @@
 
     <string name="snackbar_success">Registrazione completata\nTi è stata inviata una mail di conferma</string>
     <string name="snackbar_failed">Registrazione annullata</string>
-    <string name="snackbar_no_internet_connection">Nessuna connessione internet</string>
+    <string name="snackbar_no_internet_connection">Connessione Internet assente</string>
     <string name="snackbar_retry_login">riprova</string>
 
     <string name="error_invalid_credentials">Email o Password non validi</string>
