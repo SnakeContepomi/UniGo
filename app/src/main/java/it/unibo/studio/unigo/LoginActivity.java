@@ -1,7 +1,9 @@
 package it.unibo.studio.unigo;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -72,6 +75,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == USER_EMAIL_REQUEST)
+        {
+            if(resultCode == Activity.RESULT_OK)
+            {
+                inEmail.getEditText().setText(data.getStringExtra("result_email"));
+                Snackbar
+                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_success,Snackbar.LENGTH_LONG)
+                    .show();
+            }
+            if (resultCode == Activity.RESULT_CANCELED)
+            {
+                Snackbar
+                        .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_failed,Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        }
+    }
+
     private void initComponents()
     {
         inEmail = (TextInputLayout) findViewById(R.id.inEmail);
@@ -91,8 +115,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     // User is signed in
                     if (user.isEmailVerified())
                     {
-                        //ToDo: Snackbar!!!
-                        //Toast.makeText(getApplicationContext(), "User logged in: " + user.getEmail(), Toast.LENGTH_SHORT).show();
                         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(myIntent);
                     }

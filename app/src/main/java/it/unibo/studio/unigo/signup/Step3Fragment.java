@@ -1,5 +1,7 @@
 package it.unibo.studio.unigo.signup;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -67,7 +69,11 @@ public class Step3Fragment extends Fragment implements BlockingStep
 
     @Override
     public void onSelected() {
-        //update UI when selected
+        spRegion.getText().clear();
+        spRegion.clearFocus();
+        spUni.getText().clear();
+        spSchool.getText().clear();
+        spCourse.getText().clear();
     }
 
     @Override
@@ -305,34 +311,41 @@ public class Step3Fragment extends Fragment implements BlockingStep
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
+                                            // Aggiunta dell'utente al database
                                             if (task.isSuccessful())
-                                            {
-                                                Toast.makeText(getContext(), "email sent", Toast.LENGTH_SHORT).show();
-                                            }
+                                                addUser(callback);
                                         }
                                     });
                         }
-                        // Aggiunta dell'utente al database
-                        addUser();
-                        SignupData.clear();
-                        dialog.dismiss();
-                        callback.complete();
 
                         // Errore nella creazione dell'account
                         if (!task.isSuccessful())
                         {
                             dialog.dismiss();
-                            Log.d("e", task.getException().toString());
+                            Toast.makeText(getContext(), getResources().getString(R.string.error_registration), Toast.LENGTH_LONG).show();
                             callback.getStepperLayout().updateErrorState(true);
                         }
                     }
                 });
     }
 
-    private void addUser()
+    private void addUser(final StepperLayout.OnCompleteClickedCallback callback)
     {
         database.child("User").push().setValue(
                 new User(SignupData.getEmail(), SignupData.getName(), SignupData.getLastName(), SignupData.getPhone(),
-                         SignupData.getCity(), SignupData.getCourseKey()));
+                         SignupData.getCity(), SignupData.getCourseKey())).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                dialog.dismiss();
+                callback.complete();
+
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("result_email",SignupData.getEmail());
+                getActivity().setResult(Activity.RESULT_OK, returnIntent);
+                SignupData.clear();
+                getActivity().finish();
+            }
+        });
     }
-    }
+}

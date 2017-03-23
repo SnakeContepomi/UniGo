@@ -1,21 +1,13 @@
 package it.unibo.studio.unigo.signup;
 
-import android.graphics.Color;
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-
 import com.stepstone.stepper.StepperLayout;
-import com.stepstone.stepper.VerificationError;
-
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.utils.SignupData;
 
-import static android.R.attr.enabled;
-
-public class SignupActivity extends AppCompatActivity implements StepperLayout.StepperListener
+public class SignupActivity extends AppCompatActivity
 {
     private StepperLayout mStepperLayout;
 
@@ -27,31 +19,19 @@ public class SignupActivity extends AppCompatActivity implements StepperLayout.S
 
         mStepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
         mStepperLayout.setAdapter(new StepAdapter(getSupportFragmentManager(), this));
-        mStepperLayout.setListener(this);
-    }
-
-    @Override
-    public void onCompleted(View completeButton) {
-    }
-
-    @Override
-    public void onError(VerificationError verificationError) { }
-
-    @Override
-    public void onStepSelected(int newStepPosition) {
-        Toast.makeText(this, "onStepSelected! -> " + newStepPosition, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onReturn() {
-        //finish();
+        //mStepperLayout.setListener(this);
     }
 
     @Override
     public void onBackPressed()
     {
-        //if (mStepperLayout.getCurrentStepPosition() > 0)
-           // mStepperLayout.onBackClicked();
-        //else finish();
+        if (mStepperLayout.getCurrentStepPosition() > 0)
+            mStepperLayout.setCurrentStepPosition(mStepperLayout.getCurrentStepPosition()-1);
+        else
+        {
+            Intent returnIntent = new Intent();
+            setResult(Activity.RESULT_CANCELED, returnIntent);
+            finish();
+        }
     }
 }

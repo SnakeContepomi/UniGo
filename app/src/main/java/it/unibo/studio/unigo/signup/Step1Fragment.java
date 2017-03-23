@@ -110,7 +110,10 @@ public class Step1Fragment extends Fragment implements BlockingStep
     }
 
     @Override
-    public void onSelected(){ }
+    public void onSelected()
+    {
+        loadData();
+    }
 
     @Override
     public void onError(@NonNull VerificationError error) { }
@@ -128,15 +131,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
         inRegPass = (TextInputLayout) v.findViewById(R.id.inRegPass);
         inRegPassConfirm = (TextInputLayout) v.findViewById(R.id.inRegPassConfirm);
 
-        // Se i campi sono già stati compilati correttamente in precedenza,
-        // verranno caricati negli appositi spazi
-        if (SignupData.getEmail() != null)
-            inRegEmail.getEditText().setText(SignupData.getEmail());
-        if (SignupData.getPassword()!= null)
-        {
-            inRegPass.getEditText().setText(SignupData.getPassword());
-            inRegPassConfirm.getEditText().setText(SignupData.getPassword());
-        }
+        loadData();
 
         inRegEmail.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -233,6 +228,19 @@ public class Step1Fragment extends Fragment implements BlockingStep
                 inRegPassConfirm.setErrorEnabled(true);
                 inRegPassConfirm.setError(getResources().getString(R.string.error_password_mismatch));
                 break;
+        }
+    }
+
+    private void loadData()
+    {
+        // Se i campi sono già stati compilati correttamente in precedenza,
+        // verranno caricati negli appositi spazi
+        if (SignupData.getEmail() != null)
+            inRegEmail.getEditText().setText(SignupData.getEmail());
+        if (SignupData.getPassword()!= null)
+        {
+            inRegPass.getEditText().setText(SignupData.getPassword());
+            inRegPassConfirm.getEditText().setText(SignupData.getPassword());
         }
     }
 }

@@ -53,8 +53,9 @@ public class Step2Fragment extends Fragment implements Step
     }
 
     @Override
-    public void onSelected() {
-        //update UI when selected
+    public void onSelected()
+    {
+        loadData();
     }
 
     @Override
@@ -70,16 +71,7 @@ public class Step2Fragment extends Fragment implements Step
         inRegPhone = (TextInputLayout) v.findViewById(R.id.inRegPhone);
         inRegCity = (TextInputLayout) v.findViewById(R.id.inRegCity);
 
-        // Se i campi sono già stati compilati correttamente in precedenza,
-        // verranno caricati negli appositi spazi
-        if (SignupData.getName() != null)
-            inRegName.getEditText().setText(SignupData.getName());
-        if (SignupData.getLastName() != null)
-            inRegLastName.getEditText().setText(SignupData.getLastName());
-        if (SignupData.getPhone() != null)
-            inRegPhone.getEditText().setText(SignupData.getPhone());
-        if (SignupData.getCity() != null)
-            inRegCity.getEditText().setText(SignupData.getCity());
+        loadData();
 
         inRegName.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -162,5 +154,19 @@ public class Step2Fragment extends Fragment implements Step
                 inRegPhone.setError(getResources().getString(R.string.error_phone));
                 break;
         }
+    }
+
+    private void loadData()
+    {
+        // Se i campi sono già stati compilati correttamente in precedenza,
+        // verranno caricati negli appositi spazi
+        if (SignupData.getName() != null)
+            inRegName.getEditText().setText(SignupData.getName());
+        if (SignupData.getLastName() != null)
+            inRegLastName.getEditText().setText(SignupData.getLastName());
+        if (SignupData.getPhone() != null)
+            inRegPhone.getEditText().setText(SignupData.getPhone());
+        if (SignupData.getCity() != null)
+            inRegCity.getEditText().setText(SignupData.getCity());
     }
 }
