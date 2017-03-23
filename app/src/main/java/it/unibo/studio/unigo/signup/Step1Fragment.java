@@ -1,6 +1,12 @@
 package it.unibo.studio.unigo.signup;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -8,6 +14,9 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -17,6 +26,11 @@ import com.google.firebase.auth.ProviderQueryResult;
 import com.stepstone.stepper.BlockingStep;
 import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.SignupData;
@@ -25,11 +39,15 @@ import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class Step1Fragment extends Fragment implements BlockingStep
 {
+    public static final int GET_FROM_GALLERY = 3;
     private boolean isValid;
     private FirebaseAuth mAuth;
     private MaterialDialog dialog;
     private TextInputLayout inRegEmail, inRegPass, inRegPassConfirm;
 
+    //TEMP
+    Button btn;
+    ImageView img;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -127,12 +145,22 @@ public class Step1Fragment extends Fragment implements BlockingStep
     // Inizializzazione dei componenti
     private void initializeComponents(View v)
     {
+        btn = (Button) v.findViewById(R.id.button2);
+        img = (ImageView) v.findViewById(R.id.imageView2);
+
         inRegEmail = (TextInputLayout) v.findViewById(R.id.inRegEmail);
         inRegPass = (TextInputLayout) v.findViewById(R.id.inRegPass);
         inRegPassConfirm = (TextInputLayout) v.findViewById(R.id.inRegPassConfirm);
 
         loadData();
 
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+            }
+        });
         inRegEmail.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent)
@@ -241,6 +269,32 @@ public class Step1Fragment extends Fragment implements BlockingStep
         {
             inRegPass.getEditText().setText(SignupData.getPassword());
             inRegPassConfirm.getEditText().setText(SignupData.getPassword());
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        //Detects request codes
+        if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK)
+        {
+            Uri selectedImage = data.getData();
+
+            Bitmap bitmap = null;
+            try
+            {
+                Bitmap myBitmap = BitmapFactory.decodeFile(selectedImage.getPath());
+
+                Toast.makeText(getContext(), String.valueOf(selectedImage), Toast.LENGTH_SHORT).show();
+                img.setImageURI(selectedImage);
+                //bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 }
