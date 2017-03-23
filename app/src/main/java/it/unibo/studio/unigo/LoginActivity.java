@@ -22,7 +22,9 @@ import com.google.firebase.auth.FirebaseUser;
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.signup.SignupActivity;
 import it.unibo.studio.unigo.utils.Error;
+import it.unibo.studio.unigo.utils.Util;
 
+import static android.R.attr.data;
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener
@@ -70,7 +72,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 login(inEmail.getEditText().getText().toString(), inPass.getEditText().getText().toString());
                 break;
             case R.id.txtSignUp:
-                startActivityForResult(new Intent(LoginActivity.this, SignupActivity.class), USER_EMAIL_REQUEST);
+                if (Util.isNetworkAvailable(getApplicationContext()))
+                    startActivityForResult(new Intent(LoginActivity.this, SignupActivity.class), USER_EMAIL_REQUEST);
+                else
+                {
+                    Snackbar
+                        .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.snackbar_retry_login, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    txtSignUp.performClick();
+                                }
+                            })
+                        .show();
+                }
                 break;
         }
     }
@@ -84,14 +99,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             {
                 inEmail.getEditText().setText(data.getStringExtra("result_email"));
                 Snackbar
-                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_success,Snackbar.LENGTH_LONG)
+                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_success, Snackbar.LENGTH_LONG)
                     .show();
             }
             if (resultCode == Activity.RESULT_CANCELED)
             {
                 Snackbar
-                        .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_failed,Snackbar.LENGTH_LONG)
-                        .show();
+                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_failed, Snackbar.LENGTH_LONG)
+                    .show();
             }
         }
     }
