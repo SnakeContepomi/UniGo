@@ -36,12 +36,16 @@ public class Step2Fragment extends Fragment implements Step
     public VerificationError verifyStep() {
         if (validateInfo())
         {
-            SignupData.setName(inRegName.getEditText().getText().toString());
-            SignupData.setLastName(inRegLastName.getEditText().getText().toString());
-            if (!inRegPhone.getEditText().getText().toString().equals(""))
-                SignupData.setPhone(inRegPhone.getEditText().getText().toString());
-            if (!inRegCity.getEditText().getText().toString().equals(""))
-                SignupData.setCity(inRegCity.getEditText().getText().toString());
+            String name, last_name;
+            name = inRegName.getEditText().getText().toString();
+            name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();
+            last_name = inRegLastName.getEditText().getText().toString();
+            last_name = last_name.substring(0,1).toUpperCase() + last_name.substring(1).toLowerCase();
+
+            SignupData.setName(name);
+            SignupData.setLastName(last_name);
+            SignupData.setPhone(inRegPhone.getEditText().getText().toString());
+            SignupData.setCity(inRegCity.getEditText().getText().toString());
             return null;
         }
         else

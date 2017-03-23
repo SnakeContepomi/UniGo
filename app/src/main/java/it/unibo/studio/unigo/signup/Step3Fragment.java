@@ -11,11 +11,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,6 +35,7 @@ import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.SignupData;
 import it.unibo.studio.unigo.utils.University;
+import it.unibo.studio.unigo.utils.User;
 
 public class Step3Fragment extends Fragment implements BlockingStep
 {
@@ -42,6 +45,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
 
     private DatabaseReference database;
 
+    private MaterialDialog dialog;
     private MaterialBetterSpinner  spRegion, spUni, spSchool, spCourse;
     ArrayAdapter<String> spinnerAdapter;
 
@@ -79,9 +83,9 @@ public class Step3Fragment extends Fragment implements BlockingStep
     {
         if (isValid())
         {
+            dialog.show();
             SignupData.setCourseKey(course_key);
-            createAccount(SignupData.getEmail(), SignupData.getPassword());
-            callback.complete();
+            createAccount(SignupData.getEmail(), SignupData.getPassword(), callback);
         }
         else
             callback.getStepperLayout().updateErrorState(true);
@@ -169,6 +173,12 @@ public class Step3Fragment extends Fragment implements BlockingStep
                 course_key = courseKeys.get(i);
             }
         });
+
+        dialog = new MaterialDialog.Builder(getContext())
+                .title(getResources().getString(R.string.alert_dialog_step3_title))
+                .content(getResources().getString(R.string.alert_dialog_step3_content))
+                .progress(true, 0)
+                .build();
     }
 
     private void refreshUni()
@@ -272,7 +282,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
         return true;
     }
 
-    private void createAccount(String email, String password)
+    private void createAccount(String email, String password, final StepperLayout.OnCompleteClickedCallback callback)
     {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
@@ -284,25 +294,36 @@ public class Step3Fragment extends Fragment implements BlockingStep
                     {
                         // Invio mail di conferma
                         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        if (user != null) {
+                        if (user != null)
+                        {
+                            // Aggiornamento nominativo utente
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(SignupData.getName() + " " + SignupData.getLastName()).build();
+                            user.updateProfile(profileUpdates);
+
                             user.sendEmailVerification()
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful())
                                             {
-                                                Log.d("INFO", "Email sent.");
-                                            }}
+                                                Toast.makeText(getContext(), "email sent", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
                                     });
                         }
-                        Toast.makeText(getContext(), "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
+                        // Aggiunta dell'utente al database
+                        addUser();
+                        SignupData.clear();
+                        dialog.dismiss();
+                        callback.complete();
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+                        // Errore nella creazione dell'account
                         if (!task.isSuccessful())
                         {
-                            Toast.makeText(getContext(), "registration failed", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                            Log.d("e", task.getException().toString());
+                            callback.getStepperLayout().updateErrorState(true);
                         }
                     }
                 });
@@ -310,6 +331,8 @@ public class Step3Fragment extends Fragment implements BlockingStep
 
     private void addUser()
     {
-        // todo: aggiungi utente coi dati signupdata
+        database.child("User").push().setValue(
+                new User(SignupData.getEmail(), SignupData.getName(), SignupData.getLastName(), SignupData.getPhone(),
+                         SignupData.getCity(), SignupData.getCourseKey()));
     }
-}
+    }

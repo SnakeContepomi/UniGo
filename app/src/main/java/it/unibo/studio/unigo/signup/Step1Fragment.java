@@ -181,6 +181,11 @@ public class Step1Fragment extends Fragment implements BlockingStep
             errorHandler(Error.Type.PASSWORD_IS_EMPTY);
             isValid = false;
         }
+        if (inRegPass.getEditText().getText().toString().length() < 6)
+        {
+            errorHandler(Error.Type.PASSWORD_WEAK);
+            isValid = false;
+        }
         // Conferma password vuota
         if (inRegPassConfirm.getEditText().getText().toString().equals(""))
         {
@@ -215,6 +220,10 @@ public class Step1Fragment extends Fragment implements BlockingStep
             case PASSWORD_IS_EMPTY:
                 inRegPass.setErrorEnabled(true);
                 inRegPass.setError(getResources().getString(R.string.error_password_is_empty));
+                break;
+            case PASSWORD_WEAK:
+                inRegPass.setErrorEnabled(true);
+                inRegPass.setError(getResources().getString(R.string.error_password_is_weak));
                 break;
             case PASSWORD_CONFIRM_IS_EMPTY:
                 inRegPassConfirm.setErrorEnabled(true);

@@ -3,6 +3,7 @@ package it.unibo.studio.unigo.utils;
 public class User
 {
     String email, name, lastName, phone, city, courseKey;
+    int exp, credits;
 
     public User() { }
 
@@ -14,5 +15,7 @@ public class User
         this.phone = phone;
         this.city = city;
         this.courseKey = courseKey;
+        this.exp = 0;
+        this.credits = 50;
     }
 }

@@ -8,6 +8,7 @@ public class Error
         EMAIL_IS_EMPTY,
         PASSWORD_IS_EMPTY,
         PASSWORD_CONFIRM_IS_EMPTY,
+        PASSWORD_WEAK,
         INVALID_CREDENTIALS,
         EMAIL_ALREADY_IN_USE,
         EMAIL_INVALID,

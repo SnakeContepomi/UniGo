@@ -24,6 +24,8 @@ import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener
 {
+    static final int USER_EMAIL_REQUEST = 1;
+
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private TextInputLayout inEmail, inPass;
@@ -65,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 login(inEmail.getEditText().getText().toString(), inPass.getEditText().getText().toString());
                 break;
             case R.id.txtSignUp:
-                startActivity(new Intent(LoginActivity.this, SignupActivity.class));
+                startActivityForResult(new Intent(LoginActivity.this, SignupActivity.class), USER_EMAIL_REQUEST);
                 break;
         }
     }
