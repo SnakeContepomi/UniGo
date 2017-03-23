@@ -1,37 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/l_signup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".signup.SignupActivity">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="it.unibo.studio.unigo.signup.SignupActivity">
-
-    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/toolbarSignup"
-        style="@style/SignupToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        app:title="@string/signup_toolbar"
-        app:titleTextAppearance="@style/ToolbarTextAppearance" />
-
-    <com.stepstone.stepper.StepperLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/stepperLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:ms_activeStepColor="@color/colorAmber"
-        app:ms_backButtonColor="@color/colorAccent"
-        app:ms_backButtonText="@string/step_back"
-        app:ms_bottomNavigationBackground="@color/colorLightGray"
-        app:ms_completeButtonColor="@color/colorPrimary"
-        app:ms_completeButtonText="@string/step_complete"
-        app:ms_nextButtonColor="@color/colorAccent"
-        app:ms_nextButtonText="@string/step_next"
-        app:ms_showErrorStateEnabled="true"
-        app:ms_stepperType="tabs"
-        app:ms_tabNavigationEnabled="false" />
-
-</LinearLayout>
+    android:orientation="vertical">
+        <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/toolbarSignup"
+            style="@style/SignupToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            app:title="@string/signup_toolbar"
+            app:titleTextAppearance="@style/ToolbarTextAppearance" />
+        <com.stepstone.stepper.StepperLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/stepperLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:ms_activeStepColor="@color/colorAmber"
+            app:ms_backButtonColor="@color/colorAccent"
+            app:ms_backButtonText="@string/step_back"
+            app:ms_bottomNavigationBackground="@color/colorLightGray"
+            app:ms_completeButtonColor="@color/colorPrimary"
+            app:ms_completeButtonText="@string/step_complete"
+            app:ms_nextButtonColor="@color/colorAccent"
+            app:ms_nextButtonText="@string/step_next"
+            app:ms_showErrorStateEnabled="true"
+            app:ms_stepperType="tabs"
+            app:ms_tabNavigationEnabled="false" />
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>
