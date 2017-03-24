@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.SignupData;
 import it.unibo.studio.unigo.utils.University;
 import it.unibo.studio.unigo.utils.User;
+import it.unibo.studio.unigo.utils.Util;
 
 public class Step3Fragment extends Fragment implements BlockingStep
 {
@@ -87,12 +89,16 @@ public class Step3Fragment extends Fragment implements BlockingStep
     @Override
     public void onCompleteClicked(final StepperLayout.OnCompleteClickedCallback callback)
     {
-        if (isValid())
+        if (isValid() && Util.isNetworkAvailable(getContext()))
         {
             dialog.show();
             SignupData.setCourseKey(course_key);
             createAccount(SignupData.getEmail(), SignupData.getPassword(), callback);
         }
+        else if (isValid() && (!Util.isNetworkAvailable(getContext())))
+            Snackbar
+                .make(getActivity().findViewById(R.id.l_signup), R.string.snackbar_registration_failed, Snackbar.LENGTH_LONG)
+                .show();
         else
             callback.getStepperLayout().updateErrorState(true);
     }
@@ -322,7 +328,9 @@ public class Step3Fragment extends Fragment implements BlockingStep
                         if (!task.isSuccessful())
                         {
                             dialog.dismiss();
-                            Toast.makeText(getContext(), getResources().getString(R.string.error_registration), Toast.LENGTH_LONG).show();
+                            Snackbar
+                                    .make(getActivity().findViewById(R.id.l_signup), R.string.snackbar_registration_failed, Snackbar.LENGTH_LONG)
+                                    .show();
                             callback.getStepperLayout().updateErrorState(true);
                         }
                     }

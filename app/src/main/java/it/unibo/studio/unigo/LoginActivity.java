@@ -24,7 +24,6 @@ import it.unibo.studio.unigo.signup.SignupActivity;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.Util;
 
-import static android.R.attr.data;
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener
@@ -105,7 +104,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             if (resultCode == Activity.RESULT_CANCELED)
             {
                 Snackbar
-                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_failed, Snackbar.LENGTH_LONG)
+                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_registration_cancelled, Snackbar.LENGTH_LONG)
                     .show();
             }
         }

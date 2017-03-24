@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.SignupData;
+import it.unibo.studio.unigo.utils.Util;
 
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
@@ -72,59 +74,60 @@ public class Step1Fragment extends Fragment implements BlockingStep
     @Override
     public void onNextClicked(final StepperLayout.OnNextClickedCallback callback)
     {
-        // Variabile che indica la validità dei campi
-        isValid = true;
 
-        // Se vi sono degli errori sui campi password, is valid viene settato a false
-        validatePassword();
-        // Se il campo email è vuoto, is valid viene settato a false
-        if (inRegEmail.getEditText().getText().toString().equals(""))
+        if (Util.isNetworkAvailable(getContext()))
         {
-            errorHandler(Error.Type.EMAIL_IS_EMPTY);
-            isValid = false;
-            callback.getStepperLayout().updateErrorState(true);
-        }
-        // Controllo di validità sul campo email
-        else
-        {
-            dialog.show();
-            mAuth.fetchProvidersForEmail(inRegEmail.getEditText().getText().toString()).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
-                @Override
-                public void onComplete(@NonNull Task<ProviderQueryResult> task) {
-                    if(task.isSuccessful())
-                    {
-                        // Se get providers contiene 1 solo elemento, la mail inserita è già stata utilizzata
+            // Variabile che indica la validità dei campi
+            isValid = true;
+
+            // Se vi sono degli errori sui campi password, is valid viene settato a false
+            validatePassword();
+            // Se il campo email è vuoto, is valid viene settato a false
+            if (inRegEmail.getEditText().getText().toString().equals("")) {
+                errorHandler(Error.Type.EMAIL_IS_EMPTY);
+                isValid = false;
+                callback.getStepperLayout().updateErrorState(true);
+            }
+            // Controllo di validità sul campo email
+            else {
+                dialog.show();
+                mAuth.fetchProvidersForEmail(inRegEmail.getEditText().getText().toString()).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<ProviderQueryResult> task) {
+                        if (task.isSuccessful()) {
+                            // Se get providers contiene 1 solo elemento, la mail inserita è già stata utilizzata
+                            // e is valid viene settato a false
+                            if (task.getResult().getProviders().size() == 1) {
+                                errorHandler(Error.Type.EMAIL_ALREADY_IN_USE);
+                                isValid = false;
+                            }
+
+                            // Se la mail inserita è corretta e non è gia in uso e i campi password sono stati
+                            // compilati correttamente, vengono memorizzate le informazioni relative all'account
+                            // e si procede allo step successivo
+                            if (isValid) {
+                                SignupData.setEmail(inRegEmail.getEditText().getText().toString());
+                                SignupData.setPassword(inRegPass.getEditText().getText().toString());
+                                callback.goToNextStep();
+                            } else
+                                callback.getStepperLayout().updateErrorState(true);
+                        }
+                        // Se viene generata un eccezione, significa che la mail inserita non è valida
                         // e is valid viene settato a false
-                        if (task.getResult().getProviders().size() == 1)
-                        {
-                            errorHandler(Error.Type.EMAIL_ALREADY_IN_USE);
+                        else {
+                            errorHandler(Error.Type.EMAIL_INVALID);
                             isValid = false;
-                        }
-
-                        // Se la mail inserita è corretta e non è gia in uso e i campi password sono stati
-                        // compilati correttamente, vengono memorizzate le informazioni relative all'account
-                        // e si procede allo step successivo
-                        if (isValid)
-                        {
-                            SignupData.setEmail(inRegEmail.getEditText().getText().toString());
-                            SignupData.setPassword(inRegPass.getEditText().getText().toString());
-                            callback.goToNextStep();
-                        }
-                        else
                             callback.getStepperLayout().updateErrorState(true);
+                        }
+                        dialog.dismiss();
                     }
-                    // Se viene generata un eccezione, significa che la mail inserita non è valida
-                    // e is valid viene settato a false
-                    else
-                    {
-                        errorHandler(Error.Type.EMAIL_INVALID);
-                        isValid = false;
-                        callback.getStepperLayout().updateErrorState(true);
-                    }
-                    dialog.dismiss();
-                }
-            });
+                });
+            }
         }
+        else
+            Snackbar
+                .make(getActivity().findViewById(R.id.l_signup), R.string.snackbar_registration_failed, Snackbar.LENGTH_LONG)
+                .show();
     }
 
     @Override
