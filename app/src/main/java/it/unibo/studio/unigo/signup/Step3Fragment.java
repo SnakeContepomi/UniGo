@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,7 +48,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
     List<String> uniNames, schoolNames, courseNames;
     HashMap<Integer, String> uniKeys, schoolKeys, courseKeys;
 
-    private DatabaseReference database;
+    private DatabaseReference database, dbUni, dbSchool, dbCourse;
 
     private MaterialDialog dialog;
     private MaterialBetterSpinner  spRegion, spUni, spSchool, spCourse;
@@ -119,7 +120,14 @@ public class Step3Fragment extends Fragment implements BlockingStep
         courseNames = new ArrayList<>();
         courseKeys = new HashMap<>();
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         database = FirebaseDatabase.getInstance().getReference();
+        dbUni = FirebaseDatabase.getInstance().getReference("University");
+        dbUni.keepSynced(true);
+        dbSchool = FirebaseDatabase.getInstance().getReference("School");
+        dbSchool.keepSynced(true);
+        dbCourse = FirebaseDatabase.getInstance().getReference("Course");
+        dbCourse.keepSynced(true);
 
         spRegion = (MaterialBetterSpinner ) v.findViewById(R.id.spinner_region);
         spUni = (MaterialBetterSpinner ) v.findViewById(R.id.spinner_uni);
@@ -190,6 +198,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
                 .title(getResources().getString(R.string.alert_dialog_step3_title))
                 .content(getResources().getString(R.string.alert_dialog_step3_content))
                 .progress(true, 0)
+                .cancelable(false)
                 .build();
     }
 
@@ -198,7 +207,8 @@ public class Step3Fragment extends Fragment implements BlockingStep
         uniNames.clear();
         uniKeys.clear();
 
-        database.child("University").orderByChild("region").equalTo(spRegion.getText().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+        //database.child("University")
+                dbUni.orderByChild("region").equalTo(spRegion.getText().toString()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Toast.makeText(getContext(),String.valueOf(uniNames.size()) + String.valueOf(uniKeys.size()) , Toast.LENGTH_SHORT).show();
@@ -229,7 +239,8 @@ public class Step3Fragment extends Fragment implements BlockingStep
         schoolNames.clear();
         schoolKeys.clear();
 
-        database.child("School").orderByChild("university_key").equalTo(key).addListenerForSingleValueEvent(new ValueEventListener() {
+        //database.child("School")
+                dbSchool.orderByChild("university_key").equalTo(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Toast.makeText(getContext(),String.valueOf(uniNames.size()) + String.valueOf(uniKeys.size()) , Toast.LENGTH_SHORT).show();
@@ -260,7 +271,8 @@ public class Step3Fragment extends Fragment implements BlockingStep
         courseNames.clear();
         courseKeys.clear();
 
-        database.child("Course").orderByChild("school_key").equalTo(key).addListenerForSingleValueEvent(new ValueEventListener() {
+        //database.child("Course")
+         dbCourse.orderByChild("school_key").equalTo(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Toast.makeText(getContext(),String.valueOf(uniNames.size()) + String.valueOf(uniKeys.size()) , Toast.LENGTH_SHORT).show();
@@ -339,6 +351,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
 
     private void addUser(final StepperLayout.OnCompleteClickedCallback callback)
     {
+        database = FirebaseDatabase.getInstance().getReference();
         database.child("User").push().setValue(
                 new User(SignupData.getEmail(), SignupData.getName(), SignupData.getLastName(), SignupData.getPhone(),
                          SignupData.getCity(), SignupData.getCourseKey())).addOnCompleteListener(new OnCompleteListener<Void>() {

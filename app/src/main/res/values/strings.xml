@@ -51,7 +51,7 @@
     <string name="alert_dialog_step1_title">Verifica Email</string>
     <string name="alert_dialog_step1_content">Attendere prego</string>
     <string name="alert_dialog_step3_title">Creazione account</string>
-    <string name="alert_dialog_step3_content">Attendere prego</string>
+    <string name="alert_dialog_step3_content">L\'operazione può richiedere alcuni minuti..</string>
 
     <string name="signup_toolbar">Nuovo utente</string>
     <string name="step1_title">Login</string>
