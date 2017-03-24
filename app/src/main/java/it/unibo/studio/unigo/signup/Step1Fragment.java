@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
@@ -15,9 +13,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,28 +23,24 @@ import com.stepstone.stepper.BlockingStep;
 import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.InputStream;
 
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
+import it.unibo.studio.unigo.utils.RoundedImageView;
 import it.unibo.studio.unigo.utils.SignupData;
 import it.unibo.studio.unigo.utils.Util;
-
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class Step1Fragment extends Fragment implements BlockingStep
 {
-    public static final int GET_FROM_GALLERY = 3;
+    public static final int GET_FROM_GALLERY = 2;
     private boolean isValid;
     private FirebaseAuth mAuth;
     private MaterialDialog dialog;
     private TextInputLayout inRegEmail, inRegPass, inRegPassConfirm;
+    private RoundedImageView roundedProfileImg;
 
-    //TEMP
-    Button btn;
-    ImageView img;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -148,20 +139,22 @@ public class Step1Fragment extends Fragment implements BlockingStep
     // Inizializzazione dei componenti
     private void initializeComponents(View v)
     {
-        btn = (Button) v.findViewById(R.id.button2);
-        img = (ImageView) v.findViewById(R.id.imageView2);
-
+        roundedProfileImg = (RoundedImageView) v.findViewById(R.id.RoundedProfileImg);
         inRegEmail = (TextInputLayout) v.findViewById(R.id.inRegEmail);
         inRegPass = (TextInputLayout) v.findViewById(R.id.inRegPass);
         inRegPassConfirm = (TextInputLayout) v.findViewById(R.id.inRegPassConfirm);
 
         loadData();
 
-        btn.setOnClickListener(new View.OnClickListener() {
+        roundedProfileImg.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-
-                startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+            public void onClick(View view)
+            {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent,
+                        "Select Picture"), GET_FROM_GALLERY);
             }
         });
         inRegEmail.getEditText().setOnKeyListener(new View.OnKeyListener() {
@@ -195,6 +188,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
                 .title(getResources().getString(R.string.alert_dialog_step1_title))
                 .content(getResources().getString(R.string.alert_dialog_step1_content))
                 .progress(true, 0)
+                .cancelable(false)
                 .build();
     }
 
@@ -283,16 +277,13 @@ public class Step1Fragment extends Fragment implements BlockingStep
         //Detects request codes
         if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK)
         {
-            Uri selectedImage = data.getData();
-
             Bitmap bitmap = null;
+
             try
             {
-                Bitmap myBitmap = BitmapFactory.decodeFile(selectedImage.getPath());
-
-                Toast.makeText(getContext(), String.valueOf(selectedImage), Toast.LENGTH_SHORT).show();
-                img.setImageURI(selectedImage);
-                //bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
+                InputStream imageStream = getActivity().getContentResolver().openInputStream(data.getData());
+                Bitmap myBitmap = BitmapFactory.decodeStream(imageStream);
+                roundedProfileImg.setImageBitmap(myBitmap);
             }
             catch (Exception e)
             {
