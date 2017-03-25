@@ -120,7 +120,6 @@ public class Step3Fragment extends Fragment implements BlockingStep
         courseNames = new ArrayList<>();
         courseKeys = new HashMap<>();
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         database = FirebaseDatabase.getInstance().getReference();
         dbUni = FirebaseDatabase.getInstance().getReference("University");
         dbUni.keepSynced(true);

@@ -19,6 +19,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.signup.SignupActivity;
 import it.unibo.studio.unigo.utils.Error;
@@ -116,6 +118,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         inPass = (TextInputLayout) findViewById(R.id.inPass);
         btnLogin = (Button) findViewById(R.id.btnLogin);
         txtSignUp = (TextView) findViewById(R.id.txtSignUp);
+
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener()

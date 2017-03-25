@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.widget.LinearLayout;
 
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
+import com.google.firebase.database.FirebaseDatabase;
 import com.stepstone.stepper.StepperLayout;
 import it.unibo.studio.unigo.R;
 import rx.android.schedulers.AndroidSchedulers;
