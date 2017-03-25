@@ -360,6 +360,10 @@ public class Step3Fragment extends Fragment implements BlockingStep
                 dialog.dismiss();
                 callback.complete();
 
+                dbUni.keepSynced(false);
+                dbSchool.keepSynced(false);
+                dbCourse.keepSynced(false);
+
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("result_email",SignupData.getEmail());
                 getActivity().setResult(Activity.RESULT_OK, returnIntent);
