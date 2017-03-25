@@ -195,15 +195,16 @@ public class Step1Fragment extends Fragment implements BlockingStep
     // Controllo validità dei campi password
     private void validatePassword()
     {
+        // Password debole
+        if (inRegPass.getEditText().getText().toString().length() < 6)
+        {
+            errorHandler(Error.Type.PASSWORD_WEAK);
+            isValid = false;
+        }
         // Password vuota
         if (inRegPass.getEditText().getText().toString().equals(""))
         {
             errorHandler(Error.Type.PASSWORD_IS_EMPTY);
-            isValid = false;
-        }
-        if (inRegPass.getEditText().getText().toString().length() < 6)
-        {
-            errorHandler(Error.Type.PASSWORD_WEAK);
             isValid = false;
         }
         // Conferma password vuota
