@@ -42,15 +42,15 @@ public class StepAdapter extends AbstractFragmentStepAdapter
     }
 
     @Override
-    public int getCount() {
+    public int getCount()
+    {
         return 3;
     }
 
     @NonNull
     @Override
-    public StepViewModel getViewModel(@IntRange(from = 0) int position) {
-        //Override this method to set Step title for the Tabs, not necessary for other stepper types
-
+    public StepViewModel getViewModel(@IntRange(from = 0) int position)
+    {
         StepViewModel.Builder builder = new StepViewModel.Builder(context);
 
         switch (position)
@@ -65,7 +65,6 @@ public class StepAdapter extends AbstractFragmentStepAdapter
                 builder.setTitle(R.string.step3_title);
                 break;
         }
-
         return builder.create();
     }
 }

@@ -33,15 +33,18 @@ public class Step2Fragment extends Fragment implements Step
     // Se i campi sono stati compilati correttamente si procede allo step successivo,
     // altrimenti viene visualizzato un errore
     @Override
-    public VerificationError verifyStep() {
+    public VerificationError verifyStep()
+    {
         if (validateInfo())
         {
+            // Nome e cognome vengono memorizzati con la prima letera maiuscola
             String name, last_name;
             name = inRegName.getEditText().getText().toString();
             name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();
             last_name = inRegLastName.getEditText().getText().toString();
             last_name = last_name.substring(0,1).toUpperCase() + last_name.substring(1).toLowerCase();
 
+            // Memorizzazione temporanea delle informazioni inserite
             SignupData.setName(name);
             SignupData.setLastName(last_name);
             SignupData.setPhone(inRegPhone.getEditText().getText().toString());
@@ -59,9 +62,7 @@ public class Step2Fragment extends Fragment implements Step
     }
 
     @Override
-    public void onError(@NonNull VerificationError error) {
-        //handle error inside of the fragment, e.g. show error on EditText
-    }
+    public void onError(@NonNull VerificationError error) { }
 
     // Inizializzazione componenti
     private void initializeComponents(View v)
@@ -75,7 +76,8 @@ public class Step2Fragment extends Fragment implements Step
 
         inRegName.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
                 if (inRegName.isErrorEnabled())
                     resetError(inRegName);
                 return false;
@@ -83,7 +85,8 @@ public class Step2Fragment extends Fragment implements Step
         });
         inRegLastName.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
                 if (inRegLastName.isErrorEnabled())
                     resetError(inRegLastName);
                 return false;
@@ -91,7 +94,8 @@ public class Step2Fragment extends Fragment implements Step
         });
         inRegPhone.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
                 if (inRegPhone.isErrorEnabled())
                     resetError(inRegPhone);
                 return false;
@@ -99,7 +103,8 @@ public class Step2Fragment extends Fragment implements Step
         });
         inRegCity.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
                 if (inRegCity.isErrorEnabled())
                     resetError(inRegCity);
                 return false;
@@ -156,6 +161,7 @@ public class Step2Fragment extends Fragment implements Step
         }
     }
 
+    // Metodo per caricare i dati precedentemente compilati (se esistono) negli opportuni campi
     private void loadData()
     {
         // Se i campi sono già stati compilati correttamente in precedenza,

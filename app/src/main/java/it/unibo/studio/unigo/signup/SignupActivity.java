@@ -2,14 +2,10 @@ package it.unibo.studio.unigo.signup;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.LinearLayout;
-
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
-import com.google.firebase.database.FirebaseDatabase;
 import com.stepstone.stepper.StepperLayout;
 import it.unibo.studio.unigo.R;
 import rx.android.schedulers.AndroidSchedulers;
@@ -26,9 +22,11 @@ public class SignupActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
+        // Inizializzazione dello stepper di registrazione
         mStepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
         mStepperLayout.setAdapter(new StepAdapter(getSupportFragmentManager(), this));
 
+        // Inizializzazione del listener che monitora lo stato della connessione
         ReactiveNetwork.observeInternetConnectivity()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

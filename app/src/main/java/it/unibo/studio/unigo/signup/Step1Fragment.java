@@ -67,7 +67,6 @@ public class Step1Fragment extends Fragment implements BlockingStep
     @Override
     public void onNextClicked(final StepperLayout.OnNextClickedCallback callback)
     {
-
         if (Util.isNetworkAvailable(getContext()))
         {
             // Variabile che indica la validità dei campi
@@ -76,7 +75,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
             // Se vi sono degli errori sui campi password, is valid viene settato a false
             validatePassword();
             // Se il campo email è vuoto, is valid viene settato a false
-            if (inRegEmail.getEditText().getText().toString().equals("")) {
+            if (inRegEmail.getEditText().getText().toString().equals(""))
+            {
                 errorHandler(Error.Type.EMAIL_IS_EMPTY);
                 isValid = false;
                 callback.getStepperLayout().updateErrorState(true);
@@ -87,10 +87,12 @@ public class Step1Fragment extends Fragment implements BlockingStep
                 mAuth.fetchProvidersForEmail(inRegEmail.getEditText().getText().toString()).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
                     @Override
                     public void onComplete(@NonNull Task<ProviderQueryResult> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful())
+                        {
                             // Se get providers contiene 1 solo elemento, la mail inserita è già stata utilizzata
                             // e is valid viene settato a false
-                            if (task.getResult().getProviders().size() == 1) {
+                            if (task.getResult().getProviders().size() == 1)
+                            {
                                 errorHandler(Error.Type.EMAIL_ALREADY_IN_USE);
                                 isValid = false;
                             }
@@ -98,7 +100,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
                             // Se la mail inserita è corretta e non è gia in uso e i campi password sono stati
                             // compilati correttamente, vengono memorizzate le informazioni relative all'account
                             // e si procede allo step successivo
-                            if (isValid) {
+                            if (isValid)
+                            {
                                 SignupData.setEmail(inRegEmail.getEditText().getText().toString());
                                 SignupData.setPassword(inRegPass.getEditText().getText().toString());
                                 callback.goToNextStep();
@@ -107,7 +110,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
                         }
                         // Se viene generata un eccezione, significa che la mail inserita non è valida
                         // e is valid viene settato a false
-                        else {
+                        else
+                        {
                             errorHandler(Error.Type.EMAIL_INVALID);
                             isValid = false;
                             callback.getStepperLayout().updateErrorState(true);
@@ -171,7 +175,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
 
         inRegPass.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
                 if (inRegPass.isErrorEnabled())
                     resetError(inRegPass);
                 return false;
@@ -179,7 +184,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
         });
         inRegPassConfirm.getEditText().setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            {
                 if (inRegPassConfirm.isErrorEnabled())
                     resetError(inRegPassConfirm);
                 return false;
