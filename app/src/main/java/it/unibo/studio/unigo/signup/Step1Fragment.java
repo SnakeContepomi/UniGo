@@ -13,7 +13,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -22,16 +21,12 @@ import com.google.firebase.auth.ProviderQueryResult;
 import com.stepstone.stepper.BlockingStep;
 import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
-
 import java.io.InputStream;
-
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.RoundedImageView;
 import it.unibo.studio.unigo.utils.SignupData;
 import it.unibo.studio.unigo.utils.Util;
-
-import static android.R.attr.data;
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class Step1Fragment extends Fragment implements BlockingStep

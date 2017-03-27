@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +41,7 @@ import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import it.unibo.studio.unigo.R;
@@ -332,7 +334,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
                         StorageReference storageRef;
                         if (user != null)
                         {
-                            storageRef = FirebaseStorage.getInstance().getReference("profile_pic");
+                            storageRef = FirebaseStorage.getInstance().getReference().child("profile_pic").child(SignupData.getLastName() + "_" + SignupData.getName() + "_" + String.valueOf(System.currentTimeMillis()));
 
                             if (SignupData.getProfilePic() != null)
                             {
@@ -364,22 +366,26 @@ public class Step3Fragment extends Fragment implements BlockingStep
                             }
                             else
                             {
-                                storageRef = FirebaseStorage.getInstance().getReference("profile_pic/empty_profile_pic.png");
-
-                                // Aggiornamento nominativo utente
-                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                        .setDisplayName(SignupData.getName() + " " + SignupData.getLastName())
-                                        .setPhotoUri(storageRef.getDownloadUrl().getResult())
-                                        .build();
-                                user.updateProfile(profileUpdates);
-
-                                user.sendEmailVerification()
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                FirebaseStorage.getInstance().getReference()
+                                        .child("profile_pic/empty_profile_pic.png").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                             @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                // Aggiunta dell'utente al database
-                                                if (task.isSuccessful())
-                                                    addUser(callback);
+                                            public void onSuccess(Uri uri) {
+                                                // Aggiornamento nominativo utente
+                                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                                        .setDisplayName(SignupData.getName() + " " + SignupData.getLastName())
+                                                        .setPhotoUri(uri)
+                                                        .build();
+                                                user.updateProfile(profileUpdates);
+
+                                                user.sendEmailVerification()
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                // Aggiunta dell'utente al database
+                                                                if (task.isSuccessful())
+                                                                    addUser(callback);
+                                                            }
+                                                        });
                                             }
                                         });
                             }
