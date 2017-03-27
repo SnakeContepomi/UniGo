@@ -2,10 +2,13 @@ package it.unibo.studio.unigo.main;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -20,6 +23,8 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
+import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Course;
@@ -55,18 +60,25 @@ public class MainActivity extends AppCompatActivity
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance().getReference();
 
+        // Componente che permete di caricare nelle view immagini recuperate via url (grazie a Picasso)
+        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
+            @Override
+            public void set(ImageView imageView, Uri uri, Drawable placeholder) {
+                Picasso.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
+            }
+            @Override
+            public void cancel(ImageView imageView) {
+                Picasso.with(imageView.getContext()).cancelRequest(imageView);
+            }
+        });
+
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbar);
         profile = new ProfileDrawerItem()
                 .withName(user.getDisplayName())
                 .withEmail(user.getEmail())
-                .withIcon(user.getPhotoUrl().toString());
+                .withIcon(user.getPhotoUrl());
 
-        //ToDo:
-        //img.setImageBitmap(new BitmapFactory().decodeFile(user.getPhotoUrl().toString()));
-        //Picasso.with(this).load(user.getPhotoUrl().toString()).into(img);
-
-        // Create the AccountHeader
         header = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.color.primary)
