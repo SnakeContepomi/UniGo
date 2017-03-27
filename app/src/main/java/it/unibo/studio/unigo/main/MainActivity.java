@@ -2,33 +2,28 @@ package it.unibo.studio.unigo.main;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.squareup.picasso.Picasso;
-
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.University;
-
-import static android.R.attr.fragment;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -45,7 +40,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
-        initNavigationDrawer();
         //fillUniversity();
         //fillSchool();
         //fillCourse();
@@ -59,88 +53,43 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         fragmentManager = getFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
-    }
 
-    // Inizializzazione menu laterale
-    private void initNavigationDrawer()
-    {
-        // Elementi del menu
-        NavigationView navigationView = (NavigationView)findViewById(R.id.nav_drawer);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                int id = menuItem.getItemId();
+        // Create the AccountHeader
+        AccountHeader headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.color.primary)
+                .addProfiles(
+                        new ProfileDrawerItem().withName("Mike Penz").withEmail("mikepenz@gmail.com").withIcon(R.drawable.ic_star_black_24dp)
+                ).build();
 
-                switch (id)
-                {
-                    case R.id.navItemSocial:
-                        finish();
-                    case R.id.navItemPrincipale:
-                        Toast.makeText(getApplicationContext(),"Home",Toast.LENGTH_SHORT).show();
-                        drawerLayout.closeDrawers();
-                        break;
-                    case R.id.navItemDomande:
-                        Toast.makeText(getApplicationContext(),"Settings",Toast.LENGTH_SHORT).show();
-                        break;
-                    case R.id.navItemPreferiti:
-                        Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
-                        drawerLayout.closeDrawers();
-                        break;
-                    case R.id.navItemImpostazioni:
-                        finish();
-                    case R.id.navItemInfo:
-                        finish();
-                }
-                return true;
-            }
-        });
+        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(0).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp);
+        PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_principale).withIcon(R.drawable.ic_inbox_black_24dp);
+        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_domande).withIcon(R.drawable.ic_label_black_24dp);
+        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_preferiti).withIcon(R.drawable.ic_star_black_24dp);
+        SecondaryDrawerItem nav_settings  = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp);
+        SecondaryDrawerItem nav_info  = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp);
 
-        // Header del menu con dati relativi all'utente attualmente connesso
-        View header = navigationView.getHeaderView(0);
-        ImageView imgNav = (ImageView)header.findViewById(R.id.imgNav);
-        TextView txtNavUser = (TextView)header.findViewById(R.id.txtNavUser);
-        TextView txtNavMail = (TextView)header.findViewById(R.id.txtNavMail);
-
-        // Cliccando l'icona del profilo verrà aperta l'Activity relativa alla modifica dei dati personali
-        imgNav.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                //Toast.makeText(getApplicationContext(), "Goto -> MyProfile", Toast.LENGTH_SHORT).show();
-                ProfileFragment fragment = new ProfileFragment();
-                fragmentTransaction.add(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
-
-                drawerLayout.closeDrawers();
-            }
-        });
-
-        //ToDo: recuperare foto dal server
-        if (user != null)
-        {
-            txtNavUser.setText(user.getDisplayName());
-            txtNavMail.setText(user.getEmail());
-            //Toast.makeText(getApplicationContext(), user.getPhotoUrl().toString(), Toast.LENGTH_LONG).show();
-            Picasso.with(this).load(user.getPhotoUrl().toString()).into(imgNav);
-            //imgNav.setImageBitmap(BitmapFactory.decodeFile(user.getPhotoUrl().toString()));
-        }
-
-
-        drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.drawer_open,R.string.drawer_close)
-        {
-            @Override
-            public void onDrawerClosed(View v){
-                super.onDrawerClosed(v);
-            }
-
-            @Override
-            public void onDrawerOpened(View v) {
-                super.onDrawerOpened(v);
-            }
-        };
-        drawerLayout.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
+        //create the drawer and remember the `Drawer` result object
+        Drawer result = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .withAccountHeader(headerResult)
+                .addDrawerItems(
+                        nav_social,
+                        new DividerDrawerItem(),
+                        nav_home,
+                        nav_question,
+                        nav_favorite,
+                        new DividerDrawerItem(),
+                        nav_settings,
+                        nav_info )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        // do something with the clicked item :D
+                        return true;
+                    }
+                }).build();
     }
 
     private void fillUniversity()
