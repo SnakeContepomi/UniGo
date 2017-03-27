@@ -2,11 +2,11 @@ package it.unibo.studio.unigo.main;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -18,8 +18,9 @@ import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
@@ -29,10 +30,12 @@ public class MainActivity extends AppCompatActivity
 {
     private FirebaseUser user;
     private DatabaseReference database;
-    private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private FragmentManager fragmentManager;
-    FragmentTransaction fragmentTransaction;
+    private FragmentTransaction fragmentTransaction;
+    private ProfileDrawerItem profile;
+    private AccountHeader header;
+    private Drawer navDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -47,33 +50,50 @@ public class MainActivity extends AppCompatActivity
 
     private void initComponents()
     {
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        database = FirebaseDatabase.getInstance().getReference();
-        toolbar = (Toolbar) findViewById(R.id.toolbarMain);
-        setSupportActionBar(toolbar);
         fragmentManager = getFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        database = FirebaseDatabase.getInstance().getReference();
+
+        toolbar = (Toolbar) findViewById(R.id.toolbarMain);
+        setSupportActionBar(toolbar);
+        profile = new ProfileDrawerItem()
+                .withName(user.getDisplayName())
+                .withEmail(user.getEmail())
+                .withIcon(user.getPhotoUrl().toString());
+
+        //ToDo:
+        //img.setImageBitmap(new BitmapFactory().decodeFile(user.getPhotoUrl().toString()));
+        //Picasso.with(this).load(user.getPhotoUrl().toString()).into(img);
 
         // Create the AccountHeader
-        AccountHeader headerResult = new AccountHeaderBuilder()
+        header = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.color.primary)
-                .addProfiles(
-                        new ProfileDrawerItem().withName("Mike Penz").withEmail("mikepenz@gmail.com").withIcon(R.drawable.ic_star_black_24dp)
-                ).build();
+                .withDividerBelowHeader(true)
+                .withSelectionListEnabled(false)
+                .addProfiles(profile)
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean current) {
+                        Toast.makeText(getApplicationContext(), "CIAO", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                })
+                .build();
 
-        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(0).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp);
-        PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_principale).withIcon(R.drawable.ic_inbox_black_24dp);
-        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_domande).withIcon(R.drawable.ic_label_black_24dp);
-        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_preferiti).withIcon(R.drawable.ic_star_black_24dp);
-        SecondaryDrawerItem nav_settings  = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp);
-        SecondaryDrawerItem nav_info  = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp);
+        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(0).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_principale).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_domande).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_preferiti).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
 
         //create the drawer and remember the `Drawer` result object
-        Drawer result = new DrawerBuilder()
+        navDrawer = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
-                .withAccountHeader(headerResult)
+                .withAccountHeader(header)
                 .addDrawerItems(
                         nav_social,
                         new DividerDrawerItem(),
@@ -86,7 +106,7 @@ public class MainActivity extends AppCompatActivity
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        // do something with the clicked item :D
+                        navDrawer.closeDrawer();
                         return true;
                     }
                 }).build();
