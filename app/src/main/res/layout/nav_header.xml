@@ -12,7 +12,6 @@
         android:layout_height="80dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="20dp"
-        android:background="@drawable/empty_profile_pic"
         android:layout_gravity="center" />
     <TextView
         android:id="@+id/txtNavUser"

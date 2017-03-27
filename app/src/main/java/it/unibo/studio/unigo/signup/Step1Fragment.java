@@ -30,6 +30,8 @@ import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.RoundedImageView;
 import it.unibo.studio.unigo.utils.SignupData;
 import it.unibo.studio.unigo.utils.Util;
+
+import static android.R.attr.data;
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class Step1Fragment extends Fragment implements BlockingStep
@@ -261,6 +263,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
     {
         // Se i campi sono già stati compilati correttamente in precedenza,
         // verranno caricati negli appositi spazi
+        if (SignupData.getProfilePic() != null)
+            roundedProfileImg.setImageBitmap(SignupData.getProfilePic());
         if (SignupData.getEmail() != null)
             inRegEmail.getEditText().setText(SignupData.getEmail());
         if (SignupData.getPassword()!= null)
@@ -284,6 +288,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
             {
                 InputStream imageStream = getActivity().getContentResolver().openInputStream(data.getData());
                 Bitmap myBitmap = BitmapFactory.decodeStream(imageStream);
+                SignupData.setProfilePic(myBitmap);
                 roundedProfileImg.setImageBitmap(myBitmap);
             }
             catch (Exception e)

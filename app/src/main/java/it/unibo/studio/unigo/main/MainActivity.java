@@ -2,6 +2,8 @@ package it.unibo.studio.unigo.main;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -19,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.squareup.picasso.Picasso;
+
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
@@ -116,7 +120,9 @@ public class MainActivity extends AppCompatActivity
         {
             txtNavUser.setText(user.getDisplayName());
             txtNavMail.setText(user.getEmail());
-            //ImageView imgNav --> Uri photoUrl = user.getPhotoUrl();
+            //Toast.makeText(getApplicationContext(), user.getPhotoUrl().toString(), Toast.LENGTH_LONG).show();
+            Picasso.with(this).load(user.getPhotoUrl().toString()).into(imgNav);
+            //imgNav.setImageBitmap(BitmapFactory.decodeFile(user.getPhotoUrl().toString()));
         }
 
 

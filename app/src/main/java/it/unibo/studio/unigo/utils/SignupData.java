@@ -1,8 +1,13 @@
 package it.unibo.studio.unigo.utils;
 
+import android.graphics.Bitmap;
+
+import java.io.InputStream;
+
 public class SignupData
 {
-    private static String email, password, name, lastName, phone, city, course_key;
+    private static String email, password, name, last_name, phone, city, course_key;
+    private static Bitmap profile_pic;
 
     public static String getEmail()
     {
@@ -14,6 +19,11 @@ public class SignupData
         return password;
     }
 
+    public static Bitmap getProfilePic()
+    {
+        return profile_pic;
+    }
+
     public static String getName()
     {
         return name;
@@ -21,7 +31,7 @@ public class SignupData
 
     public static String getLastName()
     {
-        return lastName;
+        return last_name;
     }
 
     public static String getPhone()
@@ -49,6 +59,11 @@ public class SignupData
         password = s_password;
     }
 
+    public static void setProfilePic(Bitmap is_profile_pic)
+    {
+        profile_pic = is_profile_pic;
+    }
+
     public static void setName(String s_name)
     {
         name = s_name;
@@ -56,7 +71,7 @@ public class SignupData
 
     public static void setLastName(String s_lastName)
     {
-        lastName = s_lastName;
+        last_name = s_lastName;
     }
 
     public static void setPhone(String s_phone)
@@ -78,8 +93,9 @@ public class SignupData
     {
         email = null;
         password = null;
+        profile_pic = null;
         name = null;
-        lastName = null;
+        last_name = null;
         phone = null;
         city = null;
         course_key = null;

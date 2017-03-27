@@ -2,6 +2,8 @@ package it.unibo.studio.unigo.signup;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,10 +30,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.stepstone.stepper.BlockingStep;
 import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
 import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +50,9 @@ import it.unibo.studio.unigo.utils.University;
 import it.unibo.studio.unigo.utils.User;
 import it.unibo.studio.unigo.utils.Util;
 
+import static android.R.attr.bitmap;
+import static android.R.attr.data;
+
 public class Step3Fragment extends Fragment implements BlockingStep
 {
     String course_key;
@@ -49,6 +60,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
     HashMap<Integer, String> uniKeys, schoolKeys, courseKeys;
 
     private DatabaseReference database, dbUni, dbSchool, dbCourse;
+    private FirebaseUser user;
 
     private MaterialDialog dialog;
     private MaterialBetterSpinner  spRegion, spUni, spSchool, spCourse;
@@ -316,23 +328,61 @@ public class Step3Fragment extends Fragment implements BlockingStep
                     public void onComplete(@NonNull Task<AuthResult> task)
                     {
                         // Invio mail di conferma
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        user = FirebaseAuth.getInstance().getCurrentUser();
+                        StorageReference storageRef;
                         if (user != null)
                         {
-                            // Aggiornamento nominativo utente
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(SignupData.getName() + " " + SignupData.getLastName()).build();
-                            user.updateProfile(profileUpdates);
+                            storageRef = FirebaseStorage.getInstance().getReference("profile_pic");
 
-                            user.sendEmailVerification()
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            // Aggiunta dell'utente al database
-                                            if (task.isSuccessful())
-                                                addUser(callback);
-                                        }
-                                    });
+                            if (SignupData.getProfilePic() != null)
+                            {
+                                UploadTask uploadTask = storageRef.putBytes(bitmapToByteArray(SignupData.getProfilePic()));
+                                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                                        @SuppressWarnings("VisibleForTests")
+                                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                                .setDisplayName(SignupData.getName() + " " + SignupData.getLastName())
+                                                .setPhotoUri(downloadUrl)
+                                                .build();
+                                        user.updateProfile(profileUpdates);
+
+                                        user.sendEmailVerification()
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        // Aggiunta dell'utente al database
+                                                        if (task.isSuccessful())
+                                                            addUser(callback);
+                                                    }
+                                                });
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                storageRef = FirebaseStorage.getInstance().getReference("profile_pic/empty_profile_pic.png");
+
+                                // Aggiornamento nominativo utente
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(SignupData.getName() + " " + SignupData.getLastName())
+                                        .setPhotoUri(storageRef.getDownloadUrl().getResult())
+                                        .build();
+                                user.updateProfile(profileUpdates);
+
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                // Aggiunta dell'utente al database
+                                                if (task.isSuccessful())
+                                                    addUser(callback);
+                                            }
+                                        });
+                            }
                         }
 
                         // Errore nella creazione dell'account
@@ -367,5 +417,13 @@ public class Step3Fragment extends Fragment implements BlockingStep
                 getActivity().finish();
             }
         });
+    }
+
+    private byte[] bitmapToByteArray(Bitmap img)
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        img.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+
+        return baos.toByteArray();
     }
 }
