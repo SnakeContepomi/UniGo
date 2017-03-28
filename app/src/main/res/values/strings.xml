@@ -39,6 +39,7 @@
     <string name="error_email_is_empty">Inserire l\'email</string>
     <string name="error_email_already_in_use">Email già in uso</string>
     <string name="error_email_invalid">Email non valida</string>
+    <string name="error_email_malformed">Spiacenti, l\'email non è stata riconosciuta</string>
     <string name="error_password_is_empty">Inserire la password</string>
     <string name="error_password_is_weak">Password troppo debole (utilizzare almeno 6 caratteri)</string>
     <string name="error_password_mismatch">Le password non coincidono</string>
