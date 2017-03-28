@@ -101,15 +101,6 @@ public class Step2Fragment extends Fragment implements Step
                 return false;
             }
         });
-        inRegCity.getEditText().setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent)
-            {
-                if (inRegCity.isErrorEnabled())
-                    resetError(inRegCity);
-                return false;
-            }
-        });
     }
 
     // Controllo validità campi

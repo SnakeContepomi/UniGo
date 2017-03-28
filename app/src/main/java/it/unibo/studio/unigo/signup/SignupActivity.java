@@ -1,14 +1,10 @@
 package it.unibo.studio.unigo.signup;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Toast;
-
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.stepstone.stepper.StepperLayout;
 import it.unibo.studio.unigo.R;
@@ -19,7 +15,6 @@ import rx.schedulers.Schedulers;
 public class SignupActivity extends AppCompatActivity
 {
     private StepperLayout mStepperLayout;
-    private Toolbar mActionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -28,7 +23,7 @@ public class SignupActivity extends AppCompatActivity
         setContentView(R.layout.activity_signup);
 
         // Inizializzazione Toolbar
-        mActionBar = (Toolbar) findViewById(R.id.toolbarSignup);
+        Toolbar mActionBar = (Toolbar) findViewById(R.id.toolbarSignup);
         mActionBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)

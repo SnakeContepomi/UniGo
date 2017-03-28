@@ -2,8 +2,7 @@ package it.unibo.studio.unigo.utils;
 
 import android.graphics.Bitmap;
 
-import java.io.InputStream;
-
+// Classe statica che memorizza temporaneamente le informazioni inserite dall'utente durante la registrazione
 public class SignupData
 {
     private static String email, password, name, last_name, phone, city, course_key;

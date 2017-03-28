@@ -10,23 +10,19 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
-
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.signup.SignupActivity;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.Util;
-
 import static it.unibo.studio.unigo.utils.Error.resetError;
+import static it.unibo.studio.unigo.utils.Error.resetErrorAndClearText;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener
 {
@@ -34,8 +30,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
     private TextInputLayout inEmail, inPass;
-    private Button btnLogin;
     private TextView txtSignUp;
 
     @Override
@@ -43,7 +39,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     {
         super.onCreate(savedInstanceState);
 
-        // Enable Fullscreen Activity
+        // Utilizzo dell'App in modalità Fullscreen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
         initComponents();
@@ -78,13 +74,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 else
                 {
                     Snackbar
-                        .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
-                            .setAction(R.string.snackbar_retry_login, new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    txtSignUp.performClick();
-                                }
-                            })
+                        .make(findViewById(R.id.l_login), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.snackbar_retry_login, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view)
+                            {
+                                txtSignUp.performClick();
+                            }
+                        })
                         .show();
                 }
                 break;
@@ -100,13 +97,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             {
                 inEmail.getEditText().setText(data.getStringExtra("result_email"));
                 Snackbar
-                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_success, Snackbar.LENGTH_LONG)
+                    .make(findViewById(R.id.l_login), R.string.snackbar_success, Snackbar.LENGTH_LONG)
                     .show();
             }
             if (resultCode == Activity.RESULT_CANCELED)
             {
                 Snackbar
-                    .make(((LinearLayout) findViewById(R.id.l_login)), R.string.snackbar_registration_cancelled, Snackbar.LENGTH_LONG)
+                    .make(findViewById(R.id.l_login), R.string.snackbar_registration_cancelled, Snackbar.LENGTH_LONG)
                     .show();
             }
         }
@@ -116,12 +113,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     {
         inEmail = (TextInputLayout) findViewById(R.id.inEmail);
         inPass = (TextInputLayout) findViewById(R.id.inPass);
-        btnLogin = (Button) findViewById(R.id.btnLogin);
         txtSignUp = (TextView) findViewById(R.id.txtSignUp);
 
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         mAuth = FirebaseAuth.getInstance();
+        // Listener sull'utente attualmente connesso
         mAuthListener = new FirebaseAuth.AuthStateListener()
         {
             @Override
@@ -130,21 +127,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null)
                 {
-                    // User is signed in
-                    if (user.isEmailVerified())
-                    {
+                    // L'utente è autenticato e ha verificato l'email, quindi può utilizzare l'App
+                    if (user.isEmailVerified()) {
                         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(myIntent);
-                    }
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(), "Email not verified", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
                 }
-                else
-                {
-                    // User is signed out
-                }
+                // L'utente si è disconnesso
+                else { }
             }
         };
 
@@ -158,28 +149,30 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 return false;
             }
         });
-
         inPass.getEditText().setOnKeyListener(new View.OnKeyListener()
         {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent)
             {
                 if (inPass.isErrorEnabled())
-                    resetError(inPass);
+                    resetErrorAndClearText(inPass);
                 return false;
             }
         });
     }
 
+    // Metodo che permette di effettuare il login tramite email e password, con controllo degli errori
     private void login(String email, String password)
     {
         boolean emptyField = false;
 
+        // Campo email vuoto
         if (inEmail.getEditText().getText().toString().equals(""))
         {
             errorHandler(Error.Type.EMAIL_IS_EMPTY);
             emptyField = true;
         }
+        // Campo password vuoto
         if (inPass.getEditText().getText().toString().equals(""))
         {
             errorHandler(Error.Type.PASSWORD_IS_EMPTY);
@@ -199,6 +192,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     });
     }
 
+    // Metodo utilizzato per evidenziare gli errori nella GUI
     private void errorHandler(Error.Type e)
     {
         switch (e)

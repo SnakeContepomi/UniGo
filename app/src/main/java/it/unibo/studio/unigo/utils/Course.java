@@ -5,8 +5,7 @@ public class Course
     public String name;
     public String school_key;
 
-    public Course()
-    {    }
+    public Course() { }
 
     public Course(String name, String school_key)
     {

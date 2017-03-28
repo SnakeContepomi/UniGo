@@ -4,7 +4,8 @@ import android.support.design.widget.TextInputLayout;
 
 public class Error
 {
-    public static enum Type {
+    public static enum Type
+    {
         EMAIL_IS_EMPTY,
         PASSWORD_IS_EMPTY,
         PASSWORD_CONFIRM_IS_EMPTY,
@@ -15,12 +16,18 @@ public class Error
         PASSWORD_MISMATCH,
         NAME_IS_EMPTY,
         LASTNAME_IS_EMPTY,
-        PHONE_INCORRECT };
+        PHONE_INCORRECT
+    };
 
     public static void resetError(TextInputLayout layout)
     {
         layout.setErrorEnabled(false);
         layout.setError(null);
+    }
+
+    public static void resetErrorAndClearText(TextInputLayout layout)
+    {
+        resetError(layout);
         layout.getEditText().setText("");
     }
 }

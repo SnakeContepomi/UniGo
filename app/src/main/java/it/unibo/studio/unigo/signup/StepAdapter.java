@@ -1,25 +1,16 @@
 package it.unibo.studio.unigo.signup;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.stepstone.stepper.Step;
 import com.stepstone.stepper.adapter.AbstractFragmentStepAdapter;
 import com.stepstone.stepper.viewmodel.StepViewModel;
-
 import it.unibo.studio.unigo.R;
-
-import static android.os.Build.VERSION_CODES.M;
 
 public class StepAdapter extends AbstractFragmentStepAdapter
 {
-    private final String CURRENT_STEP_POSITION_KEY = "position";
-
     public StepAdapter(FragmentManager fm, Context context)
     {
         super(fm, context);

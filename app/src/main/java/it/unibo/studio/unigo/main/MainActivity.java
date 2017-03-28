@@ -81,8 +81,8 @@ public class MainActivity extends AppCompatActivity
 
         header = new AccountHeaderBuilder()
                 .withActivity(this)
-                .withHeaderBackground(R.color.primary)
-                .withDividerBelowHeader(true)
+                .withHeaderBackground(R.drawable.header_background)
+                .withDividerBelowHeader(false)
                 .withSelectionListEnabled(false)
                 .addProfiles(profile)
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {

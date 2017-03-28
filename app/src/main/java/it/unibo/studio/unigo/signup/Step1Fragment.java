@@ -28,12 +28,15 @@ import it.unibo.studio.unigo.utils.RoundedImageView;
 import it.unibo.studio.unigo.utils.SignupData;
 import it.unibo.studio.unigo.utils.Util;
 import static it.unibo.studio.unigo.utils.Error.resetError;
+import static it.unibo.studio.unigo.utils.Error.resetErrorAndClearText;
 
 public class Step1Fragment extends Fragment implements BlockingStep
 {
     public static final int GET_FROM_GALLERY = 2;
+
     private boolean isValid;
     private FirebaseAuth mAuth;
+
     private MaterialDialog dialog;
     private TextInputLayout inRegEmail, inRegPass, inRegPassConfirm;
     private RoundedImageView roundedProfileImg;
@@ -56,9 +59,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
         return null;
     }
 
-    // Metodo richiamato al click del pulsante Next
-    // Se i campi sono stati compilati correttamente si procede allo step successivo, altrimenti viene visualizzato
-    // un errore
+    // Metodo richiamato al click del pulsante Next. Se i campi sono stati compilati correttamente si procede allo step successivo,
+    // altrimenti viene visualizzato un errore
     @Override
     public void onNextClicked(final StepperLayout.OnNextClickedCallback callback)
     {
@@ -154,8 +156,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent,
-                        "Select Picture"), GET_FROM_GALLERY);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), GET_FROM_GALLERY);
             }
         });
         inRegEmail.getEditText().setOnKeyListener(new View.OnKeyListener() {
@@ -173,7 +174,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
             public boolean onKey(View view, int i, KeyEvent keyEvent)
             {
                 if (inRegPass.isErrorEnabled())
-                    resetError(inRegPass);
+                    resetErrorAndClearText(inRegPass);
                 return false;
             }
         });
@@ -182,7 +183,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
             public boolean onKey(View view, int i, KeyEvent keyEvent)
             {
                 if (inRegPassConfirm.isErrorEnabled())
-                    resetError(inRegPassConfirm);
+                    resetErrorAndClearText(inRegPassConfirm);
                 return false;
             }
         });
@@ -260,6 +261,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
         }
     }
 
+    // Metodo per caricare i dati precedentemente compilati (se esistono) negli opportuni campi
     private void loadData()
     {
         // Se i campi sono già stati compilati correttamente in precedenza,
@@ -275,16 +277,14 @@ public class Step1Fragment extends Fragment implements BlockingStep
         }
     }
 
+    // Quando viene selezionata l'immagine del profilo, viene anche caricata nell' ImageView dedicato
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
 
-        //Detects request codes
         if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK)
         {
-            Bitmap bitmap = null;
-
             try
             {
                 InputStream imageStream = getActivity().getContentResolver().openInputStream(data.getData());

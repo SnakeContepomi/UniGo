@@ -3,17 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/l_login"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@color/colorLightGray"
     android:orientation="vertical"
+    android:gravity="center"
     tools:context="it.unibo.studio.unigo.LoginActivity">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/inEmail"
         android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="200dp">
+        android:layout_height="wrap_content" >
 
         <EditText
             android:layout_width="match_parent"
@@ -25,8 +24,7 @@
     <android.support.design.widget.TextInputLayout
         android:id="@+id/inPass"
         android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_height="wrap_content">
 
         <EditText
             android:layout_width="match_parent"
@@ -39,7 +37,6 @@
         android:id="@+id/btnLogin"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:onClick="onClick"
         android:text="@string/login"
         android:theme="@style/RaisedButton" />
@@ -48,7 +45,6 @@
         android:id="@+id/txtSignUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:fontFamily="sans-serif"
         android:onClick="onClick"
         android:paddingTop="8dp"
