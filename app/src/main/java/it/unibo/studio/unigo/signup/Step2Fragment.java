@@ -48,7 +48,14 @@ public class Step2Fragment extends Fragment implements Step
             SignupData.setName(name);
             SignupData.setLastName(last_name);
             SignupData.setPhone(inRegPhone.getEditText().getText().toString());
-            SignupData.setCity(inRegCity.getEditText().getText().toString());
+            if (inRegCity.getEditText().getText().equals(""))
+                SignupData.setCity(inRegCity.getEditText().getText().toString());
+            else
+            {
+                String city = inRegCity.getEditText().getText().toString();
+                city = city.substring(0,1).toUpperCase() + city.substring(1).toLowerCase();
+                SignupData.setCity(city);
+            }
             return null;
         }
         else

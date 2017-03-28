@@ -51,7 +51,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
     private String course_key;
     private List<String> uniNames, schoolNames, courseNames;
     private HashMap<Integer, String> uniKeys, schoolKeys, courseKeys;
-    private DatabaseReference database, dbUni, dbSchool, dbCourse;
+    private DatabaseReference dbUni, dbSchool, dbCourse;
     private FirebaseUser user;
 
     private MaterialDialog dialog;
@@ -130,12 +130,11 @@ public class Step3Fragment extends Fragment implements BlockingStep
         courseKeys = new HashMap<>();
 
         // Abilitazione dell'utilizzo di Firebase in modalità offline per le tabelle University, School e Course
-        database = FirebaseDatabase.getInstance().getReference();
-        dbUni = FirebaseDatabase.getInstance().getReference("University");
+        dbUni = Util.getDatabase().getReference("University");
         dbUni.keepSynced(true);
-        dbSchool = FirebaseDatabase.getInstance().getReference("School");
+        dbSchool = Util.getDatabase().getReference("School");
         dbSchool.keepSynced(true);
-        dbCourse = FirebaseDatabase.getInstance().getReference("Course");
+        dbCourse = Util.getDatabase().getReference("Course");
         dbCourse.keepSynced(true);
 
         spRegion = (MaterialBetterSpinner ) v.findViewById(R.id.spinner_region);
@@ -425,8 +424,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
     // recuperate dalla classe statica SignupData
     private void addUser(final StepperLayout.OnCompleteClickedCallback callback)
     {
-        database = FirebaseDatabase.getInstance().getReference();
-        database.child("User").push().setValue(
+        Util.getDatabase().getReference("User").push().setValue(
                 new User(SignupData.getEmail(), SignupData.getName(), SignupData.getLastName(), SignupData.getPhone(),
                          SignupData.getCity(), SignupData.getCourseKey())).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

@@ -115,8 +115,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         inPass = (TextInputLayout) findViewById(R.id.inPass);
         txtSignUp = (TextView) findViewById(R.id.txtSignUp);
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
         mAuth = FirebaseAuth.getInstance();
         // Listener sull'utente attualmente connesso
         mAuthListener = new FirebaseAuth.AuthStateListener()
