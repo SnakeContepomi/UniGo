@@ -1,6 +1,6 @@
 package it.unibo.studio.unigo.main;
 
-import android.app.FragmentManager;
+ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity
 
     private void initComponents()
     {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         fragmentManager = getFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -74,11 +76,14 @@ public class MainActivity extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbar);
+
+        // Inizializzazione del profilo utente presente nel navDrawer
         profile = new ProfileDrawerItem()
                 .withName(user.getDisplayName())
                 .withEmail(user.getEmail())
                 .withIcon(user.getPhotoUrl());
 
+        // Inizializzazione dell'header del navDrawer
         header = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header_background)
@@ -94,6 +99,7 @@ public class MainActivity extends AppCompatActivity
                 })
                 .build();
 
+        // Inizializzazione delle voci del navDrawer
         PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(0).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_principale).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_domande).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
@@ -101,7 +107,7 @@ public class MainActivity extends AppCompatActivity
         PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
 
-        //create the drawer and remember the `Drawer` result object
+        // Creazione del navDrawer con le varie caratteristiche sopra definite
         navDrawer = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
