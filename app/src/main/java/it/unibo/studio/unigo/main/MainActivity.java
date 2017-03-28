@@ -31,6 +31,8 @@ import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.University;
 
+ import static android.R.attr.fragment;
+
 public class MainActivity extends AppCompatActivity
 {
     private FirebaseUser user;
@@ -93,7 +95,12 @@ public class MainActivity extends AppCompatActivity
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current) {
-                        Toast.makeText(getApplicationContext(), "CIAO", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "CIAO", Toast.LENGTH_SHORT).show();
+
+                        //ProfileFragment fragment = new ProfileFragment();
+                        fragmentTransaction.add(R.id.fragment_container, new ProfileFragment());
+                        fragmentTransaction.commit();
+
                         return false;
                     }
                 })
