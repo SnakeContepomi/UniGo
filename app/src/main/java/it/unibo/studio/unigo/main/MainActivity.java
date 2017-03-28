@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -30,8 +29,6 @@ import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.University;
-
- import static android.R.attr.fragment;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -94,10 +91,8 @@ public class MainActivity extends AppCompatActivity
                 .addProfiles(profile)
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
-                    public boolean onProfileChanged(View view, IProfile profile, boolean current) {
-                        //Toast.makeText(getApplicationContext(), "CIAO", Toast.LENGTH_SHORT).show();
-
-                        //ProfileFragment fragment = new ProfileFragment();
+                    public boolean onProfileChanged(View view, IProfile profile, boolean current)
+                    {
                         fragmentTransaction.add(R.id.fragment_container, new ProfileFragment());
                         fragmentTransaction.commit();
 
