@@ -13,6 +13,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -93,7 +95,6 @@ public class Step1Fragment extends Fragment implements BlockingStep
                                 errorHandler(Error.Type.EMAIL_ALREADY_IN_USE);
                                 isValid = false;
                             }
-
                             // Se la mail inserita è corretta e non è gia in uso e i campi password sono stati
                             // compilati correttamente, vengono memorizzate le informazioni relative all'account
                             // e si procede allo step successivo

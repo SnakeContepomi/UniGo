@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -406,6 +407,16 @@ public class Step3Fragment extends Fragment implements BlockingStep
                                     .show();
                             callback.getStepperLayout().updateErrorState(true);
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        dialog.dismiss();
+                        Snackbar
+                            .make(getActivity().findViewById(R.id.l_signup), R.string.error_email_malformed, Snackbar.LENGTH_LONG)
+                            .show();
+                        callback.getStepperLayout().updateErrorState(true);
                     }
                 });
     }

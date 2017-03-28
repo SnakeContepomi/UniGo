@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initComponents()
     {
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+       FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         fragmentManager = getFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
