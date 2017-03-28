@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initComponents()
     {
-       FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         fragmentManager = getFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
@@ -62,13 +62,16 @@ public class MainActivity extends AppCompatActivity
         database = FirebaseDatabase.getInstance().getReference();
 
         // Componente che permete di caricare nelle view immagini recuperate via url (grazie a Picasso)
-        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
+        DrawerImageLoader.init(new AbstractDrawerImageLoader()
+        {
             @Override
-            public void set(ImageView imageView, Uri uri, Drawable placeholder) {
+            public void set(ImageView imageView, Uri uri, Drawable placeholder)
+            {
                 Picasso.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
             }
             @Override
-            public void cancel(ImageView imageView) {
+            public void cancel(ImageView imageView)
+            {
                 Picasso.with(imageView.getContext()).cancelRequest(imageView);
             }
         });
