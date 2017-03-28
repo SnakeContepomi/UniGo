@@ -55,6 +55,7 @@
     <string name="alert_dialog_step3_content">L\'operazione può richiedere alcuni minuti..</string>
 
     <string name="signup_toolbar">Nuovo utente</string>
+    <string name="signup_icon_desc">Signup Icon</string>
     <string name="step1_title">Login</string>
     <string name="step2_title">Profilo</string>
     <string name="step3_title">Università</string>

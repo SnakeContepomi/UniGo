@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="8dp"
-        android:layout_gravity="center"
         android:orientation="horizontal">
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             app:srcCompat="@drawable/ic_location_city_black_24dp"
-            android:tint="@android:color/darker_gray"/>
+            android:tint="@android:color/darker_gray"
+            android:contentDescription="@string/signup_icon_desc"/>
         <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
             android:id="@+id/spinner_region"
             android:layout_width="300dp"
-            android:layout_gravity="center"
             android:layout_height="wrap_content"
             android:hint="@string/spinner_region_hint"
             android:textColorHint="@color/colorLightGray"
@@ -34,24 +34,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_gravity="center"
         android:orientation="horizontal">
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
             app:srcCompat="@drawable/ic_school_black_24dp"
-            android:tint="@android:color/darker_gray"/>
+            android:tint="@android:color/darker_gray"
+            android:contentDescription="@string/signup_icon_desc"/>
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:orientation="vertical">
             <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
                 android:id="@+id/spinner_uni"
                 android:layout_width="300dp"
-                android:layout_gravity="center"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:hint="@string/spinner_uni_hint"
@@ -61,7 +59,6 @@
             <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
                 android:id="@+id/spinner_school"
                 android:layout_width="300dp"
-                android:layout_gravity="center"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:hint="@string/spinner_school_hint"
@@ -71,7 +68,6 @@
             <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
                 android:id="@+id/spinner_course"
                 android:layout_width="300dp"
-                android:layout_gravity="center"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:hint="@string/spinner_course_hint"
@@ -80,6 +76,4 @@
                 app:met_primaryColor="@color/colorAccent"/>
         </LinearLayout>
     </LinearLayout>
-
-
 </LinearLayout>
