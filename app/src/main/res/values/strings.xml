@@ -34,6 +34,7 @@
     <string name="snackbar_no_internet_connection">Connessione Internet assente</string>
     <string name="snackbar_retry_login">riprova</string>
     <string name="snackbar_registration_failed">Si è verificato un errore di rete. Riprovare</string>
+    <string name="snackbar_login_message">Accesso eseguito come\n</string>
 
     <string name="error_invalid_credentials">Email o Password non validi</string>
     <string name="error_email_is_empty">Inserire l\'email</string>

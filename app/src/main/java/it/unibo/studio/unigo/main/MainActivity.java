@@ -1,14 +1,18 @@
 package it.unibo.studio.unigo.main;
 
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -25,17 +29,25 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
+
+import it.unibo.studio.unigo.LoginActivity;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
 import it.unibo.studio.unigo.utils.University;
+import it.unibo.studio.unigo.utils.Util;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
+
+import static android.support.design.widget.Snackbar.make;
 
 public class MainActivity extends AppCompatActivity
 {
     private FirebaseUser user;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference database;
     private Toolbar toolbar;
-    private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
     private ProfileDrawerItem profile;
     private AccountHeader header;
@@ -54,11 +66,9 @@ public class MainActivity extends AppCompatActivity
 
     private void initComponents()
     {
-        fragmentManager = getFragmentManager();
-        fragmentTransaction = fragmentManager.beginTransaction();
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance().getReference();
-        // Componente che permete di caricare nelle view immagini recuperate via url (grazie a Picasso)
+        // Componente che permette di caricare nelle view immagini recuperate via url (grazie a Picasso)
         DrawerImageLoader.init(new AbstractDrawerImageLoader()
         {
             @Override
@@ -80,7 +90,9 @@ public class MainActivity extends AppCompatActivity
         profile = new ProfileDrawerItem()
                 .withName(user.getDisplayName())
                 .withEmail(user.getEmail())
-                .withIcon(user.getPhotoUrl());
+                .withIcon(R.drawable.empty_profile_pic);
+        if (Util.isNetworkAvailable(getApplicationContext()))
+            profile.withIcon(user.getPhotoUrl());
 
         // Inizializzazione dell'header del navDrawer
         header = new AccountHeaderBuilder()
@@ -93,9 +105,9 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current)
                     {
-                        fragmentTransaction.add(R.id.fragment_container, new ProfileFragment());
+                        fragmentTransaction = getFragmentManager().beginTransaction();
+                        fragmentTransaction.replace(R.id.fragment_container, new ProfileFragment());
                         fragmentTransaction.commit();
-
                         return false;
                     }
                 })
@@ -130,6 +142,43 @@ public class MainActivity extends AppCompatActivity
                         return true;
                     }
                 }).build();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener()
+        {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+            {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                // L'utente si è disconnesso
+                if (user == null)
+                {
+
+                }
+            }
+        };
+
+        // Inizializzazione del listener che monitora lo stato della connessione
+        ReactiveNetwork.observeInternetConnectivity()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override public void call(Boolean isConnectedToInternet) {
+                        if (!isConnectedToInternet)
+                        {
+                            make(findViewById(R.id.drawerLayout), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
+                                .show();
+                        }
+                        else
+                        {
+                            profile.withIcon(user.getPhotoUrl());
+                            header.updateProfile(profile);
+                        }
+                    }
+                });
+
+        Snackbar
+            .make(findViewById(R.id.drawerLayout), getResources().getString(R.string.snackbar_login_message) + user.getEmail(), Snackbar.LENGTH_LONG)
+            .show();
     }
 
     private void fillUniversity()
