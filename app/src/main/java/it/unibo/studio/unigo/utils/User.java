@@ -2,8 +2,8 @@ package it.unibo.studio.unigo.utils;
 
 public class User
 {
-    String email, name, lastName, phone, city, courseKey;
-    int exp, credits;
+    public String email, name, lastName, phone, city, courseKey;
+    public int exp, credits;
 
     public User() { }
 

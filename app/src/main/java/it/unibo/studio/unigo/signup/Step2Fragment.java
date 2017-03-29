@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,6 @@ import com.stepstone.stepper.VerificationError;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.SignupData;
-
 import static it.unibo.studio.unigo.utils.Error.resetError;
 
 public class Step2Fragment extends Fragment implements Step
@@ -48,8 +48,8 @@ public class Step2Fragment extends Fragment implements Step
             SignupData.setName(name);
             SignupData.setLastName(last_name);
             SignupData.setPhone(inRegPhone.getEditText().getText().toString());
-            if (inRegCity.getEditText().getText().equals(""))
-                SignupData.setCity(inRegCity.getEditText().getText().toString());
+            if (inRegCity.getEditText().getText().toString().equals(""))
+                SignupData.setCity("");
             else
             {
                 String city = inRegCity.getEditText().getText().toString();
