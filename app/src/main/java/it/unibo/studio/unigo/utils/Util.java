@@ -13,10 +13,7 @@ public class Util
     public static FirebaseDatabase getDatabase()
     {
         if (database == null)
-        {
             database = FirebaseDatabase.getInstance();
-            database.setPersistenceEnabled(true);
-        }
         return database;
     }
 

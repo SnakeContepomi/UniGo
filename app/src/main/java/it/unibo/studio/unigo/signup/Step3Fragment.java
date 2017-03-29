@@ -25,7 +25,6 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -426,24 +425,25 @@ public class Step3Fragment extends Fragment implements BlockingStep
     {
         Util.getDatabase().getReference("User").push().setValue(
                 new User(SignupData.getEmail(), SignupData.getName(), SignupData.getLastName(), SignupData.getPhone(),
-                         SignupData.getCity(), SignupData.getCourseKey())).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
-            {
-                dialog.dismiss();
-                callback.complete();
+                         SignupData.getCity(), SignupData.getCourseKey()))
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        dialog.dismiss();
+                        callback.complete();
 
-                dbUni.keepSynced(false);
-                dbSchool.keepSynced(false);
-                dbCourse.keepSynced(false);
+                        dbUni.keepSynced(false);
+                        dbSchool.keepSynced(false);
+                        dbCourse.keepSynced(false);
 
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra("result_email",SignupData.getEmail());
-                getActivity().setResult(Activity.RESULT_OK, returnIntent);
-                SignupData.clear();
-                getActivity().finish();
-            }
-        });
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("result_email",SignupData.getEmail());
+                        getActivity().setResult(Activity.RESULT_OK, returnIntent);
+                        SignupData.clear();
+                        getActivity().finish();
+                    }
+                });
     }
 
     // Metodo per convertire un'immagine Bitmap in un Array di Byte
