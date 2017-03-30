@@ -161,6 +161,7 @@ public class MainActivity extends AppCompatActivity
                     public boolean onProfileChanged(View view, IProfile profile, boolean current)
                     {
                         loadFragment(fragmentProfile, FRAGMENT_PROFILE);
+                        getSupportActionBar().setTitle(R.string.drawer_profilo);
                         return false;
                     }
                 })
@@ -206,26 +207,32 @@ public class MainActivity extends AppCompatActivity
                         {
                             case 1:
                                 loadFragment(fragmentHome, FRAGMENT_HOME);
+                                getSupportActionBar().setTitle(R.string.drawer_principale);
                                 navDrawer.closeDrawer();
                                 break;
                             case 2:
                                 loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
+                                getSupportActionBar().setTitle(R.string.drawer_domande);
                                 navDrawer.closeDrawer();
                                 break;
                             case 3:
                                 loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
+                                getSupportActionBar().setTitle(R.string.drawer_preferiti);
                                 navDrawer.closeDrawer();
                                 break;
                             case 4:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
+                                getSupportActionBar().setTitle(R.string.drawer_social);
                                 navDrawer.closeDrawer();
                                 break;
                             case 5:
                                 loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
+                                getSupportActionBar().setTitle(R.string.drawer_impostazioni);
                                 navDrawer.closeDrawer();
                                 break;
                             case 6:
                                 loadFragment(fragmentInfo, FRAGMENT_INFO);
+                                getSupportActionBar().setTitle(R.string.drawer_guida);
                                 navDrawer.closeDrawer();
                                 break;
                         }
