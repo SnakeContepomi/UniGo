@@ -1,5 +1,6 @@
 package it.unibo.studio.unigo.main;
 
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -41,6 +42,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
+import static android.R.attr.id;
 import static android.support.design.widget.Snackbar.make;
 
 public class MainActivity extends AppCompatActivity
@@ -63,6 +65,15 @@ public class MainActivity extends AppCompatActivity
         //fillUniversity();
         //fillSchool();
         //fillCourse();
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if ((navDrawer != null) && (navDrawer.isDrawerOpen()))
+            navDrawer.closeDrawer();
+        else
+            super.onBackPressed();
     }
 
     private void initComponents()
@@ -106,21 +117,19 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current)
                     {
-                        fragmentTransaction = getFragmentManager().beginTransaction();
-                        fragmentTransaction.replace(R.id.fragment_container, new ProfileFragment());
-                        fragmentTransaction.commit();
+                        loadFragment(new ProfileFragment());
                         return false;
                     }
                 })
                 .build();
 
         // Inizializzazione delle voci del navDrawer
-        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(0).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_principale).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_domande).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_preferiti).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_principale).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_domande).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_preferiti).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
 
         // Creazione del navDrawer con le varie caratteristiche sopra definite
         navDrawer = new DrawerBuilder()
@@ -138,12 +147,39 @@ public class MainActivity extends AppCompatActivity
                         nav_info )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem)
+                    {
+                        switch ((int) drawerItem.getIdentifier())
+                        {
+                            case 1:
+                                loadFragment(new SocialFragment());
+                                break;
+                            case 2:
+                                loadFragment(new HomeFragment());
+                                break;
+                            case 3:
+                                loadFragment(new QuestionFragment());
+                                break;
+                            case 4:
+                                loadFragment(new FavoriteFragment());
+                                break;
+                            case 5:
+                                loadFragment(new SettingsFragment());
+                                break;
+                            case 6:
+                                loadFragment(new InfoFragment());
+                                break;
+                        }
+
                         navDrawer.closeDrawer();
                         return true;
                     }
                 }).build();
 
+        // Viene caricato il Fragment 'Home' all'avvio dell'Activity
+        navDrawer.setSelection(2);
+
+        // Gestione Logout
         mAuthListener = new FirebaseAuth.AuthStateListener()
         {
             @Override
@@ -185,6 +221,13 @@ public class MainActivity extends AppCompatActivity
                 }
             })
             .show();
+    }
+
+    private void loadFragment(Fragment fragment)
+    {
+        fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.commit();
     }
 
     private void fillUniversity()
