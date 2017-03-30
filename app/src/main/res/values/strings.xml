@@ -75,10 +75,11 @@
 
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-    <string name="drawer_social">Social</string>
     <string name="drawer_principale">Principale</string>
+    <string name="drawer_tutte">Tutte</string>
     <string name="drawer_domande">Le mie domande</string>
     <string name="drawer_preferiti">Preferiti</string>
+    <string name="drawer_social">Social</string>
     <string name="drawer_impostazioni">Impostazioni</string>
     <string name="drawer_guida">Guida &amp; info</string>
 </resources>

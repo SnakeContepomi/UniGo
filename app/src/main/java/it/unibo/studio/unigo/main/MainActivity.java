@@ -2,9 +2,9 @@ package it.unibo.studio.unigo.main;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,6 +23,7 @@ import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.ExpandableBadgeDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
@@ -31,8 +31,6 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
-
-import it.unibo.studio.unigo.LoginActivity;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Course;
 import it.unibo.studio.unigo.utils.School;
@@ -42,16 +40,31 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-import static android.R.attr.id;
-import static android.support.design.widget.Snackbar.make;
-
 public class MainActivity extends AppCompatActivity
 {
-    private FirebaseUser user;
+    private final String FRAGMENT_HOME = "home";
+    private final String FRAGMENT_QUESTION = "question";
+    private final String FRAGMENT_FAVORITE = "favorite";
+    private final String FRAGMENT_SOCIAL = "social";
+    private final String FRAGMENT_SETTINGS = "settings";
+    private final String FRAGMENT_INFO = "info";
+    private final String FRAGMENT_PROFILE = "profile";
+
+    private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseUser user;
     private DatabaseReference database;
-    private Toolbar toolbar;
+
     private FragmentTransaction fragmentTransaction;
+    private ProfileFragment fragmentProfile;
+    private HomeFragment fragmentHome;
+    private QuestionFragment fragmentQuestion;
+    private FavoriteFragment fragmentFavorite;
+    private SocialFragment fragmentSocial;
+    private SettingsFragment fragmentSettings;
+    private InfoFragment fragmentInfo;
+
+    private Toolbar toolbar;
     private ProfileDrawerItem profile;
     private AccountHeader header;
     private Drawer navDrawer;
@@ -68,18 +81,40 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStart()
+    {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        if (mAuthListener != null)
+            mAuth.removeAuthStateListener(mAuthListener);
+    }
+
+    @Override
     public void onBackPressed()
     {
         if ((navDrawer != null) && (navDrawer.isDrawerOpen()))
             navDrawer.closeDrawer();
         else
-            super.onBackPressed();
+        {
+            HomeFragment home = (HomeFragment) getFragmentManager().findFragmentByTag(FRAGMENT_HOME);
+            if ((home == null) || (!home.isVisible()))
+                navDrawer.setSelection(navDrawer.getDrawerItem(1));
+            else
+                super.onBackPressed();
+        }
     }
 
     private void initComponents()
     {
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        database = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        database = Util.getDatabase().getReference();
         // Componente che permette di caricare nelle view immagini recuperate via url (grazie a Picasso)
         DrawerImageLoader.init(new AbstractDrawerImageLoader()
         {
@@ -97,6 +132,14 @@ public class MainActivity extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbar);
+
+        fragmentProfile = new ProfileFragment();
+        fragmentHome = new HomeFragment();
+        fragmentQuestion = new QuestionFragment();
+        fragmentFavorite = new FavoriteFragment();
+        fragmentSocial = new SocialFragment();
+        fragmentSettings = new SettingsFragment();
+        fragmentInfo = new InfoFragment();
 
         // Inizializzazione del profilo utente presente nel navDrawer
         profile = new ProfileDrawerItem()
@@ -117,31 +160,41 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current)
                     {
-                        loadFragment(new ProfileFragment());
+                        loadFragment(fragmentProfile, FRAGMENT_PROFILE);
                         return false;
                     }
                 })
                 .build();
 
         // Inizializzazione delle voci del navDrawer
-        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_principale).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_domande).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_preferiti).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_tutte).withLevel(2).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_domande).withLevel(2).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_preferiti).withLevel(2).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
+        ExpandableBadgeDrawerItem nav_expandable = new ExpandableBadgeDrawerItem()
+                .withName(R.string.drawer_principale)
+                .withIcon(R.drawable.ic_home_black_24dp)
+                .withIconTintingEnabled(true)
+                .withSelectable(false)
+                .withIsExpanded(true)
+                .withSubItems(
+                    nav_home,
+                    nav_question,
+                    nav_favorite
+                );
 
         // Creazione del navDrawer con le varie caratteristiche sopra definite
         navDrawer = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
                 .withAccountHeader(header)
+                // --- Badge ---
+                // withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)).withBadge("100").
                 .addDrawerItems(
+                        nav_expandable,
                         nav_social,
-                        new DividerDrawerItem(),
-                        nav_home,
-                        nav_question,
-                        nav_favorite,
                         new DividerDrawerItem(),
                         nav_settings,
                         nav_info )
@@ -152,32 +205,36 @@ public class MainActivity extends AppCompatActivity
                         switch ((int) drawerItem.getIdentifier())
                         {
                             case 1:
-                                loadFragment(new SocialFragment());
+                                loadFragment(fragmentHome, FRAGMENT_HOME);
+                                navDrawer.closeDrawer();
                                 break;
                             case 2:
-                                loadFragment(new HomeFragment());
+                                loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
+                                navDrawer.closeDrawer();
                                 break;
                             case 3:
-                                loadFragment(new QuestionFragment());
+                                loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
+                                navDrawer.closeDrawer();
                                 break;
                             case 4:
-                                loadFragment(new FavoriteFragment());
+                                loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
+                                navDrawer.closeDrawer();
                                 break;
                             case 5:
-                                loadFragment(new SettingsFragment());
+                                loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
+                                navDrawer.closeDrawer();
                                 break;
                             case 6:
-                                loadFragment(new InfoFragment());
+                                loadFragment(fragmentInfo, FRAGMENT_INFO);
+                                navDrawer.closeDrawer();
                                 break;
                         }
-
-                        navDrawer.closeDrawer();
                         return true;
                     }
                 }).build();
 
         // Viene caricato il Fragment 'Home' all'avvio dell'Activity
-        navDrawer.setSelection(2);
+        navDrawer.setSelection(navDrawer.getDrawerItem(1));
 
         // Gestione Logout
         mAuthListener = new FirebaseAuth.AuthStateListener()
@@ -223,10 +280,11 @@ public class MainActivity extends AppCompatActivity
             .show();
     }
 
-    private void loadFragment(Fragment fragment)
+    // Metodo per caricare un fragment nella Main Activity
+    private void loadFragment(Fragment fragment, String tag)
     {
         fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.replace(R.id.fragment_container, fragment, tag);
         fragmentTransaction.commit();
     }
 
