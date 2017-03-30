@@ -1,20 +1,20 @@
 <resources>
-    <!-- Base application theme. -->
+    <!-- Base Application Theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
+        <item name="drawerArrowStyle">@style/MaterialDrawer.DrawerArrowStyle</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- RaisedButton layout -->
+    <!-- RaisedButton Layout -->
     <style name="RaisedButton" parent="Theme.AppCompat.Light">
         <item name="colorControlHighlight">@color/colorPrimaryDarkest</item>
         <item name="colorButtonNormal">@color/colorPrimaryDark</item>
         <item name="android:textColor">@color/colorWhite</item>
     </style>
 
-    <!-- Sinup Toolbar -->
+    <!-- Signup Toolbar -->
     <style name="SignupToolbar">
         <item name="theme">@style/ThemeOverlay.AppCompat.Dark</item>
         <item name="navigationIcon">@drawable/ic_arrow_back_white_24px</item>
@@ -22,9 +22,14 @@
         <item name="android:elevation">4dp</item>
     </style>
 
+    <!-- Toolbar Text Style -->
     <style name="ToolbarTextAppearance">
         <item name="android:textColor">@color/colorWhite</item>
         <item name="android:textSize">20sp</item>
     </style>
 
+    <!-- Hamburger Icon & Back Arrow Icon Style -->
+    <style name="MaterialDrawer.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@android:color/white</item>
+    </style>
 </resources>

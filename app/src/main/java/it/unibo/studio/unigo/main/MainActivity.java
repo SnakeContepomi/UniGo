@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -157,27 +158,32 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        // Inizializzazione del listener che monitora lo stato della connessione
-        ReactiveNetwork.observeInternetConnectivity()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Boolean>() {
-                    @Override public void call(Boolean isConnectedToInternet) {
-                        if (!isConnectedToInternet)
-                        {
-                            make(findViewById(R.id.drawerLayout), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
-                                .show();
-                        }
-                        else
-                        {
-                            profile.withIcon(user.getPhotoUrl());
-                            header.updateProfile(profile);
-                        }
-                    }
-                });
-
         Snackbar
             .make(findViewById(R.id.drawerLayout), getResources().getString(R.string.snackbar_login_message) + user.getEmail(), Snackbar.LENGTH_LONG)
+            .addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+            @Override
+                public void onDismissed(Snackbar transientBottomBar, int event)
+                {
+                    super.onDismissed(transientBottomBar, event);
+                    // Inizializzazione del listener che monitora lo stato della connessione
+                    ReactiveNetwork.observeInternetConnectivity()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<Boolean>() {
+                            @Override public void call(Boolean isConnectedToInternet) {
+                            if (!isConnectedToInternet)
+                                Snackbar
+                                    .make(findViewById(R.id.drawerLayout), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
+                                    .show();
+                            else
+                            {
+                                profile.withIcon(user.getPhotoUrl());
+                                header.updateProfile(profile);
+                            }
+                            }
+                        });
+                }
+            })
             .show();
     }
 
