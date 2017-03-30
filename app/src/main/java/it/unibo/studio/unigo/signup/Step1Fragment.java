@@ -288,6 +288,8 @@ public class Step1Fragment extends Fragment implements BlockingStep
             {
                 InputStream imageStream = getActivity().getContentResolver().openInputStream(data.getData());
                 Bitmap myBitmap = BitmapFactory.decodeStream(imageStream);
+                myBitmap = cropToSquare(myBitmap);
+
                 SignupData.setProfilePic(myBitmap);
                 roundedProfileImg.setImageBitmap(myBitmap);
             }
@@ -296,5 +298,14 @@ public class Step1Fragment extends Fragment implements BlockingStep
                 e.printStackTrace();
             }
         }
+    }
+
+    // Metodo per ritagliare l'immagine selezionata in maniera da averla quadrata e centrata
+    private Bitmap cropToSquare(Bitmap srcBmp)
+    {
+        if (srcBmp.getWidth() >= srcBmp.getHeight())
+            return Bitmap.createBitmap(srcBmp, srcBmp.getWidth()/2 - srcBmp.getHeight()/2, 0, srcBmp.getHeight(), srcBmp.getHeight());
+        else
+            return Bitmap.createBitmap(srcBmp, 0, srcBmp.getHeight()/2 - srcBmp.getWidth()/2, srcBmp.getWidth(), srcBmp.getWidth());
     }
 }
