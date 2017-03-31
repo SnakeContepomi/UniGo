@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity
                         {
                             case 1:
                                 loadFragment(fragmentHome, FRAGMENT_HOME);
-                                getSupportActionBar().setTitle(R.string.drawer_principale);
+                                getSupportActionBar().setTitle(R.string.drawer_tutte);
                                 navDrawer.closeDrawer();
                                 break;
                             case 2:

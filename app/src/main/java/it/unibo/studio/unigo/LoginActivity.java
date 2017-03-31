@@ -7,9 +7,12 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -17,6 +20,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
+import com.mikepenz.materialdrawer.util.KeyboardUtil;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
+
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.signup.SignupActivity;
 import it.unibo.studio.unigo.utils.Error;
@@ -42,6 +50,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Utilizzo dell'App in modalità Fullscreen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
+        KeyboardUtil keyboardUtil = new KeyboardUtil(LoginActivity.this,this.findViewById(R.id.l_login));
+        keyboardUtil.enable();
         initComponents();
     }
 
@@ -155,6 +165,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (inPass.isErrorEnabled())
                     resetErrorAndClearText(inPass);
                 return false;
+            }
+        });
+
+        KeyboardVisibilityEvent.setEventListener(this, new KeyboardVisibilityEventListener() {
+            @Override
+            public void onVisibilityChanged(boolean isOpen)
+            {
+                LinearLayout layout = (LinearLayout) findViewById(R.id.l_login);
+                if (isOpen)
+                    layout.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+                else
+                    layout.setGravity(Gravity.CENTER);
             }
         });
     }

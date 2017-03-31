@@ -46,6 +46,8 @@ dependencies {
     compile('com.mikepenz:materialdrawer:5.8.2@aar') {
         transitive = true
     }
+    // SoftKeyboard Listener
+    compile 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
