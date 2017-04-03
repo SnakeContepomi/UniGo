@@ -1,27 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Home Fragment" />
-
-        <Button
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/app_name" />
-
-    <android.support.design.widget.FloatingActionButton
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right|bottom"
-        android:layout_marginBottom="38dp"
-        app:useCompatPadding="true"/>
+        android:text="Home Fragment" />
 
-</android.support.design.widget.CoordinatorLayout>
+    <Button
+        android:id="@+id/buttonTemp"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name" />
+</LinearLayout>
