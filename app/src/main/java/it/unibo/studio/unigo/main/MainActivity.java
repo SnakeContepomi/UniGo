@@ -1,23 +1,22 @@
 package it.unibo.studio.unigo.main;
 
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -50,16 +49,16 @@ public class MainActivity extends AppCompatActivity
     private final String FRAGMENT_INFO = "info";
     private final String FRAGMENT_PROFILE = "profile";
 
+    private boolean firstTime;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
     private DatabaseReference database;
 
-    private FragmentTransaction fragmentTransaction;
     private ProfileFragment fragmentProfile;
     private HomeFragment fragmentHome;
-    private QuestionFragment fragmentQuestion;
     private FavoriteFragment fragmentFavorite;
+    private QuestionFragment fragmentQuestion;
     private SocialFragment fragmentSocial;
     private SettingsFragment fragmentSettings;
     private InfoFragment fragmentInfo;
@@ -85,6 +84,36 @@ public class MainActivity extends AppCompatActivity
     {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+
+        if (firstTime)
+        {
+            Snackbar.make(getCurrentFragment().getView(), getResources().getString(R.string.snackbar_login_message) + user.getEmail(), Snackbar.LENGTH_LONG)
+                .addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    @Override
+                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                        super.onDismissed(transientBottomBar, event);
+                        // Inizializzazione del listener che monitora lo stato della connessione
+                        ReactiveNetwork.observeInternetConnectivity()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Action1<Boolean>() {
+                                @Override
+                                public void call(Boolean isConnectedToInternet) {
+                                    if (!isConnectedToInternet)
+                                        Snackbar
+                                                .make(getCurrentFragment().getView(), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
+                                                .show();
+                                    else {
+                                        profile.withIcon(user.getPhotoUrl());
+                                        header.updateProfile(profile);
+                                    }
+                                }
+                            });
+                    }
+                })
+                .show();
+            firstTime = false;
+        }
     }
 
     @Override
@@ -112,9 +141,11 @@ public class MainActivity extends AppCompatActivity
 
     private void initComponents()
     {
+        firstTime = true;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         database = Util.getDatabase().getReference();
+
         // Componente che permette di caricare nelle view immagini recuperate via url (grazie a Picasso)
         DrawerImageLoader.init(new AbstractDrawerImageLoader()
         {
@@ -130,13 +161,35 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // Inizializzazione NavDrawer
+        initNavDrawer();
+
+        // Gestione Logout
+        mAuthListener = new FirebaseAuth.AuthStateListener()
+        {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+            {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                // L'utente si è disconnesso
+                if (user == null)
+                {
+
+                }
+            }
+        };
+    }
+
+    // Inizializzazione della Toolbar e del NavDrawer
+    private void initNavDrawer()
+    {
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbar);
 
         fragmentProfile = new ProfileFragment();
         fragmentHome = new HomeFragment();
-        fragmentQuestion = new QuestionFragment();
         fragmentFavorite = new FavoriteFragment();
+        fragmentQuestion = new QuestionFragment();
         fragmentSocial = new SocialFragment();
         fragmentSettings = new SettingsFragment();
         fragmentInfo = new InfoFragment();
@@ -169,8 +222,8 @@ public class MainActivity extends AppCompatActivity
 
         // Inizializzazione delle voci del navDrawer
         PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_tutte).withLevel(2).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_domande).withLevel(2).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_preferiti).withLevel(2).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
+        final PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_preferiti).withLevel(2).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_domande).withLevel(2).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
@@ -181,9 +234,9 @@ public class MainActivity extends AppCompatActivity
                 .withSelectable(false)
                 .withIsExpanded(true)
                 .withSubItems(
-                    nav_home,
-                    nav_question,
-                    nav_favorite
+                        nav_home,
+                        nav_favorite,
+                        nav_question
                 );
 
         // Creazione del navDrawer con le varie caratteristiche sopra definite
@@ -211,13 +264,13 @@ public class MainActivity extends AppCompatActivity
                                 navDrawer.closeDrawer();
                                 break;
                             case 2:
-                                loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
-                                getSupportActionBar().setTitle(R.string.drawer_domande);
+                                loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
+                                getSupportActionBar().setTitle(R.string.drawer_preferiti);
                                 navDrawer.closeDrawer();
                                 break;
                             case 3:
-                                loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
-                                getSupportActionBar().setTitle(R.string.drawer_preferiti);
+                                loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
+                                getSupportActionBar().setTitle(R.string.drawer_domande);
                                 navDrawer.closeDrawer();
                                 break;
                             case 4:
@@ -238,61 +291,39 @@ public class MainActivity extends AppCompatActivity
                         }
                         return true;
                     }
-                }).build();
+                })
+                .build();
 
         // Viene caricato il Fragment 'Home' all'avvio dell'Activity
         navDrawer.setSelection(navDrawer.getDrawerItem(1));
-
-        // Gestione Logout
-        mAuthListener = new FirebaseAuth.AuthStateListener()
-        {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
-            {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                // L'utente si è disconnesso
-                if (user == null)
-                {
-
-                }
-            }
-        };
-
-        Snackbar
-            .make(findViewById(R.id.drawerLayout), getResources().getString(R.string.snackbar_login_message) + user.getEmail(), Snackbar.LENGTH_LONG)
-            .addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
-            @Override
-                public void onDismissed(Snackbar transientBottomBar, int event)
-                {
-                    super.onDismissed(transientBottomBar, event);
-                    // Inizializzazione del listener che monitora lo stato della connessione
-                    ReactiveNetwork.observeInternetConnectivity()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<Boolean>() {
-                            @Override public void call(Boolean isConnectedToInternet) {
-                            if (!isConnectedToInternet)
-                                Snackbar
-                                    .make(findViewById(R.id.drawerLayout), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
-                                    .show();
-                            else
-                            {
-                                profile.withIcon(user.getPhotoUrl());
-                                header.updateProfile(profile);
-                            }
-                            }
-                        });
-                }
-            })
-            .show();
     }
 
     // Metodo per caricare un fragment nella Main Activity
     private void loadFragment(Fragment fragment, String tag)
     {
-        fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment, tag);
-        fragmentTransaction.commit();
+        getFragmentManager()
+            .beginTransaction()
+            .replace(R.id.fragment_container, fragment, tag)
+            .commit();
+    }
+
+    // Metodo che ritorna il Fragment attualmente caricato
+    private Fragment getCurrentFragment()
+    {
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.fragment_container);
+
+        if (fragment instanceof ProfileFragment)
+            return fragmentProfile;
+        if (fragment instanceof HomeFragment)
+            return fragmentHome;
+        if (fragment instanceof SocialFragment)
+            return fragmentSocial;
+        if (fragment instanceof SettingsFragment)
+            return fragmentSettings;
+        if (fragment instanceof InfoFragment)
+            return fragmentInfo;
+
+        return null;
     }
 
     private void fillUniversity()

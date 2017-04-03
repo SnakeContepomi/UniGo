@@ -36,16 +36,14 @@ dependencies {
     }
     // Registration Stepper
     compile 'com.stepstone.stepper:material-stepper:3.1.0'
-    // Material Progress Dialog
-    compile 'com.afollestad.material-dialogs:core:0.9.4.2'
-    // Network Listener
-    compile 'com.github.pwittchen:reactivenetwork:0.8.0'
     // Image Loader
     compile 'com.squareup.picasso:picasso:2.5.2'
+    // Material Progress Dialog
+    compile 'com.afollestad.material-dialogs:core:0.9.4.2'
     // Material Navigation Drawer
-    compile('com.mikepenz:materialdrawer:5.8.2@aar') {
-        transitive = true
-    }
+    compile('com.mikepenz:materialdrawer:5.8.2@aar') { transitive = true }
+    // Network Listener
+    compile 'com.github.pwittchen:reactivenetwork:0.8.0'
     // SoftKeyboard Listener
     compile 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
 }
