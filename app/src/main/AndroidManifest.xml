@@ -20,5 +20,4 @@
         <activity android:name=".signup.SignupActivity" android:screenOrientation="portrait"/>
         <activity android:name=".main.PostActivity" android:screenOrientation="portrait"/>
     </application>
-
 </manifest>
