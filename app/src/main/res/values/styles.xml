@@ -40,6 +40,14 @@
         <item name="android:tint">@color/colorWhite</item>
     </style>
 
+    <!-- New Post Toolbar -->
+    <style name="PostToolbar">
+        <item name="theme">@style/ThemeOverlay.AppCompat.Dark</item>
+        <item name="navigationIcon">@drawable/ic_arrow_back_white_24px</item>
+        <item name="android:background">?colorPrimary</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+
     <!-- Full Width EditText -->
     <style name="FullWidthEditText" parent="Widget.AppCompat.EditText">
         <item name="android:padding">20dp</item>
