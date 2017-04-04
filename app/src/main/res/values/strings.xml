@@ -49,11 +49,16 @@
     <string name="error_name_is_empty">Inserire il nome</string>
     <string name="error_lastname_is_empty">Inserire il cognome</string>
     <string name="error_phone">Numero telefonico non valido</string>
+    <string name="error_post_title">Inserire il titolo.</string>
+    <string name="error_post_course">Inserire la materia.</string>
+    <string name="error_post_desc">Nessun testo presente nel corpo del messaggio.</string>
 
     <string name="alert_dialog_step1_title">Verifica Email</string>
     <string name="alert_dialog_step1_content">Attendere prego</string>
     <string name="alert_dialog_step3_title">Creazione account</string>
     <string name="alert_dialog_step3_content">L\'operazione può richiedere alcuni minuti..</string>
+    <string name="alert_dialog_cancel">Annulla</string>
+    <string name="alert_dialog_send">Invia</string>
 
     <string name="signup_toolbar">Nuovo utente</string>
     <string name="signup_icon_desc">Signup Icon</string>

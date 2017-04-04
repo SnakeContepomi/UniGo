@@ -16,7 +16,11 @@ public class Error
         PASSWORD_MISMATCH,
         NAME_IS_EMPTY,
         LASTNAME_IS_EMPTY,
-        PHONE_INCORRECT
+        PHONE_INCORRECT,
+
+        TITLE_IS_EMPTY,
+        COURSE_IS_EMPTY,
+        DESC_IS_EMPTY
     };
 
     public static void resetError(TextInputLayout layout)
