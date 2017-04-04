@@ -46,6 +46,10 @@ dependencies {
     compile 'com.github.pwittchen:reactivenetwork:0.8.0'
     // SoftKeyboard Listener
     compile 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
+    // Material circular fab reveal animation
+    compile 'com.github.coyarzun89:fabtransitionactivity:0.2.0'
+    // Libreria su cui si basa fabtransitionactivity
+    compile ('com.github.ozodrukh:CircularReveal:2.0.1@aar') { transitive = true }
 }
 
 apply plugin: 'com.google.gms.google-services'

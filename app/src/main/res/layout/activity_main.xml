@@ -15,7 +15,8 @@
         android:background="?attr/colorPrimary"
         app:popupTheme="@style/AppTheme"
         app:title="@string/app_name"
-        app:titleTextAppearance="@style/ToolbarTextAppearance" />
+        app:titleTextAppearance="@style/ToolbarTextAppearance"
+        android:elevation="2dp"/>
 
     <LinearLayout
         android:id="@+id/fragment_container"
@@ -36,5 +37,14 @@
         android:theme="@style/HomeFab"
         app:rippleColor="@color/colorPrimaryDark"
         app:fabSize="auto"/>
+
+    <com.github.fabtransitionactivity.SheetLayout
+        android:id="@+id/bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        app:ft_container_gravity="center"
+        app:ft_color="@color/primary"
+        android:elevation="2dp"/>
 
 </android.support.design.widget.CoordinatorLayout>

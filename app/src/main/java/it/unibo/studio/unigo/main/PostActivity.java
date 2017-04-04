@@ -1,62 +1,36 @@
 package it.unibo.studio.unigo.main;
 
-import android.animation.Animator;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ViewAnimationUtils;
-import android.view.ViewTreeObserver;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.LinearLayout;
 import it.unibo.studio.unigo.R;
 
 public class PostActivity extends AppCompatActivity
 {
-    LinearLayout rootLayout;
+    private LinearLayout rootLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        // Sovrascrittura della transizione di default
-        overridePendingTransition(0, 0);
         setContentView(R.layout.activity_post);
-
-        rootLayout = (LinearLayout) findViewById(R.id.profileLayout);
-
-        if (savedInstanceState == null)
-        {
-            //rootLayout.setVisibility(View.INVISIBLE);
-            ViewTreeObserver viewTreeObserver = rootLayout.getViewTreeObserver();
-            if (viewTreeObserver.isAlive())
-                viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout()
-                    {
-                        circularRevealActivity();
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
-                            rootLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                         else
-                            rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
-                });
-        }
+        initComponents();
     }
 
-    // Animazione per caricare l'activity tramite circular reveal
-    private void circularRevealActivity()
+    private void initComponents()
     {
-        // Coordinate inizio animazione
-        int cx = rootLayout.getRight();
-        int cy = rootLayout.getBottom();
+        rootLayout = (LinearLayout) findViewById(R.id.profileLayout);
 
-        // Raggio animazione
-        float finalRadius = Math.max(rootLayout.getWidth(), rootLayout.getHeight());
-
-        // Animator view
-        Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, 0, finalRadius);
-
-        // Inizio animazione
-        //rootLayout.setVisibility(View.VISIBLE);
-        circularReveal.start();
+        // Inizializzazione Toolbar
+        Toolbar mActionBar = (Toolbar) findViewById(R.id.PostToolbar);
+        mActionBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                onBackPressed();
+            }
+        });
     }
 }

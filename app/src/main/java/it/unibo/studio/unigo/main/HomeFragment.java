@@ -1,12 +1,12 @@
 package it.unibo.studio.unigo.main;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.github.fabtransitionactivity.SheetLayout;
 import it.unibo.studio.unigo.R;
 
 public class HomeFragment extends Fragment
@@ -43,8 +43,7 @@ public class HomeFragment extends Fragment
             @Override
             public void onClick(View view)
             {
-                Intent intent = new Intent(getActivity(), PostActivity.class);
-                startActivity(intent);
+                ((SheetLayout) getActivity().findViewById(R.id.bottom_sheet)).expandFab();
             }
         });
     }

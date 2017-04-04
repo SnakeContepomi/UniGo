@@ -1,18 +1,19 @@
 package it.unibo.studio.unigo.main;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
+import com.github.fabtransitionactivity.SheetLayout;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,8 +40,9 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements SheetLayout.OnFabAnimationEndListener
 {
+    private final int REQUEST_CODE_POST = 1;
     private final String FRAGMENT_HOME = "home";
     private final String FRAGMENT_QUESTION = "question";
     private final String FRAGMENT_FAVORITE = "favorite";
@@ -67,6 +69,8 @@ public class MainActivity extends AppCompatActivity
     private ProfileDrawerItem profile;
     private AccountHeader header;
     private Drawer navDrawer;
+    private FloatingActionButton fab;
+    private SheetLayout sheetLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -85,6 +89,7 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
 
+        // Avvio dell'utente loggato con attivazione del listener sullo stato della connessione
         if (firstTime)
         {
             Snackbar.make(findViewById(R.id.drawerLayout), getResources().getString(R.string.snackbar_login_message) + user.getEmail(), Snackbar.LENGTH_LONG)
@@ -139,8 +144,30 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_CODE_POST)
+            sheetLayout.contractFab();
+    }
+
+    // Creazione della nuova activity con animazione
+    @Override
+    public void onFabAnimationEnd()
+    {
+        Intent intent = new Intent(this, PostActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_POST);
+    }
+
     private void initComponents()
     {
+        // Inizializzazione dei componenti utilizzati per l'animazione del fab
+        sheetLayout = (SheetLayout) findViewById(R.id.bottom_sheet);
+        fab = (FloatingActionButton) findViewById(R.id.fabHome);
+        sheetLayout.setFab(fab);
+        sheetLayout.setFabAnimationEndListener(this);
+
         firstTime = true;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
