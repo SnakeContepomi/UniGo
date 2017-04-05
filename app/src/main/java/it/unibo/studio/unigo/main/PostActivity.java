@@ -19,9 +19,17 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        overridePendingTransition(R.anim.activity_open_translate_from_bottom, R.anim.activity_no_animation);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
         initComponents();
+    }
+
+    @Override
+    protected void onPause()
+    {
+        overridePendingTransition(R.anim.activity_no_animation, R.anim.activity_close_translate_to_bottom);
+        super.onPause();
     }
 
     @Override
