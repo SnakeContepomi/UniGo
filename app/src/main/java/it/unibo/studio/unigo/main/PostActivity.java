@@ -9,8 +9,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
+import java.lang.reflect.Array;
+
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
+import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.User;
 
 public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
 {
@@ -32,6 +41,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         super.onPause();
     }
 
+    // Listener sul pulsante di invio del nuovo post
     @Override
     public boolean onMenuItemClick(MenuItem item)
     {
@@ -144,7 +154,27 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // Metodo per aggiungere al database la domanda appena compilata
     private void addPost()
     {
-        Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
+        Util.getDatabase().getReference("User").child(MainActivity.currentUser_key)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        User u = dataSnapshot.getValue(User.class);
+
+                        // Definire nella classe Util crediti partenza, crediti per postare, crediti in arrivo (like/ quando si effetuano commenti)
+                        /* if (u.credits > Util.CreditiNecessari)
+                        {
+                            usare transazioni per scalare crediti e effettuare il post
+                            runTransaction, capitolo read & write data
+                        }*/
+
+                        Toast.makeText(getApplicationContext(), u.email, Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
+
         finish();
     }
 }

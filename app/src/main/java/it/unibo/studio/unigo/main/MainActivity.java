@@ -13,11 +13,16 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import com.github.fabtransitionactivity.SheetLayout;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -36,9 +41,14 @@ import it.unibo.studio.unigo.utils.firebase.Course;
 import it.unibo.studio.unigo.utils.firebase.School;
 import it.unibo.studio.unigo.utils.firebase.University;
 import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.User;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+
+import static android.R.attr.data;
+import static it.unibo.studio.unigo.utils.Util.getDatabase;
+import static rx.internal.operators.NotificationLite.getValue;
 
 public class MainActivity extends AppCompatActivity implements SheetLayout.OnFabAnimationEndListener
 {
@@ -50,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private final String FRAGMENT_SETTINGS = "settings";
     private final String FRAGMENT_INFO = "info";
     private final String FRAGMENT_PROFILE = "profile";
+
+    public static String currentUser_key, currentUser_courseKey;
 
     private boolean firstTime;
     private FirebaseAuth mAuth;
@@ -78,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
+        retrieveUserInfo();
         //fillUniversity();
         //fillSchool();
         //fillCourse();
@@ -171,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         firstTime = true;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        database = Util.getDatabase().getReference();
+        database = getDatabase().getReference();
 
         // Componente che permette di caricare nelle view immagini recuperate via url (grazie a Picasso)
         DrawerImageLoader.init(new AbstractDrawerImageLoader()
@@ -205,6 +218,27 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 }
             }
         };
+    }
+
+    // Memorizzazione utente corrente per poter effettuare operazioni anche in modalità offline
+    private void retrieveUserInfo()
+    {
+        Util.getDatabase().getReference("User").orderByChild("email").equalTo(user.getEmail()).limitToFirst(1)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        for (DataSnapshot child : dataSnapshot.getChildren())
+                        {
+                            User u = child.getValue(User.class);
+                            currentUser_key = child.getKey();
+                            currentUser_courseKey = u.courseKey;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
     }
 
     // Inizializzazione della Toolbar e del NavDrawer
