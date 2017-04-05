@@ -1,4 +1,4 @@
-package it.unibo.studio.unigo.utils;
+package it.unibo.studio.unigo.utils.firebase;
 
 public class User
 {

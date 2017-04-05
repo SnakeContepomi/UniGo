@@ -38,11 +38,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.utils.Course;
-import it.unibo.studio.unigo.utils.School;
+import it.unibo.studio.unigo.utils.firebase.Course;
+import it.unibo.studio.unigo.utils.firebase.School;
 import it.unibo.studio.unigo.utils.SignupData;
-import it.unibo.studio.unigo.utils.University;
-import it.unibo.studio.unigo.utils.User;
+import it.unibo.studio.unigo.utils.firebase.University;
+import it.unibo.studio.unigo.utils.firebase.User;
 import it.unibo.studio.unigo.utils.Util;
 
 public class Step3Fragment extends Fragment implements BlockingStep
