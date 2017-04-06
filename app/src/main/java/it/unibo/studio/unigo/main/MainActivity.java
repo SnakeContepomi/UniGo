@@ -61,8 +61,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private final String FRAGMENT_INFO = "info";
     private final String FRAGMENT_PROFILE = "profile";
 
-    public static String currentUser_key, currentUser_courseKey;
-
     private boolean firstTime;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -231,8 +229,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                         for (DataSnapshot child : dataSnapshot.getChildren())
                         {
                             User u = child.getValue(User.class);
-                            currentUser_key = child.getKey();
-                            currentUser_courseKey = u.courseKey;
+                            Util.CURRENT_USER_KEY = child.getKey();
+                            Util.CURRENT_COURSE_KEY = u.courseKey;
+                            //ToDo
+                            Toast.makeText(getApplicationContext(), Util.CURRENT_COURSE_KEY, Toast.LENGTH_LONG).show();
                         }
                     }
 

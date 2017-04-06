@@ -36,6 +36,8 @@
     <string name="snackbar_registration_failed">Si è verificato un errore di rete. Riprovare</string>
     <string name="snackbar_login_message">Accesso eseguito come\n</string>
 
+    <string name="toast_post_sent">Post creato</string>
+
     <string name="error_invalid_credentials">Email o Password non validi</string>
     <string name="error_email_is_empty">Inserire l\'email</string>
     <string name="error_email_already_in_use">Email già in uso</string>
@@ -52,6 +54,8 @@
     <string name="error_post_title">Inserire il titolo.</string>
     <string name="error_post_course">Inserire la materia.</string>
     <string name="error_post_desc">Nessun testo presente nel corpo del messaggio.</string>
+    <string name="error_not_enough_credits">Non disponi di sufficienti crediti per effettuare la domanda.</string>
+    <string name="error_network_unavailable">Assicurati di essere connesso ad Internet e riprova.</string>
 
     <string name="alert_dialog_step1_title">Verifica Email</string>
     <string name="alert_dialog_step1_content">Attendere prego</string>

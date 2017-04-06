@@ -6,6 +6,8 @@ public class Error
 {
     public static enum Type
     {
+        NETWORK_UNAVAILABLE,
+
         EMAIL_IS_EMPTY,
         PASSWORD_IS_EMPTY,
         PASSWORD_CONFIRM_IS_EMPTY,
@@ -20,7 +22,8 @@ public class Error
 
         TITLE_IS_EMPTY,
         COURSE_IS_EMPTY,
-        DESC_IS_EMPTY
+        DESC_IS_EMPTY,
+        NOT_ENOUGH_CREDITS
     };
 
     public static void resetError(TextInputLayout layout)

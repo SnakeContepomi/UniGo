@@ -2,6 +2,7 @@ package it.unibo.studio.unigo.main;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -10,15 +11,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-
-import java.lang.reflect.Array;
-
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
 
 public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
@@ -51,9 +53,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
             case R.id.post_toolbar_send:
                 error = isValid();
                 if (error == null)
-                {
-                    addPost();
-                }
+                    validatePost();
                 else
                     errorHandler(error);
                 break;
@@ -85,13 +85,18 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // - Non vi sono errori --> viene ritornato nul
     private Error.Type isValid()
     {
-        if (etTitle.getText().toString().equals(""))
-            return Error.Type.TITLE_IS_EMPTY;
-        if (etCourse.getText().toString().equals(""))
-            return Error.Type.COURSE_IS_EMPTY;
-        if (etDesc.getText().toString().equals(""))
-            return Error.Type.DESC_IS_EMPTY;
-        return null;
+        if (Util.isNetworkAvailable(getApplicationContext()))
+        {
+            if (etTitle.getText().toString().equals(""))
+                return Error.Type.TITLE_IS_EMPTY;
+            if (etCourse.getText().toString().equals(""))
+                return Error.Type.COURSE_IS_EMPTY;
+            if (etDesc.getText().toString().equals(""))
+                return Error.Type.DESC_IS_EMPTY;
+            return null;
+        }
+        else
+            return Error.Type.NETWORK_UNAVAILABLE;
     }
 
     // Metodo che gestisce gli errori sui campi e mostra un alert dialog
@@ -100,6 +105,18 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         switch (e)
         {
+            // Connessione non disponibile
+            case NETWORK_UNAVAILABLE:
+                builder.setMessage(getString(R.string.error_network_unavailable));
+                builder.setPositiveButton(getString(android.R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
+                            }
+                        });
+                break;
             // Titolo vuoto
             case TITLE_IS_EMPTY:
                 builder.setMessage(getString(R.string.error_post_title));
@@ -132,7 +149,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                             @Override
                             public void onClick(DialogInterface dialog, int which)
                             {
-                                addPost();
+                                validatePost();
                             }
                         });
                 builder.setNegativeButton(getString(R.string.alert_dialog_cancel),
@@ -144,6 +161,16 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                             }
                         });
                 break;
+            case NOT_ENOUGH_CREDITS:
+                builder.setMessage(getString(R.string.error_not_enough_credits));
+                builder.setPositiveButton(getString(android.R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
+                            }
+                        });
         }
 
         // Visualizzazione alertDialog
@@ -151,30 +178,69 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         dialog.show();
     }
 
-    // Metodo per aggiungere al database la domanda appena compilata
+    // Metodo che verifica se l'utente ha crediti sufficienti per effettuare la domanda.
+    // In caso positivo, la domanda viene inserita correttamente e vengono scalati i crediti dal profilo,
+    // altrimenti viene restituito un errore
+    private void validatePost()
+    {
+        Util.getDatabase().getReference("User").child(Util.CURRENT_USER_KEY)
+            .runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData)
+                {
+                    User u = mutableData.getValue(User.class);
+                    if (u == null)
+                        return Transaction.success(mutableData);
+                    // L'utente possiede crediti sufficienti per effettuare la domanda
+                    if (u.credits >= Util.CREDITS_QUESTION)
+                    {
+                        u.credits -= Util.CREDITS_QUESTION;
+                        mutableData.setValue(u);
+                        return Transaction.success(mutableData);
+                    }
+                    // L'utente non possiede crediti sufficienti per effettuare la domanda
+                    else
+                        return Transaction.abort();
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot)
+                {
+                    if (success)
+                        addPost();
+                    else
+                        errorHandler(Error.Type.NOT_ENOUGH_CREDITS);
+                }
+            });
+    }
+
+    // Metodo per aggiungere al database la domanda appena compilata e collegarla all'utente
     private void addPost()
     {
-        Util.getDatabase().getReference("User").child(MainActivity.currentUser_key)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                        User u = dataSnapshot.getValue(User.class);
+        final String key = Util.getDatabase().getReference("Question").push().getKey();
+        Util.getDatabase().getReference("Question").child(key).setValue(
+                new Question(etTitle.getText().toString(), etCourse.getText().toString(), etDesc.getText().toString(),
+                             Util.CURRENT_USER_KEY, Util.CURRENT_COURSE_KEY)).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                linkPostToUser(key);
+            }
+        });
+    }
 
-                        // Definire nella classe Util crediti partenza, crediti per postare, crediti in arrivo (like/ quando si effetuano commenti)
-                        /* if (u.credits > Util.CreditiNecessari)
-                        {
-                            usare transazioni per scalare crediti e effettuare il post
-                            runTransaction, capitolo read & write data
-                        }*/
-
-                        Toast.makeText(getApplicationContext(), u.email, Toast.LENGTH_LONG).show();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) { }
-                });
-
-        finish();
+    // Metodo per collegare la domanda appena creata all'utente che l'ha effettuata
+    private void linkPostToUser(String question_key)
+    {
+        //Util.getDatabase().getReference("User").child(Util.CURRENT_USER_KEY).child("questions").push().setValue(question_key);
+        Util.getDatabase().getReference("User").child(Util.CURRENT_USER_KEY).child("questions").child(question_key).setValue(true)
+        .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                Toast.makeText(getApplicationContext(), R.string.toast_post_sent, Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 }

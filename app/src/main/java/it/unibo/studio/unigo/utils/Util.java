@@ -11,6 +11,17 @@ import static android.os.Build.VERSION_CODES.M;
 
 public class Util
 {
+    public static String CURRENT_USER_KEY, CURRENT_COURSE_KEY;
+    public static final int EXP_START = 0;
+    public static final int EXP_ANSWER = 10;
+    public static final int EXP_LIKE = 2;
+    public static final int CREDITS_START = 50;
+    public static final int CREDITS_ANSWER = 5;
+    public static final int CREDITS_LIKE = 1;
+    // Crediti richiesti per effettuare una domanda
+    public static final int CREDITS_QUESTION = 10;
+
+
     private static FirebaseDatabase database;
 
     // Riferimento al database di Firebase

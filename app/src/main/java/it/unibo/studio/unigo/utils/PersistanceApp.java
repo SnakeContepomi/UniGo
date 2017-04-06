@@ -11,6 +11,6 @@ public class PersistanceApp extends Application
     public void onCreate()
     {
         super.onCreate();
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        Util.getDatabase().setPersistenceEnabled(true);
     }
 }

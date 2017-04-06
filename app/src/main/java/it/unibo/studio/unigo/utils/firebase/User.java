@@ -1,9 +1,14 @@
 package it.unibo.studio.unigo.utils.firebase;
 
+import java.util.HashMap;
+
+import it.unibo.studio.unigo.utils.Util;
+
 public class User
 {
     public String email, name, lastName, phone, city, courseKey;
     public int exp, credits;
+    public HashMap<String, Boolean> questions;
 
     public User() { }
 
@@ -15,7 +20,7 @@ public class User
         this.phone = phone;
         this.city = city;
         this.courseKey = courseKey;
-        this.exp = 0;
-        this.credits = 50;
+        this.exp = Util.EXP_START;
+        this.credits = Util.CREDITS_START;
     }
 }
