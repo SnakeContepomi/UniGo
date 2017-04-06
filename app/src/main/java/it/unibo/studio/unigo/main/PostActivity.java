@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -25,7 +25,9 @@ import it.unibo.studio.unigo.utils.firebase.User;
 
 public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
 {
-    EditText etTitle, etCourse, etDesc;
+    private EditText etTitle, etCourse, etDesc;
+
+    private MaterialDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -78,6 +80,12 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         etTitle = (EditText) findViewById(R.id.etPostTitle);
         etCourse = (EditText) findViewById(R.id.etPostCourse);
         etDesc = (EditText) findViewById(R.id.etPostDesc);
+
+        dialog = new MaterialDialog.Builder(PostActivity.this)
+                .content(R.string.alert_dialog_post_creation)
+                .progress(true, 0)
+                .cancelable(false)
+                .build();
     }
 
     // Controllo di validità dei campi:
@@ -183,6 +191,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // altrimenti viene restituito un errore
     private void validatePost()
     {
+        dialog.show();
         Util.getDatabase().getReference("User").child(Util.CURRENT_USER_KEY)
             .runTransaction(new Transaction.Handler() {
                 @Override
@@ -209,7 +218,10 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                     if (success)
                         addPost();
                     else
+                    {
+                        dialog.dismiss();
                         errorHandler(Error.Type.NOT_ENOUGH_CREDITS);
+                    }
                 }
             });
     }
@@ -238,6 +250,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
+                dialog.dismiss();
                 Toast.makeText(getApplicationContext(), R.string.toast_post_sent, Toast.LENGTH_LONG).show();
                 finish();
             }

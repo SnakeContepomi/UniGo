@@ -21,6 +21,7 @@
         android:id="@+id/etPostTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:inputType="textEmailSubject"
         android:hint="@string/post_title"/>
 
     <View
@@ -33,6 +34,7 @@
         android:id="@+id/etPostCourse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:inputType="textEmailSubject"
         android:hint="@string/post_course"/>
 
     <View

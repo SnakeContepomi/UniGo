@@ -4,10 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.Calendar;
 
-import static android.os.Build.VERSION_CODES.M;
 
 public class Util
 {

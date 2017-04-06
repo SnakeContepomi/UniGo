@@ -231,8 +231,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                             User u = child.getValue(User.class);
                             Util.CURRENT_USER_KEY = child.getKey();
                             Util.CURRENT_COURSE_KEY = u.courseKey;
-                            //ToDo
-                            Toast.makeText(getApplicationContext(), Util.CURRENT_COURSE_KEY, Toast.LENGTH_LONG).show();
                         }
                     }
 

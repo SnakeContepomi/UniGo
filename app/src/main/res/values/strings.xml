@@ -63,6 +63,7 @@
     <string name="alert_dialog_step3_content">L\'operazione può richiedere alcuni minuti..</string>
     <string name="alert_dialog_cancel">Annulla</string>
     <string name="alert_dialog_send">Invia</string>
+    <string name="alert_dialog_post_creation">Invio in corso..</string>
 
     <string name="signup_toolbar">Nuovo utente</string>
     <string name="signup_icon_desc">Signup Icon</string>
