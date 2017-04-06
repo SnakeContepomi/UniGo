@@ -92,7 +92,6 @@
     <string name="drawer_social">Social</string>
     <string name="drawer_impostazioni">Impostazioni</string>
     <string name="drawer_guida">Guida &amp; info</string>
-    <string name="drawer_profilo">Profilo</string>
 
     <string name="post_toolbar_title">Scrivi</string>
     <string name="post_toolbar_send">Invia</string>

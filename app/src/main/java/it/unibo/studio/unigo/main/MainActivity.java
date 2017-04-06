@@ -13,15 +13,12 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
-
 import com.github.fabtransitionactivity.SheetLayout;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -37,18 +34,11 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.utils.firebase.Course;
-import it.unibo.studio.unigo.utils.firebase.School;
-import it.unibo.studio.unigo.utils.firebase.University;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-
-import static android.R.attr.data;
-import static it.unibo.studio.unigo.utils.Util.getDatabase;
-import static rx.internal.operators.NotificationLite.getValue;
 
 public class MainActivity extends AppCompatActivity implements SheetLayout.OnFabAnimationEndListener
 {
@@ -59,15 +49,12 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private final String FRAGMENT_SOCIAL = "social";
     private final String FRAGMENT_SETTINGS = "settings";
     private final String FRAGMENT_INFO = "info";
-    private final String FRAGMENT_PROFILE = "profile";
 
     private boolean firstTime;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
-    private DatabaseReference database;
 
-    private ProfileFragment fragmentProfile;
     private HomeFragment fragmentHome;
     private FavoriteFragment fragmentFavorite;
     private QuestionFragment fragmentQuestion;
@@ -89,9 +76,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         setContentView(R.layout.activity_main);
         initComponents();
         retrieveUserInfo();
-        //fillUniversity();
-        //fillSchool();
-        //fillCourse();
     }
 
     @Override
@@ -182,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         firstTime = true;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        database = getDatabase().getReference();
 
         // Componente che permette di caricare nelle view immagini recuperate via url (grazie a Picasso)
         DrawerImageLoader.init(new AbstractDrawerImageLoader()
@@ -245,7 +228,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbar);
 
-        fragmentProfile = new ProfileFragment();
         fragmentHome = new HomeFragment();
         fragmentFavorite = new FavoriteFragment();
         fragmentQuestion = new QuestionFragment();
@@ -272,8 +254,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current)
                     {
-                        loadFragment(fragmentProfile, FRAGMENT_PROFILE);
-                        getSupportActionBar().setTitle(R.string.drawer_profilo);
+                        startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
                         return false;
                     }
                 })
@@ -281,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         // Inizializzazione delle voci del navDrawer
         PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_tutte).withLevel(2).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
-        final PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_preferiti).withLevel(2).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_preferiti).withLevel(2).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_domande).withLevel(2).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);

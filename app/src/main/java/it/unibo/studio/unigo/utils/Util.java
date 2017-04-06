@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.DecimalFormat;
 import java.util.Calendar;
 
 
@@ -19,6 +21,7 @@ public class Util
     // Crediti richiesti per effettuare una domanda
     public static final int CREDITS_QUESTION = 10;
 
+    private static DecimalFormat mFormat= new DecimalFormat("00");
 
     private static FirebaseDatabase database;
 
@@ -41,6 +44,11 @@ public class Util
     public static String getDate()
     {
         Calendar c = Calendar.getInstance();
-        return c.get(Calendar.DAY_OF_MONTH) + "/" + c.get(Calendar.MONTH) + "/" + c.get(Calendar.YEAR) + " " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE);
+
+        return mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH))) +
+                "/" + mFormat.format(Double.valueOf(c.get(Calendar.MONTH))) +
+                "/" + c.get(Calendar.YEAR) +
+                " " + mFormat.format(Double.valueOf(+ c.get(Calendar.HOUR_OF_DAY))) +
+                ":" + mFormat.format(Double.valueOf(+ c.get(Calendar.MINUTE)));
     }
 }
