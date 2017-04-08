@@ -11,8 +11,8 @@ public class ProfileActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
-        //overridePendingTransition(Animazione_activity_entrante, Animazione_activity_uscente)
-        overridePendingTransition(R.anim.swap_in_bottom, R.anim.swap_out_bottom);
+        //overridePendingTransition(entrante, uscente)
+        overridePendingTransition(R.anim.target_activity_creation, R.anim.main_activity_dissolve);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
     }
@@ -20,7 +20,7 @@ public class ProfileActivity extends AppCompatActivity
     @Override
     protected void onPause()
     {
-        //overridePendingTransition(R.anim.activity_no_animation, R.anim.swap_out_bottom);
+        overridePendingTransition(R.anim.main_activity_creation, R.anim.target_activity_dissolve);
         super.onPause();
     }
 }
