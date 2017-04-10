@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,6 @@ import com.github.fabtransitionactivity.SheetLayout;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,27 +82,30 @@ public class HomeFragment extends Fragment
 
     private void initQuestionListener()
     {
-        //Log.d("INFO", "INFO");
-        Util.getDatabase().getReference("Question").orderByChild("course_key").equalTo(Util.CURRENT_COURSE_KEY).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s)
-            {
-                Question q = dataSnapshot.getValue(Question.class);
-                questionList.add(q);
-                mAdapter.notifyItemRangeInserted(questionList.size() - 1, 1);
-            }
+        if (!Util.homeFragmentListenerEnabled)
+        {
+            Util.getDatabase().getReference("Question").orderByChild("course_key").equalTo(Util.CURRENT_COURSE_KEY).addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s)
+                {
+                    Question q = dataSnapshot.getValue(Question.class);
+                    questionList.add(q);
+                    mAdapter.notifyItemInserted(questionList.size() - 1);
+                }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) { }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) { }
+            });
+            Util.homeFragmentListenerEnabled = true;
+        }
     }
 }
