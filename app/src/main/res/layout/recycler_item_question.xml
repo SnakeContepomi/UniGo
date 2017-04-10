@@ -12,7 +12,7 @@
         android:orientation="horizontal">
 
         <it.unibo.studio.unigo.utils.RoundedImageView
-            android:id="@+id/RoundedProfileImg"
+            android:id="@+id/itemq_user"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginEnd="16dp"
@@ -30,25 +30,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <TextView
+                    android:id="@+id/itemq_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:fontFamily="sans-serif"
-                    android:text="Domanda"
                     android:ellipsize="end"
+                    android:fontFamily="sans-serif"
                     android:lines="1"
-                    android:textSize="16sp"
-                    android:textColor="@color/ms_black"/>
+                    android:text="Domanda"
+                    android:textColor="@color/ms_black"
+                    android:textSize="16sp" />
+
                 <TextView
+                    android:id="@+id/itemq_date"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="0"
                     android:fontFamily="sans-serif"
-                    android:textAlignment="textEnd"
                     android:text="04/04/2017"
-                    android:textSize="14sp"
-                    android:textColor="@color/md_grey_500"/>
+                    android:textAlignment="textEnd"
+                    android:textColor="@color/md_grey_500"
+                    android:textSize="14sp" />
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -59,34 +63,40 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
+
                     <TextView
+                        android:id="@+id/itemq_course"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:ellipsize="end"
                         android:fontFamily="sans-serif"
+                        android:lines="1"
                         android:text="Materia"
-                        android:ellipsize="end"
-                        android:lines="1"
-                        android:textSize="14sp"
-                        android:textColor="@color/md_grey_500"/>
+                        android:textColor="@color/md_grey_500"
+                        android:textSize="14sp" />
+
                     <TextView
+                        android:id="@+id/itemq_desc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:text="Inizio Descrizione"
                         android:ellipsize="end"
+                        android:fontFamily="sans-serif"
                         android:lines="1"
-                        android:textSize="14sp"
-                        android:textColor="@color/md_grey_500"/>
+                        android:text="Inizio Descrizione"
+                        android:textColor="@color/md_grey_500"
+                        android:textSize="14sp" />
                 </LinearLayout>
+
                 <ImageView
+                    android:id="@+id/itemq_star"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
                     android:layout_gravity="bottom"
-                    android:paddingStart="16dp"
+                    android:layout_weight="0"
                     android:contentDescription="@string/rvq_favorite"
+                    android:paddingStart="16dp"
                     android:src="@drawable/ic_star_border_black_24dp"
-                    android:tint="@color/md_grey_500"/>
+                    android:tint="@color/md_grey_500" />
             </LinearLayout>
         </LinearLayout>
 
