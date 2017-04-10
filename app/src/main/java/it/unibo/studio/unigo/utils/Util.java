@@ -21,9 +21,10 @@ public class Util
     // Crediti richiesti per effettuare una domanda
     public static final int CREDITS_QUESTION = 10;
 
-    private static DecimalFormat mFormat= new DecimalFormat("00");
-
+    public static boolean homeFragmentListenerEnabled = false;
     private static FirebaseDatabase database;
+
+    private static DecimalFormat mFormat= new DecimalFormat("00");
 
     // Riferimento al database di Firebase
     public static FirebaseDatabase getDatabase()
