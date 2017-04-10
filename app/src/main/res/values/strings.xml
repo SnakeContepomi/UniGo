@@ -98,4 +98,6 @@
     <string name="post_title">Titolo</string>
     <string name="post_course">Materia</string>
     <string name="post_description">Descrizione</string>
+
+    <string name="rvq_favorite">Aggiungi ai preferiti</string>
 </resources>
