@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -348,6 +350,7 @@ public class Step3Fragment extends Fragment implements BlockingStep
                                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                         @SuppressWarnings("VisibleForTests")
                                         Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                        SignupData.setPhotoUrl(downloadUrl.toString());
 
                                         // Aggiornamento informazioni profilo
                                         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -423,16 +426,15 @@ public class Step3Fragment extends Fragment implements BlockingStep
     // recuperate dalla classe statica SignupData
     private void addUser(final StepperLayout.OnCompleteClickedCallback callback)
     {
-        final String user_key = Util.getDatabase().getReference("User").push().getKey();
-        Util.getDatabase().getReference("User").child(user_key).setValue(
-                new User(SignupData.getEmail(), SignupData.getName(), SignupData.getLastName(), SignupData.getPhone(),
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(SignupData.getEmail())).setValue(
+                new User(SignupData.getPhotoUrl(), SignupData.getName(), SignupData.getLastName(), SignupData.getPhone(),
                          SignupData.getCity(), SignupData.getCourseKey()))
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task)
                     {
                         // Viene collegato l'utente creato al corso selezionato
-                        Util.getDatabase().getReference("Course").child(SignupData.getCourseKey()).child("users").child(user_key).setValue(true);
+                        Util.getDatabase().getReference("Course").child(SignupData.getCourseKey()).child("users").child(Util.encodeEmail(SignupData.getEmail())).setValue(true);
 
                         dialog.dismiss();
                         callback.complete();

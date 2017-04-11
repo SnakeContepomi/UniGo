@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private boolean firstTime;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseUser user;
 
     private HomeFragment fragmentHome;
     private FavoriteFragment fragmentFavorite;
@@ -87,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         // Avvio dell'utente loggato con attivazione del listener sullo stato della connessione
         if (firstTime)
         {
-            Snackbar.make(findViewById(R.id.drawerLayout), getResources().getString(R.string.snackbar_login_message) + user.getEmail(), Snackbar.LENGTH_LONG)
+            Snackbar.make(findViewById(R.id.drawerLayout), getResources().getString(R.string.snackbar_login_message) + Util.getCurrentUser().getEmail(), Snackbar.LENGTH_LONG)
                 .addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     @Override
                     public void onDismissed(Snackbar transientBottomBar, int event) {
@@ -104,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                                 .make(findViewById(R.id.drawerLayout), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
                                                 .show();
                                     else {
-                                        profile.withIcon(user.getPhotoUrl());
+                                        profile.withIcon(Util.getCurrentUser().getPhotoUrl());
                                         header.updateProfile(profile);
                                     }
                                 }
@@ -160,12 +159,18 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         // Inizializzazione dei componenti utilizzati per l'animazione del fab
         sheetLayout = (SheetLayout) findViewById(R.id.bottom_sheet);
         fab = (FloatingActionButton) findViewById(R.id.fabHome);
+        fab.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view)
+            {
+                ((SheetLayout) findViewById(R.id.bottom_sheet)).expandFab();
+            }
+        });
         sheetLayout.setFab(fab);
         sheetLayout.setFabAnimationEndListener(this);
 
         firstTime = true;
         mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
 
         // Componente che permette di caricare nelle view immagini recuperate via url (grazie a Picasso)
         DrawerImageLoader.init(new AbstractDrawerImageLoader()
@@ -191,9 +196,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
             {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
                 // L'utente si è disconnesso
-                if (user == null)
+                if (Util.getCurrentUser() == null)
                 {
 
                 }
@@ -204,17 +208,13 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     // Memorizzazione utente corrente per poter effettuare operazioni anche in modalità offline
     private void retrieveUserInfo()
     {
-        Util.getDatabase().getReference("User").orderByChild("email").equalTo(user.getEmail()).limitToFirst(1)
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail()))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
-                        for (DataSnapshot child : dataSnapshot.getChildren())
-                        {
-                            User u = child.getValue(User.class);
-                            Util.CURRENT_USER_KEY = child.getKey();
+                            User u = dataSnapshot.getValue(User.class);
                             Util.CURRENT_COURSE_KEY = u.courseKey;
-                        }
                     }
 
                     @Override
@@ -237,11 +237,11 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         // Inizializzazione del profilo utente presente nel navDrawer
         profile = new ProfileDrawerItem()
-                .withName(user.getDisplayName())
-                .withEmail(user.getEmail())
+                .withName(Util.getCurrentUser().getDisplayName())
+                .withEmail(Util.getCurrentUser().getEmail())
                 .withIcon(R.drawable.empty_profile_pic);
         if (Util.isNetworkAvailable(getApplicationContext()))
-            profile.withIcon(user.getPhotoUrl());
+            profile.withIcon(Util.getCurrentUser().getPhotoUrl());
 
         // Inizializzazione dell'header del navDrawer
         header = new AccountHeaderBuilder()
@@ -302,31 +302,37 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentHome, FRAGMENT_HOME);
                                 getSupportActionBar().setTitle(R.string.drawer_tutte);
                                 navDrawer.closeDrawer();
+                                showFab();
                                 break;
                             case 2:
                                 loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
                                 getSupportActionBar().setTitle(R.string.drawer_preferiti);
                                 navDrawer.closeDrawer();
+                                showFab();
                                 break;
                             case 3:
                                 loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
                                 getSupportActionBar().setTitle(R.string.drawer_domande);
                                 navDrawer.closeDrawer();
+                                showFab();
                                 break;
                             case 4:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
                                 getSupportActionBar().setTitle(R.string.drawer_social);
                                 navDrawer.closeDrawer();
+                                hideFab();
                                 break;
                             case 5:
                                 loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
                                 getSupportActionBar().setTitle(R.string.drawer_impostazioni);
                                 navDrawer.closeDrawer();
+                                hideFab();
                                 break;
                             case 6:
                                 loadFragment(fragmentInfo, FRAGMENT_INFO);
                                 getSupportActionBar().setTitle(R.string.drawer_guida);
                                 navDrawer.closeDrawer();
+                                hideFab();
                                 break;
                         }
                         return true;
@@ -345,5 +351,17 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             .beginTransaction()
             .replace(R.id.fragment_container, fragment, tag)
             .commit();
+    }
+
+    private void showFab()
+    {
+        if (!fab.isShown())
+            fab.show();
+    }
+
+    private void hideFab()
+    {
+        if (fab.isShown())
+            fab.hide();
     }
 }

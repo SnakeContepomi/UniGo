@@ -192,7 +192,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     private void validatePost()
     {
         dialog.show();
-        Util.getDatabase().getReference("User").child(Util.CURRENT_USER_KEY)
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail()))
             .runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData)
@@ -232,7 +232,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         final String key = Util.getDatabase().getReference("Question").push().getKey();
         Util.getDatabase().getReference("Question").child(key).setValue(
                 new Question(etTitle.getText().toString(), etCourse.getText().toString(), etDesc.getText().toString(),
-                             Util.CURRENT_USER_KEY, Util.CURRENT_COURSE_KEY)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        Util.encodeEmail(Util.getCurrentUser().getEmail()), Util.CURRENT_COURSE_KEY)).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
@@ -244,8 +244,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // Metodo per collegare la domanda appena creata all'utente che l'ha effettuata
     private void linkPostToUser(String question_key)
     {
-        //Util.getDatabase().getReference("User").child(Util.CURRENT_USER_KEY).child("questions").push().setValue(question_key);
-        Util.getDatabase().getReference("User").child(Util.CURRENT_USER_KEY).child("questions").child(question_key).setValue(true)
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("questions").child(question_key).setValue(true)
         .addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task)

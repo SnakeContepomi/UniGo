@@ -3,15 +3,21 @@ package it.unibo.studio.unigo.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DecimalFormat;
 import java.util.Calendar;
 
+import static android.os.Build.VERSION_CODES.M;
+
 
 public class Util
 {
-    public static String CURRENT_USER_KEY, CURRENT_COURSE_KEY;
+    public static String CURRENT_COURSE_KEY;
     public static final int EXP_START = 0;
     public static final int EXP_ANSWER = 10;
     public static final int EXP_LIKE = 2;
@@ -21,8 +27,8 @@ public class Util
     // Crediti richiesti per effettuare una domanda
     public static final int CREDITS_QUESTION = 10;
 
-    public static boolean homeFragmentListenerEnabled = false;
     private static FirebaseDatabase database;
+    private static FirebaseUser user;
 
     private static DecimalFormat mFormat= new DecimalFormat("00");
 
@@ -32,6 +38,14 @@ public class Util
         if (database == null)
             database = FirebaseDatabase.getInstance();
         return database;
+    }
+
+    // Metodo per recupererare le informazioni dell'utente loggato
+    public static FirebaseUser getCurrentUser()
+    {
+        if (user == null)
+            user = FirebaseAuth.getInstance().getCurrentUser();
+        return user;
     }
 
     // Ritorna true il dispositivo è connesso ad internet, false altrimenti
@@ -46,10 +60,67 @@ public class Util
     {
         Calendar c = Calendar.getInstance();
 
-        return mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH))) +
+        return c.get(Calendar.YEAR) +
                 "/" + mFormat.format(Double.valueOf(c.get(Calendar.MONTH))) +
-                "/" + c.get(Calendar.YEAR) +
+                "/" + mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH))) +
                 " " + mFormat.format(Double.valueOf(+ c.get(Calendar.HOUR_OF_DAY))) +
                 ":" + mFormat.format(Double.valueOf(+ c.get(Calendar.MINUTE)));
+    }
+
+    // Metodo per restituire la data in un formato che dipende dalla distanza temporale
+    public static String formatDate(String date)
+    {
+        Calendar c = Calendar.getInstance();
+
+        // Se la data passata è quella odierna, viene restituito solamente l'orario
+        if( date.substring(0, 4).equals(String.valueOf(c.get(Calendar.YEAR))) &&
+            date.substring(5, 7).equals(mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))) &&
+            date.substring(8, 10).equals(mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))) )
+            return date.substring(11);
+        // Se la data passata risulta nello stesso anno, viene restituito giorno + mese
+        else if (date.substring(0, 4).equals(String.valueOf(c.get(Calendar.YEAR))))
+            return date.substring(8,10) + " " + getMonthName(date.substring(5,7));
+        // Altrimenti viene restituita la data completa
+        else
+            return date.substring(8, 10) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4);
+    }
+
+    private static String getMonthName(String month)
+    {
+        switch (month)
+        {
+            case "01":
+                return "Gen";
+            case "02":
+                return "Feb";
+            case "03":
+                return "Mar";
+            case "04":
+                return "Apr";
+            case "05":
+                return "Mag";
+            case "06":
+                return "Giu";
+            case "07":
+                return "Lug";
+            case "08":
+                return "Ago";
+            case "09":
+                return "Set";
+            case "10":
+                return "Ott";
+            case "11":
+                return "Nov";
+            case "12":
+                return "Dic";
+            default:
+                return "";
+        }
+    }
+
+    // Metodo per memorizzare l'indirizzo email in Firebase rimpiazzando i punti con un carattere consentito
+    public static String encodeEmail(String email)
+    {
+        return email.replace(".", "%2E");
     }
 }

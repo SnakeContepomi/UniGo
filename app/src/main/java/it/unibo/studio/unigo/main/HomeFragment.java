@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.github.fabtransitionactivity.SheetLayout;
 import com.google.firebase.database.ChildEventListener;
@@ -26,8 +25,8 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 public class HomeFragment extends Fragment
 {
     private List<Question> questionList;
+    private ChildEventListener questionListener;
 
-    private FloatingActionButton fab;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -42,31 +41,15 @@ public class HomeFragment extends Fragment
     }
 
     @Override
-    public void onStop()
+    public void onDestroy()
     {
-        super.onStop();
-        fab.hide();
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        fab.show();
+        super.onDestroy();
+        stopQuestionListener();
     }
 
     private void initComponents(View v)
     {
         questionList = new ArrayList<Question> ();
-
-        fab = (FloatingActionButton) getActivity().findViewById(R.id.fabHome);
-        fab.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view)
-            {
-                ((SheetLayout) getActivity().findViewById(R.id.bottom_sheet)).expandFab();
-            }
-        });
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewQuestion);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
@@ -77,35 +60,41 @@ public class HomeFragment extends Fragment
         mAdapter = new QuestionAdapter(questionList);
         mRecyclerView.setAdapter(mAdapter);
 
-        initQuestionListener();
+        startQuestionListener();
     }
 
-    private void initQuestionListener()
+    private void startQuestionListener()
     {
-        if (!Util.homeFragmentListenerEnabled)
-        {
-            Util.getDatabase().getReference("Question").orderByChild("course_key").equalTo(Util.CURRENT_COURSE_KEY).addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s)
-                {
-                    Question q = dataSnapshot.getValue(Question.class);
-                    questionList.add(q);
-                    mAdapter.notifyItemInserted(questionList.size() - 1);
-                }
+        questionListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                Question q = dataSnapshot.getValue(Question.class);
+                questionList.add(0, q);
+                mAdapter.notifyItemInserted(0);
+                mRecyclerView.scrollToPosition(0);
+            }
 
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) { }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
 
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) { }
-            });
-            Util.homeFragmentListenerEnabled = true;
-        }
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        };
+
+        //Util.getDatabase().getReference("Question").orderByChild("course_key").equalTo(Util.CURRENT_COURSE_KEY).addChildEventListener(questionListener);
+
+        Util.getDatabase().getReference("Question").orderByChild("date").startAt(Util.CURRENT_COURSE_KEY, "course_key").addChildEventListener(questionListener);
+    }
+
+    private void stopQuestionListener()
+    {
+        Util.getDatabase().getReference("Question").orderByChild("course_key").equalTo(Util.CURRENT_COURSE_KEY).removeEventListener(questionListener);
     }
 }

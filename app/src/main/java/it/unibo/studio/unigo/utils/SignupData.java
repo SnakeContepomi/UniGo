@@ -5,8 +5,13 @@ import android.graphics.Bitmap;
 // Classe statica che memorizza temporaneamente le informazioni inserite dall'utente durante la registrazione
 public class SignupData
 {
-    private static String email, password, name, last_name, phone, city, course_key;
+    private static String photoUrl, email, password, name, last_name, phone, city, course_key;
     private static Bitmap profile_pic;
+
+    public static String getPhotoUrl()
+    {
+        return photoUrl;
+    }
 
     public static String getEmail()
     {
@@ -46,6 +51,11 @@ public class SignupData
     public static String getCourseKey()
     {
         return course_key;
+    }
+
+    public static void setPhotoUrl(String s_url)
+    {
+        photoUrl = s_url;
     }
 
     public static void setEmail(String s_email)
@@ -90,6 +100,7 @@ public class SignupData
 
     public static void clear()
     {
+        photoUrl = null;
         email = null;
         password = null;
         profile_pic = null;

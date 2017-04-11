@@ -68,7 +68,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         holder.txtTitle.setText(q.title);
         holder.txtCourse.setText(q.course);
         holder.txtDesc.setText(q.desc);
-        holder.txtDate.setText(q.date);
+        holder.txtDate.setText(Util.formatDate(q.date));
         Picasso.with(holder.imgProfile.getContext())
                 .load("https://firebasestorage.googleapis.com/v0/b/unigo-569da.appspot.com/o/profile_pic%2Fempty_profile_pic.png?alt=media&token=f7967e62-d479-40b8-a6fa-4675f5b1ecf0")
                 .into(holder.imgProfile);
