@@ -230,13 +230,17 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     private void addPost()
     {
         final String key = Util.getDatabase().getReference("Question").push().getKey();
-        Util.getDatabase().getReference("Question").child(key).setValue(
-                new Question(etTitle.getText().toString(), etCourse.getText().toString(), etDesc.getText().toString(),
-                        Util.encodeEmail(Util.getCurrentUser().getEmail()), Util.CURRENT_COURSE_KEY)).addOnCompleteListener(new OnCompleteListener<Void>() {
+        final Question question = new Question(etTitle.getText().toString(), etCourse.getText().toString(), etDesc.getText().toString(),
+                                  Util.encodeEmail(Util.getCurrentUser().getEmail()), Util.CURRENT_COURSE_KEY);
+        Util.getDatabase().getReference("Question").child(key).setValue(question).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
+                linkPostToCourse(key, question.date);
                 linkPostToUser(key);
+                dialog.dismiss();
+                Toast.makeText(getApplicationContext(), R.string.toast_post_sent, Toast.LENGTH_LONG).show();
+                finish();
             }
         });
     }
@@ -244,15 +248,11 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // Metodo per collegare la domanda appena creata all'utente che l'ha effettuata
     private void linkPostToUser(String question_key)
     {
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("questions").child(question_key).setValue(true)
-        .addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
-            {
-                dialog.dismiss();
-                Toast.makeText(getApplicationContext(), R.string.toast_post_sent, Toast.LENGTH_LONG).show();
-                finish();
-            }
-        });
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("questions").child(question_key).setValue(true);
+    }
+
+    private void linkPostToCourse(String question_key, String date)
+    {
+        Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").child(question_key).setValue(date);
     }
 }

@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
-        retrieveUserInfo();
     }
 
     @Override
@@ -203,23 +202,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 }
             }
         };
-    }
-
-    // Memorizzazione utente corrente per poter effettuare operazioni anche in modalità offline
-    private void retrieveUserInfo()
-    {
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail()))
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                            User u = dataSnapshot.getValue(User.class);
-                            Util.CURRENT_COURSE_KEY = u.courseKey;
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) { }
-                });
     }
 
     // Inizializzazione della Toolbar e del NavDrawer

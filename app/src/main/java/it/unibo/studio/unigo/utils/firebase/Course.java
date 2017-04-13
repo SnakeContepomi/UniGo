@@ -7,6 +7,7 @@ public class Course
     public String name;
     public String school_key;
     public HashMap<String, Boolean> users;
+    public HashMap<String, String> questions;
 
     public Course() { }
 

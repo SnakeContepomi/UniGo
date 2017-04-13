@@ -10,7 +10,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static android.os.Build.VERSION_CODES.M;
 
@@ -29,6 +31,8 @@ public class Util
 
     private static FirebaseDatabase database;
     private static FirebaseUser user;
+
+    public static List<QuestionAdapterItem> questionList = new ArrayList<QuestionAdapterItem>();
 
     private static DecimalFormat mFormat= new DecimalFormat("00");
 
@@ -63,8 +67,9 @@ public class Util
         return c.get(Calendar.YEAR) +
                 "/" + mFormat.format(Double.valueOf(c.get(Calendar.MONTH))) +
                 "/" + mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH))) +
-                " " + mFormat.format(Double.valueOf(+ c.get(Calendar.HOUR_OF_DAY))) +
-                ":" + mFormat.format(Double.valueOf(+ c.get(Calendar.MINUTE)));
+                " " + mFormat.format(Double.valueOf(c.get(Calendar.HOUR_OF_DAY))) +
+                ":" + mFormat.format(Double.valueOf(c.get(Calendar.MINUTE))) +
+                ":" + mFormat.format(Double.valueOf(c.get(Calendar.SECOND)));
     }
 
     // Metodo per restituire la data in un formato che dipende dalla distanza temporale
@@ -76,7 +81,7 @@ public class Util
         if( date.substring(0, 4).equals(String.valueOf(c.get(Calendar.YEAR))) &&
             date.substring(5, 7).equals(mFormat.format(Double.valueOf(c.get(Calendar.MONTH)))) &&
             date.substring(8, 10).equals(mFormat.format(Double.valueOf(c.get(Calendar.DAY_OF_MONTH)))) )
-            return date.substring(11);
+            return date.substring(11, 16);
         // Se la data passata risulta nello stesso anno, viene restituito giorno + mese
         else if (date.substring(0, 4).equals(String.valueOf(c.get(Calendar.YEAR))))
             return date.substring(8,10) + " " + getMonthName(date.substring(5,7));

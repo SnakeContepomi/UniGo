@@ -42,14 +42,16 @@ dependencies {
     compile 'com.afollestad.material-dialogs:core:0.9.4.2'
     // Material Navigation Drawer
     compile('com.mikepenz:materialdrawer:5.8.2@aar') { transitive = true }
-    // Network Listener
-    compile 'com.github.pwittchen:reactivenetwork:0.8.0'
-    // SoftKeyboard Listener
-    compile 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
+    // Material Progress Wheel
+    compile 'com.pnikosis:materialish-progress:1.7'
     // Material circular fab reveal animation
     compile 'com.github.coyarzun89:fabtransitionactivity:0.2.0'
     // Libreria su cui si basa fabtransitionactivity
     compile ('com.github.ozodrukh:CircularReveal:2.0.1@aar') { transitive = true }
+    // Network Listener
+    compile 'com.github.pwittchen:reactivenetwork:0.8.0'
+    // SoftKeyboard Listener
+    compile 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
