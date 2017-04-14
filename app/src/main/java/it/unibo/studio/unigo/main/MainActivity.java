@@ -34,6 +34,7 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.utils.BackgroundService;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
 import rx.android.schedulers.AndroidSchedulers;
@@ -74,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
+
+        // Background Service
+        Intent intent = new Intent(this, BackgroundService.class);
+        startService(intent);
     }
 
     @Override
