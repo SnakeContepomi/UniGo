@@ -31,8 +31,7 @@ public class Util
 
     private static FirebaseDatabase database;
     private static FirebaseUser user;
-
-    public static List<QuestionAdapterItem> questionList = new ArrayList<QuestionAdapterItem>();
+    private static List<QuestionAdapterItem> questionList;
 
     private static DecimalFormat mFormat= new DecimalFormat("00");
 
@@ -50,6 +49,14 @@ public class Util
         if (user == null)
             user = FirebaseAuth.getInstance().getCurrentUser();
         return user;
+    }
+
+    // Metodo per recupererare l'elenco delle domande presenti nel corso corrente
+    public static List<QuestionAdapterItem> getQuestionList()
+    {
+        if (questionList == null)
+            questionList = new ArrayList<QuestionAdapterItem>();
+        return questionList;
     }
 
     // Ritorna true il dispositivo è connesso ad internet, false altrimenti

@@ -13,7 +13,6 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import java.util.ArrayList;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.QuestionAdapter;
 import it.unibo.studio.unigo.utils.QuestionAdapterItem;
@@ -25,7 +24,6 @@ public class HomeFragment extends Fragment
 {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private DividerItemDecoration divider;
 
     @Override
@@ -50,15 +48,15 @@ public class HomeFragment extends Fragment
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewQuestion);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(v.getContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(v.getContext()));
 
         // Inizializzazione adapter della lista delle domande
-        mAdapter = new QuestionAdapter(Util.questionList);
+        mAdapter = new QuestionAdapter(Util.getQuestionList());
         mRecyclerView.setAdapter(mAdapter);
         divider = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         divider.setDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.item_divider, null));
-        mAdapter.notifyDataSetChanged();
+
+        loadQuestionFromList();
     }
 
     // Memorizzazione utente corrente per poter effettuare operazioni anche in modalità offline
@@ -81,66 +79,34 @@ public class HomeFragment extends Fragment
                         @Override
                         public void onCancelled(DatabaseError databaseError) { }
                     });
-
         }
     }
 
+    // Metodo che recupera gli id di tutte le domande del corso corrente.
+    // Viene aggiunto un listener sulle domande recuperate per poter individuare le nuove domande/cambiamenti
     private void startQuestionListener()
     {
-        // Listener sull'inserimento di nuovi post riguardanti il corso dell'utente
+        // Listener sul campo "questions" della tabella Course per recuperare tutte le domande relative a quel corso
+        // e per poter gestire gestire anche le domande che verranno inserite in futuro
         Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByValue().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
-                // Ottenuta la chiave di una domanda, vengono recuperate tutte le sue informazioni dalla tabella Question
+                // Per ogni chiave del corso trovata, vengono recuperate le relative informazioni dalla tabella Question
+                // e viene aggiunto un elemento nella RecyclerView
                 Util.getDatabase().getReference("Question").child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
-                        final Question q = dataSnapshot.getValue(Question.class);
-                        // Viene recuperato l'utente che ha effettuato la domanda, in modo da caricare la sua foto profilo
-                        Util.getDatabase().getReference("User").child(q.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot)
-                            {
-                                Util.questionList.add(0, new QuestionAdapterItem(q, dataSnapshot.getValue(User.class).photoUrl));
-
-                                mRecyclerView.addItemDecoration(divider);
-                                mAdapter.notifyItemInserted(0);
-                                mRecyclerView.scrollToPosition(0);
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) { }
-                        });
+                        addQuestionIntoRecyclerView(dataSnapshot.getValue(Question.class));
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-                // Listener sui cambiamenti del post appena inserito (commenti, like, ...)
-                Util.getDatabase().getReference("Question").child(dataSnapshot.getKey()).addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) { }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s)
-                    {
-                        //Toast.makeText(getActivity().getApplicationContext(), dataSnapshot.getKey() + ": " + dataSnapshot.getValue(String.class), Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) { }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) { }
                 });
+
+                // Viene agganciata ad ogni domanda recuperata il listener che ne cattura gli eventuali cambiamenti
+                addOnChangeListenerToQuestion(dataSnapshot.getKey());
             }
 
             @Override
@@ -155,6 +121,62 @@ public class HomeFragment extends Fragment
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+    }
+
+
+    // Metodo per aggiungere alla RecyclerView la domanda passata come parametro
+    private void addQuestionIntoRecyclerView(final Question question)
+    {
+        // Viene recuperato l'utente che ha effettuato la domanda, in modo da caricare la sua foto profilo
+        Util.getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                Util.getQuestionList().add(0, new QuestionAdapterItem(question, dataSnapshot.getValue(User.class).photoUrl));
+                mRecyclerView.addItemDecoration(divider);
+                mAdapter.notifyItemInserted(0);
+                mRecyclerView.scrollToPosition(0);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo per agganciare ad una domanda il listener sui suoi cambiamenti
+    private void addOnChangeListenerToQuestion(String question_key)
+    {
+        // Listener sui cambiamenti del post appena inserito (commenti, like, ...)
+        Util.getDatabase().getReference("Question").child(question_key).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s)
+            {
+                //Toast.makeText(getActivity().getApplicationContext(), dataSnapshot.getKey() + ": " + dataSnapshot.getValue(String.class), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo utilizzato per caricare le domande già recuperate dal database e presenti nella lista questionList
+    private void loadQuestionFromList()
+    {
+        for(int i = 0; i < Util.getQuestionList().size(); i++)
+        {
+            mRecyclerView.addItemDecoration(divider);
+            mAdapter.notifyItemInserted(i);
+            mRecyclerView.scrollToPosition(0);
+        }
     }
 
     private void stopQuestionListener()
