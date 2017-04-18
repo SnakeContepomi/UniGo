@@ -16,22 +16,31 @@ import android.os.Message;
 import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
+
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.PostActivity;
+import it.unibo.studio.unigo.utils.firebase.Question;
+import it.unibo.studio.unigo.utils.firebase.User;
+
+import static android.os.Build.VERSION_CODES.M;
 
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
 // i cambiamenti da Firebase
 public class BackgroundService extends Service
 {
     private ServiceHandler mServiceHandler;
+    // Identificativo del servizio in background
+    private final int serviceId = 1;
     // ID che permette di aggiornare un particolare tipo di notifica
-    int notifyID = 1;
-    boolean avoidSyncEvent;
+    private int notifyID = 1;
+    private boolean avoidSyncEvent;
+    public static boolean isRunning = false;
 
     // Handler per gestire i messaggi ricevuti
     private final class ServiceHandler extends Handler
@@ -48,6 +57,7 @@ public class BackgroundService extends Service
             // mId allows you to update the notification later on.
             mNotificationManager.notify(notifyID, createNotification("Hello World!").build());
 
+            /*
             try
             {
                 // Updating the same notification if it's still alive
@@ -57,7 +67,7 @@ public class BackgroundService extends Service
             catch (InterruptedException e)
             {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 
@@ -67,11 +77,14 @@ public class BackgroundService extends Service
     {
         Looper mServiceLooper;
 
+        isRunning = true;
+        //avoidSyncEvent = true;
         HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         // Inizializzazione dell'Handler
         mServiceLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mServiceLooper);
+        retrieveUserInfo();
     }
 
     // Definizione dell'obiettivo del servizio (notificare i cambiamenti del database)
@@ -79,31 +92,8 @@ public class BackgroundService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        DatabaseReference database;
-        final int startId2 = startId;
-        avoidSyncEvent = true;
+        Log.d("PROVA", String.valueOf(startId));
 
-        database = Util.getDatabase().getReference("Question");
-        database.addValueEventListener(new ValueEventListener()
-        {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                if (!avoidSyncEvent)
-                {
-                    // For each start request, send a message to start a job and deliver the
-                    // start ID so we know which request we're stopping when we finish the job
-                    Message msg = mServiceHandler.obtainMessage();
-                    msg.arg1 = startId2;
-                    mServiceHandler.sendMessage(msg);
-                }
-                else
-                    avoidSyncEvent = false;
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
 
         return START_STICKY;
     }
@@ -112,7 +102,11 @@ public class BackgroundService extends Service
     public IBinder onBind(Intent intent) { return null; }
 
     @Override
-    public void onDestroy() { }
+    public void onDestroy()
+    {
+        isRunning = false;
+        avoidSyncEvent = true;
+    }
 
     // Metodo per creare la notifica
     private NotificationCompat.Builder createNotification(String contentText)
@@ -150,5 +144,132 @@ public class BackgroundService extends Service
                 );
         mBuilder.setContentIntent(resultPendingIntent);
         return mBuilder;
+    }
+
+    // Memorizzazione utente corrente per poter effettuare operazioni anche in modalità offline
+    private void retrieveUserInfo()
+    {
+        if (Util.CURRENT_COURSE_KEY == null)
+        {
+            Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail()))
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot)
+                        {
+                            User u = dataSnapshot.getValue(User.class);
+                            Util.CURRENT_COURSE_KEY = u.courseKey;
+                            startQuestionListener();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) { }
+                    });
+        }
+    }
+
+    // Metodo che recupera gli id di tutte le domande del corso corrente.
+    // Viene aggiunto un listener sulle domande recuperate per poter individuare le nuove domande/cambiamenti
+    private void startQuestionListener()
+    {
+        // Listener sul campo "questions" della tabella Course per recuperare tutte le domande relative a quel corso
+        // e per poter gestire gestire anche le domande che verranno inserite in futuro
+        Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByValue().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                // Per ogni chiave del corso trovata, vengono recuperate le relative informazioni dalla tabella Question
+                // e viene aggiunto un elemento nella RecyclerView
+                Util.getDatabase().getReference("Question").child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        addQuestionIntoList(dataSnapshot.getValue(Question.class));
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
+
+                // Viene agganciata ad ogni domanda recuperata il listener che ne cattura gli eventuali cambiamenti
+                addOnChangeListenerToQuestion(dataSnapshot.getKey());
+
+                sendNotification("aaa");
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo per aggiungere alla RecyclerView la domanda passata come parametro
+    private void addQuestionIntoList(final Question question)
+    {
+        // Viene recuperato l'utente che ha effettuato la domanda, in modo da caricare la sua foto profilo
+        Util.getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                Util.getQuestionList().add(0, new QuestionAdapterItem(question, dataSnapshot.getValue(User.class).photoUrl));
+                if (Util.isHomeFragmentVisible())
+                    Util.getHomeFragment().updateElement(0);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo per agganciare ad una domanda il listener sui suoi cambiamenti
+    private void addOnChangeListenerToQuestion(String question_key)
+    {
+        // Listener sui cambiamenti del post appena inserito (commenti, like, ...)
+        Util.getDatabase().getReference("Question").child(question_key).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s)
+            {
+                sendNotification("bbb");
+                //Toast.makeText(getActivity().getApplicationContext(), dataSnapshot.getKey() + ": " + dataSnapshot.getValue(String.class), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    private void sendNotification(String title)
+    {
+        Log.d("PROVA", "SyncEvent: " + avoidSyncEvent);
+
+        if (!avoidSyncEvent)
+        {
+            // For each start request, send a message to start a job and deliver the
+            // start ID so we know which request we're stopping when we finish the job
+            Message msg = mServiceHandler.obtainMessage();
+            msg.arg1 = serviceId;
+            mServiceHandler.sendMessage(msg);
+        }
+        else
+            avoidSyncEvent = false;
     }
 }
