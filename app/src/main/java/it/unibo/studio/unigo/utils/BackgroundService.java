@@ -34,7 +34,6 @@ import static android.os.Build.VERSION_CODES.M;
 // i cambiamenti da Firebase
 public class BackgroundService extends Service
 {
-    private ServiceHandler mServiceHandler;
     // Identificativo del servizio in background
     private final int serviceId = 1;
     // ID che permette di aggiornare un particolare tipo di notifica
@@ -42,61 +41,17 @@ public class BackgroundService extends Service
     private boolean avoidSyncEvent;
     public static boolean isRunning = false;
 
-    // Handler per gestire i messaggi ricevuti
-    private final class ServiceHandler extends Handler
-    {
-        private ServiceHandler(Looper looper)
-        {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg)
-        {
-            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            // mId allows you to update the notification later on.
-            mNotificationManager.notify(notifyID, createNotification("Hello World!").build());
-
-            /*
-            try
-            {
-                // Updating the same notification if it's still alive
-                Thread.sleep(10000);
-                mNotificationManager.notify(notifyID, createNotification("Updating Notification 1").build());
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }*/
-        }
-    }
-
     // Avvio del servizio in background
     @Override
     public void onCreate()
     {
-        Looper mServiceLooper;
-
+        super.onCreate();
         isRunning = true;
-        //avoidSyncEvent = true;
-        HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-        // Inizializzazione dell'Handler
-        mServiceLooper = thread.getLooper();
-        mServiceHandler = new ServiceHandler(mServiceLooper);
+        avoidSyncEvent = true;
+
         retrieveUserInfo();
     }
 
-    // Definizione dell'obiettivo del servizio (notificare i cambiamenti del database)
-    // Viene richiamato dopo onCreate
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId)
-    {
-        Log.d("PROVA", String.valueOf(startId));
-
-
-        return START_STICKY;
-    }
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -158,13 +113,38 @@ public class BackgroundService extends Service
                         {
                             User u = dataSnapshot.getValue(User.class);
                             Util.CURRENT_COURSE_KEY = u.courseKey;
-                            startQuestionListener();
+                            if (Util.getQuestionList().size() == 0)
+                            {
+                                Util.getQuestionList().clear();
+                                Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByValue().addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot)
+                                    {
+                                        for (DataSnapshot child : dataSnapshot.getChildren())
+                                            Util.getDatabase().getReference("Question").child(child.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot)
+                                                {
+                                                    addQuestionIntoList(dataSnapshot.getValue(Question.class), dataSnapshot.getKey());
+                                                }
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) { }
+                                            });
+                                        startQuestionListener();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) { }
+                                });
+                            }
                         }
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) { }
                     });
         }
+        else
+            startQuestionListener();
     }
 
     // Metodo che recupera gli id di tutte le domande del corso corrente.
@@ -173,37 +153,34 @@ public class BackgroundService extends Service
     {
         // Listener sul campo "questions" della tabella Course per recuperare tutte le domande relative a quel corso
         // e per poter gestire gestire anche le domande che verranno inserite in futuro
-        Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByValue().addChildEventListener(new ChildEventListener() {
+        Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByValue().addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            public void onDataChange(DataSnapshot dataSnapshot)
             {
-                // Per ogni chiave del corso trovata, vengono recuperate le relative informazioni dalla tabella Question
-                // e viene aggiunto un elemento nella RecyclerView
-                Util.getDatabase().getReference("Question").child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                        addQuestionIntoList(dataSnapshot.getValue(Question.class));
-                    }
+                for(DataSnapshot child : dataSnapshot.getChildren())
+                    // Per ogni chiave del corso trovata, vengono recuperate le relative informazioni dalla tabella Question
+                    // e viene aggiunto un elemento nella RecyclerView
+                    Util.getDatabase().getReference("Question").child(child.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot)
+                        {
+                            if (!Util.questionExists(dataSnapshot.getKey()))
+                            {
+                                Log.d("PROVA", "Question Key: " + dataSnapshot.getKey().toString());
+                                addQuestionIntoList(dataSnapshot.getValue(Question.class), dataSnapshot.getKey());
+                                // Viene agganciata ad ogni domanda recuperata il listener che ne cattura gli eventuali cambiamenti
+                                addOnChangeListenerToQuestion(dataSnapshot.getKey());
+                                if (!avoidSyncEvent)
+                                    sendNotification();
+                                else
+                                    avoidSyncEvent = false;
+                            }
+                        }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) { }
-                });
-
-                // Viene agganciata ad ogni domanda recuperata il listener che ne cattura gli eventuali cambiamenti
-                addOnChangeListenerToQuestion(dataSnapshot.getKey());
-
-                sendNotification("aaa");
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) { }
+                    });
             }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) { }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
@@ -211,14 +188,14 @@ public class BackgroundService extends Service
     }
 
     // Metodo per aggiungere alla RecyclerView la domanda passata come parametro
-    private void addQuestionIntoList(final Question question)
+    private void addQuestionIntoList(final Question question, final String question_key)
     {
         // Viene recuperato l'utente che ha effettuato la domanda, in modo da caricare la sua foto profilo
         Util.getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                Util.getQuestionList().add(0, new QuestionAdapterItem(question, dataSnapshot.getValue(User.class).photoUrl));
+                Util.getQuestionList().add(0, new QuestionAdapterItem(question, question_key, dataSnapshot.getValue(User.class).photoUrl));
                 if (Util.isHomeFragmentVisible())
                     Util.getHomeFragment().updateElement(0);
             }
@@ -242,7 +219,7 @@ public class BackgroundService extends Service
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s)
             {
-                sendNotification("bbb");
+               // sendNotification();
                 //Toast.makeText(getActivity().getApplicationContext(), dataSnapshot.getKey() + ": " + dataSnapshot.getValue(String.class), Toast.LENGTH_SHORT).show();
             }
 
@@ -257,19 +234,10 @@ public class BackgroundService extends Service
         });
     }
 
-    private void sendNotification(String title)
+    private void sendNotification()
     {
-        Log.d("PROVA", "SyncEvent: " + avoidSyncEvent);
-
-        if (!avoidSyncEvent)
-        {
-            // For each start request, send a message to start a job and deliver the
-            // start ID so we know which request we're stopping when we finish the job
-            Message msg = mServiceHandler.obtainMessage();
-            msg.arg1 = serviceId;
-            mServiceHandler.sendMessage(msg);
-        }
-        else
-            avoidSyncEvent = false;
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(notifyID, createNotification("Hello World!").build());
     }
 }

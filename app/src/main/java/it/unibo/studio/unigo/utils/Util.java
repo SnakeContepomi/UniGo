@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import it.unibo.studio.unigo.main.HomeFragment;
+
 import static android.os.Build.VERSION_CODES.M;
 
 
@@ -31,8 +33,9 @@ public class Util
 
     private static FirebaseDatabase database;
     private static FirebaseUser user;
+    private static HomeFragment homeFragment;
+    private static boolean isHomeFragmentVisible;
     private static List<QuestionAdapterItem> questionList;
-
     private static DecimalFormat mFormat= new DecimalFormat("00");
 
     // Riferimento al database di Firebase
@@ -51,12 +54,42 @@ public class Util
         return user;
     }
 
+    public static HomeFragment getHomeFragment()
+    {
+        return homeFragment;
+    }
+
+    public static void setHomeFragment(HomeFragment fragment)
+    {
+        homeFragment = fragment;
+    }
+
     // Metodo per recupererare l'elenco delle domande presenti nel corso corrente
     public static List<QuestionAdapterItem> getQuestionList()
     {
         if (questionList == null)
             questionList = new ArrayList<QuestionAdapterItem>();
         return questionList;
+    }
+
+    public static boolean questionExists(String key)
+    {
+        for(QuestionAdapterItem item : questionList)
+            if (item.getQuestionKey().equals(key))
+                return true;
+        return false;
+    }
+
+    public static boolean isHomeFragmentVisible()
+    {
+        if (isHomeFragmentVisible)
+            return true;
+        return false;
+    }
+
+    public static void setHomeFragmentVisibility(boolean visibiliy)
+    {
+        isHomeFragmentVisible = visibiliy;
     }
 
     // Ritorna true il dispositivo è connesso ad internet, false altrimenti

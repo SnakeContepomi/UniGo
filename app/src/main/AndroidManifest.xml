@@ -15,17 +15,14 @@
 
         <!-- Receiver per far partire il background Service all'avvio del telefono-->
         <receiver
-            android:name=".utils.BootReceiver"
-            android:enabled="true"
-            android:exported="false">
+            android:name=".utils.BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <!-- Servizio per ricevere notifiche anche quando l'applicazione non è aperta -->
         <service
-            android:name=".utils.BackgroundService"
-            android:exported="false"/>
+            android:name=".utils.BackgroundService"/>
 
 
         <activity android:name=".LoginActivity" android:screenOrientation="portrait">

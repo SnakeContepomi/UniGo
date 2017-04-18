@@ -76,9 +76,13 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         setContentView(R.layout.activity_main);
         initComponents();
 
+
         // Background Service
-        Intent intent = new Intent(this, BackgroundService.class);
-        startService(intent);
+        if (!BackgroundService.isRunning)
+        {
+            Intent intent = new Intent(this, BackgroundService.class);
+            startService(intent);
+        }
     }
 
     @Override
@@ -221,6 +225,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         fragmentSocial = new SocialFragment();
         fragmentSettings = new SettingsFragment();
         fragmentInfo = new InfoFragment();
+
+        Util.setHomeFragment(fragmentHome);
 
         // Inizializzazione del profilo utente presente nel navDrawer
         profile = new ProfileDrawerItem()
