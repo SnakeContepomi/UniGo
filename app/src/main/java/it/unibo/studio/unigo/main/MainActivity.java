@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         setContentView(R.layout.activity_main);
         initComponents();
 
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).keepSynced(true);
 
         // Background Service
         if (!BackgroundService.isRunning)
