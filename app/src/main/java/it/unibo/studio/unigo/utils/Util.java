@@ -3,24 +3,19 @@ package it.unibo.studio.unigo.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
 import it.unibo.studio.unigo.main.HomeFragment;
-
-import static android.os.Build.VERSION_CODES.M;
-
 
 public class Util
 {
+    public static final String MY_PREFERENCES = "my_pref";
+    public static final String LAST_QUESTION_READ = "last_key";
     public static String CURRENT_COURSE_KEY;
     public static final int EXP_START = 0;
     public static final int EXP_ANSWER = 10;
