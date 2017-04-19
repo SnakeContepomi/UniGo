@@ -16,10 +16,6 @@ import android.widget.ImageView;
 import com.github.fabtransitionactivity.SheetLayout;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -36,7 +32,6 @@ import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.BackgroundService;
 import it.unibo.studio.unigo.utils.Util;
-import it.unibo.studio.unigo.utils.firebase.User;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -57,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
     private HomeFragment fragmentHome;
     private FavoriteFragment fragmentFavorite;
-    private QuestionFragment fragmentQuestion;
+    private MyQuestionFragment fragmentQuestion;
     private SocialFragment fragmentSocial;
     private SettingsFragment fragmentSettings;
     private InfoFragment fragmentInfo;
@@ -222,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         fragmentHome = new HomeFragment();
         fragmentFavorite = new FavoriteFragment();
-        fragmentQuestion = new QuestionFragment();
+        fragmentQuestion = new MyQuestionFragment();
         fragmentSocial = new SocialFragment();
         fragmentSettings = new SettingsFragment();
         fragmentInfo = new InfoFragment();

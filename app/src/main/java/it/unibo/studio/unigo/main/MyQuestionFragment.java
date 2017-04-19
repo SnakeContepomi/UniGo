@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 import it.unibo.studio.unigo.R;
 
-public class QuestionFragment extends Fragment
+public class MyQuestionFragment extends Fragment
 {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
