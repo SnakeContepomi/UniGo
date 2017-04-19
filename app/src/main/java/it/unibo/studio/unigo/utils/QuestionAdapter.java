@@ -16,8 +16,6 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 
-import static it.unibo.studio.unigo.utils.Util.getDatabase;
-
 public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder>
 {
     private List<QuestionAdapterItem> questionList;
@@ -92,7 +90,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 else
                 {
                     holder.imgIcon.setBackgroundResource(R.drawable.ic_star_black_24dp);
-                    holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.icon_tint_selected)));
+                    holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.colorYellow)));
                 }
             }
 
@@ -114,7 +112,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                         {
                             current_question.setValue(true);
                             holder.imgIcon.setBackgroundResource(R.drawable.ic_star_black_24dp);
-                            holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.icon_tint_selected)));
+                            holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.colorYellow)));
                         }
                         // Se la domanda è già nei preferiti, essa viene rimossa
                         else
