@@ -181,6 +181,7 @@ public class BackgroundService extends Service
             {
                 // Aggiunta della domanda alla lista in Util
                 Util.getQuestionList().add(0, new QuestionAdapterItem(question, question_key, dataSnapshot.getValue(User.class).photoUrl));
+
                 // Aggiornamento della recyclerView di Home fragment se è visibile
                 if (Util.isHomeFragmentVisible())
                     Util.getHomeFragment().updateElement(0);

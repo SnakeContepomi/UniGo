@@ -6,7 +6,7 @@
     android:orientation="horizontal"
     android:gravity="center_vertical">
 
-    <it.unibo.studio.unigo.utils.RoundedImageView
+    <com.github.akashandroid90.imageletter.MaterialLetterIcon
         android:id="@+id/itemq_user"
         android:layout_width="40dp"
         android:layout_height="40dp"
@@ -44,7 +44,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="0"
                 android:fontFamily="sans-serif"
-                android:textAlignment="textEnd"
+                android:gravity="bottom"
                 android:textColor="@color/md_grey_500"
                 android:textSize="12sp" />
         </LinearLayout>

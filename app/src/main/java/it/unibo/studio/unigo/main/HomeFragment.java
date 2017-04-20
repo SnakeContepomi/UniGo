@@ -18,11 +18,12 @@ public class HomeFragment extends Fragment
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private DividerItemDecoration divider;
+    View v;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        View v = inflater.inflate(R.layout.fragment_home, container, false);
+         v = inflater.inflate(R.layout.fragment_home, container, false);
         initComponents(v);
 
         return v;
@@ -40,7 +41,7 @@ public class HomeFragment extends Fragment
     {
         super.onResume();
         //loadQuestionFromList();
-        Util.setHomeFragmentVisibility(true);
+        //Util.setHomeFragmentVisibility(true);
     }
 
     private void initComponents(View v)

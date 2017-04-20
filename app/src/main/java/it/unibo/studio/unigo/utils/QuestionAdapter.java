@@ -3,7 +3,9 @@ package it.unibo.studio.unigo.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +14,20 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.PostActivity;
 import it.unibo.studio.unigo.main.QuestionDetailActivity;
+
+import static android.R.attr.data;
 
 public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder>
 {
@@ -35,7 +42,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         // Campi del Recycler Item Question
         LinearLayout layout;
         TextView txtTitle, txtCourse, txtDesc, txtDate;
-        RoundedImageView imgProfile;
+        MaterialLetterIcon imgProfile;
         ImageView imgIcon;
 
         ViewHolder(LinearLayout v)
@@ -47,7 +54,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             txtCourse = (TextView) v.findViewById(R.id.itemq_course);
             txtDesc = (TextView) v.findViewById(R.id.itemq_desc);
             txtDate = (TextView) v.findViewById(R.id.itemq_date);
-            imgProfile = (RoundedImageView) v.findViewById(R.id.itemq_user);
+            imgProfile = (MaterialLetterIcon ) v.findViewById(R.id.itemq_user);
             imgIcon = (ImageView) v.findViewById(R.id.itemq_star);
         }
     }
@@ -92,7 +99,24 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         holder.txtCourse.setText(q_item.getQuestion().course);
         holder.txtDesc.setText(q_item.getQuestion().desc);
         holder.txtDate.setText(Util.formatDate(q_item.getQuestion().date));
-        Picasso.with(holder.imgProfile.getContext()).load(q_item.getPhotoUrl()).fit().into(holder.imgProfile);
+        if (!Util.isNetworkAvailable(holder.context) || q_item.getPhotoUrl().equals(holder.context.getResources().getString(R.string.empty_profile_pic_url)))
+        {
+            Util.getDatabase().getReference("User").child(q_item.getQuestion().user_key).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot)
+                {
+                    holder.imgProfile.setLetter(dataSnapshot.getValue(String.class));
+                    holder.imgProfile.setShapeColor(getBackgroundColor(holder.context, dataSnapshot.getValue(String.class)));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+        else
+            Picasso.with(holder.imgProfile.getContext()).load(q_item.getPhotoUrl()).fit().into(holder.imgProfile);
 
         // Viene controllato se la domanda è stata inserita all'interno dei preferiti dell'utente
         current_question.addListenerForSingleValueEvent(new ValueEventListener()
@@ -154,5 +178,69 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
     public int getItemCount()
     {
         return questionList.size();
+    }
+
+    // Metodo per ottenere il colore di sfondo per la lettera material, scelto in base alla prima lettera della stringa passata
+    private int getBackgroundColor(Context context, String s)
+    {
+        int[] colors = context.getResources().getIntArray(R.array.colors);
+
+        s.toLowerCase();
+        switch (s.charAt(0))
+        {
+            case 'A':
+                return colors[0];
+            case 'B':
+                return colors[2];
+            case 'C':
+                return colors[4];
+            case 'D':
+                return colors[6];
+            case 'E':
+                return colors[8];
+            case 'F':
+                return colors[10];
+            case 'G':
+                return colors[12];
+            case 'H':
+                return colors[1];
+            case 'I':
+                return colors[3];
+            case 'J':
+                return colors[5];
+            case 'K':
+                return colors[7];
+            case 'L':
+                return colors[9];
+            case 'M':
+                return colors[11];
+            case 'N':
+                return colors[0];
+            case 'O':
+                return colors[2];
+            case 'P':
+                return colors[4];
+            case 'Q':
+                return colors[6];
+            case 'R':
+                return colors[8];
+            case 'S':
+                return colors[10];
+            case 'T':
+                return colors[12];
+            case 'U':
+                return colors[1];
+            case 'V':
+                return colors[3];
+            case 'W':
+                return colors[5];
+            case 'X':
+                return colors[7];
+            case 'Y':
+                return colors[9];
+            case 'Z':
+                return colors[11];
+        }
+        return 0;
     }
 }
