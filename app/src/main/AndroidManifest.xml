@@ -13,27 +13,37 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- Receiver per far partire il background Service all'avvio del telefono-->
-        <receiver
-            android:name=".utils.BootReceiver">
+        <!-- Receiver per far partire il background Service all'avvio del telefono -->
+        <receiver android:name=".utils.BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <!-- Servizio per ricevere notifiche anche quando l'applicazione non è aperta -->
-        <service
-            android:name=".utils.BackgroundService"/>
+        <service android:name=".utils.BackgroundService" />
 
-
-        <activity android:name=".LoginActivity" android:screenOrientation="portrait">
+        <activity
+            android:name=".LoginActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".main.MainActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".signup.SignupActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".main.ProfileActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".main.PostActivity" android:screenOrientation="portrait"/>
+        <activity
+            android:name=".main.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".signup.SignupActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".main.ProfileActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".main.PostActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".main.QuestionDetailActivity"
+            android:screenOrientation="portrait"/>
     </application>
+
 </manifest>

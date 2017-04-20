@@ -24,34 +24,35 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    // Material Spinner
+    compile('com.weiwangcn.betterspinner:library-material:1.1.0') {
+        exclude group: 'com.android.support', module: 'appcompat-v7'
+    }
+    // Registration Stepper
+    // Image Loader
+    // Material Progress Dialog
+    // Material Navigation Drawer
+    compile('com.mikepenz:materialdrawer:5.8.2@aar') { transitive = true }
+    // Material Progress Wheel
+    // Material circular fab reveal animation
+    // Libreria su cui si basa fabtransitionactivity
+    compile('com.github.ozodrukh:CircularReveal:2.0.1@aar') { transitive = true }
+    // Network Listener
+    // SoftKeyboard Listener
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:design:25.3.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
     compile 'com.google.firebase:firebase-auth:10.0.1'
     compile 'com.google.firebase:firebase-database:10.0.1'
     compile 'com.google.firebase:firebase-storage:10.0.1'
-    // Material Spinner
-    compile('com.weiwangcn.betterspinner:library-material:1.1.0') {
-        exclude group: 'com.android.support', module: 'appcompat-v7'
-    }
-    // Registration Stepper
     compile 'com.stepstone.stepper:material-stepper:3.1.0'
-    // Image Loader
     compile 'com.squareup.picasso:picasso:2.5.2'
-    // Material Progress Dialog
     compile 'com.afollestad.material-dialogs:core:0.9.4.2'
-    // Material Navigation Drawer
-    compile('com.mikepenz:materialdrawer:5.8.2@aar') { transitive = true }
-    // Material Progress Wheel
     compile 'com.pnikosis:materialish-progress:1.7'
-    // Material circular fab reveal animation
     compile 'com.github.coyarzun89:fabtransitionactivity:0.2.0'
-    // Libreria su cui si basa fabtransitionactivity
-    compile ('com.github.ozodrukh:CircularReveal:2.0.1@aar') { transitive = true }
-    // Network Listener
     compile 'com.github.pwittchen:reactivenetwork:0.8.0'
-    // SoftKeyboard Listener
     compile 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
 }
+
 
 apply plugin: 'com.google.gms.google-services'
