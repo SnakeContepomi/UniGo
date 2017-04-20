@@ -147,7 +147,10 @@ public class BackgroundService extends Service
                         if (!Util.questionExists(dataSnapshot.getKey()))
                         {
                             addQuestionIntoList(dataSnapshot.getValue(Question.class), dataSnapshot.getKey(), false);
-                            sendNotification();
+                            // La notifica viene attivata solo se la nuova domanda è stata scritta da un utente diverso
+                            // da quelo loggato
+                            if (!dataSnapshot.getValue(Question.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                                sendNotification();
                         }
                     }
                     @Override
