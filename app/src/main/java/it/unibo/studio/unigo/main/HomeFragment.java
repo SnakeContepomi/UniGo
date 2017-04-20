@@ -2,7 +2,6 @@ package it.unibo.studio.unigo.main;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,14 +17,12 @@ public class HomeFragment extends Fragment
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private DividerItemDecoration divider;
-    View v;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-         v = inflater.inflate(R.layout.fragment_home, container, false);
+        View v = inflater.inflate(R.layout.fragment_home, container, false);
         initComponents(v);
-
         return v;
     }
 
@@ -40,14 +37,13 @@ public class HomeFragment extends Fragment
     public void onResume()
     {
         super.onResume();
-        //loadQuestionFromList();
-        //Util.setHomeFragmentVisibility(true);
+        Util.setHomeFragmentVisibility(true);
     }
 
     private void initComponents(View v)
     {
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewQuestion);
-        mRecyclerView.setVisibility(View.GONE);
+        setRecyclerViewVisibility(false);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(v.getContext()));
@@ -56,27 +52,40 @@ public class HomeFragment extends Fragment
         mAdapter = new QuestionAdapter(Util.getQuestionList());
         mRecyclerView.setAdapter(mAdapter);
         divider = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
-        divider.setDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.item_divider, null));
-
+        divider.setDrawable(v.getContext().getDrawable(R.drawable.item_divider));
         loadQuestionFromList();
-        Util.setHomeFragmentVisibility(true);
     }
 
     // Metodo utilizzato per caricare le domande già recuperate dal database e presenti nella lista questionList
-    private void loadQuestionFromList()
+    public void loadQuestionFromList()
     {
-        for(int i = 0; i < Util.getQuestionList().size(); i++)
+        if (Util.getQuestionList().size() != 0)
         {
-            mRecyclerView.addItemDecoration(divider);
-            mAdapter.notifyItemInserted(i);
-            mRecyclerView.scrollToPosition(0);
+            for(int i = 0; i < Util.getQuestionList().size(); i++)
+            {
+                mRecyclerView.addItemDecoration(divider);
+                mAdapter.notifyItemInserted(i);
+            }
+            setRecyclerViewVisibility(true);
         }
-        mRecyclerView.setVisibility(View.VISIBLE);
     }
 
+    // Metodo utilizzato per aggiornare l'elemento in posizione "position" nella recyclerview
     public void updateElement(int position)
     {
         mAdapter.notifyItemInserted(position);
         mRecyclerView.scrollToPosition(0);
+    }
+
+    // Metodo utilizzato per nascondere/mostrare la recyclerview
+    private void setRecyclerViewVisibility(boolean b)
+    {
+        if (b)
+        {
+            mRecyclerView.scrollToPosition(0);
+            mRecyclerView.setVisibility(View.VISIBLE);
+        }
+        else
+            mRecyclerView.setVisibility(View.GONE);
     }
 }
