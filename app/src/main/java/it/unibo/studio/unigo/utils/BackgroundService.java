@@ -27,8 +27,6 @@ import it.unibo.studio.unigo.utils.firebase.User;
 // i cambiamenti da Firebase
 public class BackgroundService extends Service
 {
-    // Identificativo del servizio in background
-    private final int serviceId = 1;
     // ID che permette di aggiornare un particolare tipo di notifica
     private int notifyID = 1;
     public static boolean isRunning = false;
@@ -276,7 +274,7 @@ public class BackgroundService extends Service
         SharedPreferences prefs = getSharedPreferences(Util.MY_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(Util.LAST_QUESTION_READ, key);
-        editor.commit();
+        editor.apply();
     }
 
     // Metodo per recuperare la chiave dell'ultima domanda memorizzata
