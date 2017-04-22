@@ -3,11 +3,9 @@ package it.unibo.studio.unigo.utils;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -15,8 +13,6 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import it.unibo.studio.unigo.R;
-
-import static android.os.Build.VERSION_CODES.M;
 
 public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -77,7 +73,7 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if (viewType == 1)
             return new questionHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item_question, parent, false));
         else
-            return new answerHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item_answer, parent, false));
+            return new answerHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.card_answer, parent, false));
     }
 
     // Replace the contents of a view (invoked by the layout manager)
