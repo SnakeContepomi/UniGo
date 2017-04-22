@@ -9,6 +9,7 @@ public class User
     public String photoUrl, name, lastName, phone, city, courseKey;
     public int exp, credits;
     public HashMap<String, Boolean> questions;
+    public HashMap<String, Boolean> favorites;
 
     public User() { }
 

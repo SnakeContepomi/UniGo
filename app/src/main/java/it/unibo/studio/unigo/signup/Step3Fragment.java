@@ -379,6 +379,8 @@ public class Step3Fragment extends Fragment implements BlockingStep
                                         .child("profile_pic/empty_profile_pic.png").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                             @Override
                                             public void onSuccess(Uri uri) {
+                                                SignupData.setPhotoUrl(getContext().getResources().getString(R.string.empty_profile_pic_url));
+
                                                 // Aggiornamento informazioni profilo
                                                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                                         .setDisplayName(SignupData.getName() + " " + SignupData.getLastName())

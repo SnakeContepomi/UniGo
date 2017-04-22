@@ -14,4 +14,35 @@
     <!-- Material DEFAULT drawer colors -->
     <color name="material_drawer_primary_icon">#8A000000</color>
     <color name="material_drawer_selected_text">@color/colorPrimary</color>
+
+    <!-- Array di colori di background delle Material Letters-->
+    <color name="icon_letter_red">#ff867c</color>
+    <color name="icon_letter_pink">#ff77a9</color>
+    <color name="icon_letter_purple">#ab47bc</color>
+    <color name="icon_letter_deep_purple">#b085f5</color>
+    <color name="icon_letter_indigo">#8e99f3</color>
+    <color name="icon_letter_blue">#42a5f5</color>
+    <color name="icon_letter_light_blue">#73e8ff</color>
+    <color name="icon_letter_green">#98ee99</color>
+    <color name="icon_letter_light_green">#9ccc65</color>
+    <color name="icon_letter_amber">#ffca28</color>
+    <color name="icon_letter_orange">#ffa726</color>
+    <color name="icon_letter_deep_orange">#ffa270</color>
+    <color name="icon_letter_brown">#be9c91</color>
+
+    <array name="colors">
+        <item>@color/icon_letter_red</item>
+        <item>@color/icon_letter_pink</item>
+        <item>@color/icon_letter_purple</item>
+        <item>@color/icon_letter_deep_purple</item>
+        <item>@color/icon_letter_indigo</item>
+        <item>@color/icon_letter_blue</item>
+        <item>@color/icon_letter_light_blue</item>
+        <item>@color/icon_letter_green</item>
+        <item>@color/icon_letter_light_green</item>
+        <item>@color/icon_letter_amber</item>
+        <item>@color/icon_letter_orange</item>
+        <item>@color/icon_letter_deep_orange</item>
+        <item>@color/icon_letter_brown</item>
+    </array>
 </resources>
