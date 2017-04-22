@@ -3,6 +3,8 @@ package it.unibo.studio.unigo.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+
+import java.io.Serializable;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.PostActivity;
@@ -83,7 +87,11 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             public void onClick(View view)
             {
                 Intent intent = new Intent(holder.context, QuestionDetailActivity.class);
-                intent.putExtra("questionId", q_item.getQuestionKey());
+                Bundle b = new Bundle();
+                b.putSerializable("question", q_item.getQuestion());
+                b.putString("question_key", q_item.getQuestionKey());
+                b.putString("photo_url", q_item.getPhotoUrl());
+                intent.putExtras(b);
                 holder.context.startActivity(intent);
             }
         });

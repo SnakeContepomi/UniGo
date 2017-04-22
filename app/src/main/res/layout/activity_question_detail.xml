@@ -1,34 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+    <android.support.v7.widget.Toolbar
+        style="@style/PostToolbar"
+        android:id="@+id/questionToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Question ID:" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/AppTheme"
+        app:title="@string/post_toolbar_title"
+        app:titleTextAppearance="@style/ToolbarTextAppearance" />
 
-        <TextView
-            android:id="@+id/txtQDKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <EditText
-        android:id="@+id/etQuestDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="@string/post_title"
-        android:inputType="textEmailSubject" />
-
-    <View
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerViewQuestionDetail"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorDividerGray"/>
+        android:layout_height="match_parent" />
 
 </LinearLayout>

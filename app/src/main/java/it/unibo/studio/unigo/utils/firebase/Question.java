@@ -1,8 +1,10 @@
 package it.unibo.studio.unigo.utils.firebase;
 
+import java.io.Serializable;
+
 import it.unibo.studio.unigo.utils.Util;
 
-public class Question
+public class Question implements Serializable
 {
     public String title;
     public String course;
