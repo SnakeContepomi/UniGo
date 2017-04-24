@@ -35,7 +35,7 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         {
             super(v);
             context = v.getContext();
-            txt1 = (TextView) v.findViewById(R.id.itemq_title);
+            txt1 = (TextView) v.findViewById(R.id.cardq_name);
         }
     }
 
@@ -71,7 +71,7 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         if (viewType == 1)
-            return new questionHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item_question, parent, false));
+            return new questionHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.card_question, parent, false));
         else
             return new answerHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.card_answer, parent, false));
     }

@@ -12,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:popupTheme="@style/AppTheme"
-        app:title="@string/post_toolbar_title"
+        app:title="@string/detail_toolbar"
         app:titleTextAppearance="@style/ToolbarTextAppearance" />
 
     <android.support.v7.widget.RecyclerView

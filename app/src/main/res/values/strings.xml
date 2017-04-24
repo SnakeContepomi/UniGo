@@ -101,4 +101,8 @@
     <string name="post_description">Descrizione</string>
 
     <string name="rvq_favorite">Aggiungi ai preferiti</string>
+
+    <string name="detail_toolbar">Domanda</string>
+    <string name="detail_cardq_course">In ►</string>
+    <string name="detail_nanswer">risposte</string>
 </resources>
