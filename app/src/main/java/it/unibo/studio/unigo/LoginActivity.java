@@ -76,13 +76,24 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (view.getId())
         {
             case R.id.btnLogin:
-                login(inEmail.getEditText().getText().toString(), inPass.getEditText().getText().toString());
+                if (Util.isNetworkAvailable(getApplicationContext()))
+                    login(inEmail.getEditText().getText().toString(), inPass.getEditText().getText().toString());
+                else
+                    Snackbar
+                            .make(findViewById(R.id.l_login), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.snackbar_retry_login, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view)
+                                {
+                                    txtSignUp.performClick();
+                                }
+                            })
+                            .show();
                 break;
             case R.id.txtSignUp:
                 if (Util.isNetworkAvailable(getApplicationContext()))
                     startActivityForResult(new Intent(LoginActivity.this, SignupActivity.class), USER_EMAIL_REQUEST);
                 else
-                {
                     Snackbar
                         .make(findViewById(R.id.l_login), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG)
                         .setAction(R.string.snackbar_retry_login, new View.OnClickListener() {
@@ -93,7 +104,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             }
                         })
                         .show();
-                }
                 break;
         }
     }

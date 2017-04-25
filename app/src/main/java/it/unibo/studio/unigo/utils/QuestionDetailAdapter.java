@@ -1,14 +1,17 @@
 package it.unibo.studio.unigo.utils;
 
 import android.content.Context;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.squareup.picasso.Picasso;
+
+import net.cachapa.expandablelayout.ExpandableLayout;
 
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    static class questionHolder extends RecyclerView.ViewHolder
+    private static class questionHolder extends RecyclerView.ViewHolder
     {
         Context context;
         // Campi del Recycler Item Answer
@@ -39,23 +42,24 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    static class answerHolder extends RecyclerView.ViewHolder
+    private static class answerHolder extends RecyclerView.ViewHolder
     {
         Context context;
         // Campi del Recycler Item Answer
-        CardView card;
-        RoundedImageView imgProfile;
-        TextView txt1, txt2;
+        MaterialLetterIcon imgProfile;
+        LinearLayout btnComment;
+        ExpandableLayout expandableLayout;
+        TextView txtName, txtDesc;
 
         answerHolder(View v)
         {
             super(v);
             context = v.getContext();
-
-            card = (CardView) v.findViewById(R.id.cardViewQuestionDetail);
-            imgProfile = (RoundedImageView) v.findViewById(R.id.itema_user);
-            txt1 = (TextView) v.findViewById(R.id.itema_txt1);
-            txt2 = (TextView) v.findViewById(R.id.itema_txt2);
+            imgProfile = (MaterialLetterIcon) v.findViewById(R.id.carda_userPhoto);
+            txtName = (TextView) v.findViewById(R.id.carda_name);
+            txtDesc = (TextView) v.findViewById(R.id.carda_desc);
+            btnComment = (LinearLayout) v.findViewById(R.id.carda_comment);
+            expandableLayout = (ExpandableLayout) v.findViewById(R.id.expandable_layout);
         }
     }
 
@@ -90,10 +94,17 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 break;
 
             case TYPE_ANSWER:
-                answerHolder ah = (answerHolder) holder;
+                final answerHolder ah = (answerHolder) holder;
                 Picasso.with(ah.imgProfile.getContext()).load(qd_item.getPhoto()).fit().into(ah.imgProfile);
-                ah.txt1.setText(qd_item.getAnswer().user_key);
-                ah.txt2.setText(qd_item.getAnswer().desc);
+                ah.txtName.setText(qd_item.getAnswer().user_key);
+                ah.txtDesc.setText(qd_item.getAnswer().desc);
+                ah.btnComment.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        ah.expandableLayout.toggle();
+                    }
+                });
                 break;
         }
     }
