@@ -1,4 +1,4 @@
-package it.unibo.studio.unigo.main;
+package it.unibo.studio.unigo.main.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;

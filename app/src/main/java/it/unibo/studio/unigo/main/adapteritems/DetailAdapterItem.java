@@ -1,15 +1,15 @@
-package it.unibo.studio.unigo.utils;
+package it.unibo.studio.unigo.main.adapteritems;
 
 import it.unibo.studio.unigo.utils.firebase.Answer;
 
-public class QuestionDetailAdapterItem
+public class DetailAdapterItem
 {
     public Answer answer;
     public String photo;
 
-    public QuestionDetailAdapterItem() { }
+    public DetailAdapterItem() { }
 
-    public QuestionDetailAdapterItem(Answer answer, String photo)
+    public DetailAdapterItem(Answer answer, String photo)
     {
         this.answer = answer;
         this.photo = photo;

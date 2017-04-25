@@ -1,19 +1,16 @@
-package it.unibo.studio.unigo.utils;
+package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
@@ -22,13 +19,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.PostActivity;
 import it.unibo.studio.unigo.main.QuestionDetailActivity;
-
-import static android.R.attr.data;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
+import it.unibo.studio.unigo.utils.Util;
 
 public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder>
 {

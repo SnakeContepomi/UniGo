@@ -1,4 +1,4 @@
-package it.unibo.studio.unigo.main;
+package it.unibo.studio.unigo.main.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.utils.QuestionAdapter;
+import it.unibo.studio.unigo.main.adapters.QuestionAdapter;
 import it.unibo.studio.unigo.utils.Util;
 
 public class HomeFragment extends Fragment

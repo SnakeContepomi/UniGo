@@ -1,6 +1,5 @@
-package it.unibo.studio.unigo.utils;
+package it.unibo.studio.unigo.main.adapteritems;
 
-import android.graphics.Bitmap;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
 public class QuestionAdapterItem

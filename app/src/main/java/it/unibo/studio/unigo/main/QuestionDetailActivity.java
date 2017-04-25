@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -14,15 +13,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.utils.QuestionAdapterItem;
-import it.unibo.studio.unigo.utils.QuestionDetailAdapter;
-import it.unibo.studio.unigo.utils.QuestionDetailAdapterItem;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
+import it.unibo.studio.unigo.main.adapters.DetailAdapter;
+import it.unibo.studio.unigo.main.adapteritems.DetailAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Question;
-
-import static android.R.attr.data;
-import static android.os.Build.VERSION_CODES.M;
 
 
 public class QuestionDetailActivity extends AppCompatActivity
@@ -31,8 +27,8 @@ public class QuestionDetailActivity extends AppCompatActivity
     private String user_name;
 
     private RecyclerView recyclerViewQuestionDetail;
-    private List<QuestionDetailAdapterItem> answerList;
-    private QuestionDetailAdapter mAdapter;
+    private List<DetailAdapterItem> answerList;
+    private DetailAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -97,10 +93,10 @@ public class QuestionDetailActivity extends AppCompatActivity
                         public void onDataChange(DataSnapshot dataSnapshot)
                         {
 
-                            answerList.add(new QuestionDetailAdapterItem(answer.getValue(Answer.class), dataSnapshot.getValue(String.class)));
+                            answerList.add(new DetailAdapterItem(answer.getValue(Answer.class), dataSnapshot.getValue(String.class)));
                             if (!iterator.hasNext())
                             {
-                                mAdapter = new QuestionDetailAdapter(answerList, question, user_name);
+                                mAdapter = new DetailAdapter(answerList, question, user_name);
                                 recyclerViewQuestionDetail.setAdapter(mAdapter);
                             }
                         }

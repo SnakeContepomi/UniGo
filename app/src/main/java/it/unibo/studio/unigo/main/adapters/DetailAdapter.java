@@ -1,4 +1,4 @@
-package it.unibo.studio.unigo.utils;
+package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -16,12 +16,14 @@ import net.cachapa.expandablelayout.ExpandableLayout;
 import java.util.List;
 
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
+import it.unibo.studio.unigo.main.adapteritems.DetailAdapterItem;
 
-public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private static final int TYPE_QUESTION = 1;
     private static final int TYPE_ANSWER = 2;
-    private List<QuestionDetailAdapterItem> answerList;
+    private List<DetailAdapterItem> answerList;
     private QuestionAdapterItem question;
     private String user_name;
 
@@ -63,7 +65,7 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    public QuestionDetailAdapter(List<QuestionDetailAdapterItem> answerList, QuestionAdapterItem question, String user_name)
+    public DetailAdapter(List<DetailAdapterItem> answerList, QuestionAdapterItem question, String user_name)
     {
         this.answerList = answerList;
         this.question = question;
@@ -84,7 +86,7 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position)
     {
-        final QuestionDetailAdapterItem qd_item = answerList.get(position);
+        final DetailAdapterItem qd_item = answerList.get(position);
 
         switch (holder.getItemViewType())
         {

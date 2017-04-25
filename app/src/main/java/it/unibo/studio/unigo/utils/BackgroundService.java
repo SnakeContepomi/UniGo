@@ -18,9 +18,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import java.util.Iterator;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.HomeFragment;
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.PostActivity;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
 

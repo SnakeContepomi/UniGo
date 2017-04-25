@@ -10,7 +10,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import it.unibo.studio.unigo.main.HomeFragment;
+import it.unibo.studio.unigo.main.fragments.HomeFragment;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 
 public class Util
 {
