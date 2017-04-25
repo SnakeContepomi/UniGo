@@ -1,156 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:orientation="vertical">
+    android:layout_height="88dp"
+    android:paddingTop="8dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <com.github.akashandroid90.imageletter.MaterialLetterIcon
+        android:id="@+id/itemq_user"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/empty_profile_pic" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:orientation="horizontal">
-        <com.github.akashandroid90.imageletter.MaterialLetterIcon
-            android:id="@+id/cardq_userPhoto"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/empty_profile_pic" />
+        android:paddingStart="0dp"
+        android:paddingEnd="16dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/itemq_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:fontFamily="sans"
+                android:lines="1"
+                android:textColor="@color/ms_black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/itemq_date"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:fontFamily="sans-serif"
+                android:gravity="bottom"
+                android:textColor="@color/md_grey_500"
+                android:textSize="12sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical">
+
                 <TextView
-                    android:id="@+id/cardq_name"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/itemq_course"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:ellipsize="end"
                     android:fontFamily="sans-serif"
-                    android:textColor="@color/ms_black"
-                    android:text="Riccardo L."
-                    android:textStyle="bold"
+                    android:lines="1"
+                    android:textColor="@color/md_grey_500"
                     android:textSize="14sp" />
+
                 <TextView
-                    android:id="@+id/cardq_date"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/itemq_desc"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
+                    android:ellipsize="end"
                     android:fontFamily="sans-serif"
-                    android:text="15 Mar"
+                    android:lines="1"
                     android:textColor="@color/md_grey_500"
                     android:textSize="14sp" />
             </LinearLayout>
-            <TextView
-                android:id="@+id/cardq_lvl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textColor="@color/md_grey_500"
-                android:text="[Grand Master]"
-                android:textSize="14sp" />
-        </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="4dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:textColor="@color/md_grey_500"
-            android:textSize="12sp"
-            android:text="@string/detail_cardq_course"/>
-        <TextView
-            android:id="@+id/cardq_course"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
-            android:ellipsize="end"
-            android:lines="1"
-            android:textColor="@color/colorAccent"
-            android:textSize="12sp"
-            android:text="Ingegneria dei Sistemi Software Adattativi Complessi"/>
-    </LinearLayout>
 
-    <TextView
-        android:id="@+id/cardq_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:fontFamily="sans-serif-medium"
-        android:textColor="@color/ms_black"
-        android:textSize="24sp"
-        android:text="How to use Roboto in XML layout?"/>
-    <TextView
-        android:id="@+id/cardq_desc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:fontFamily="sans-serif"
-        android:textColor="@color/md_grey_500"
-        android:textSize="14sp"
-        android:text="Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. "/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:gravity="end|center_vertical">
-        <TextView
-            android:id="@+id/cardq_nanswer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif"
-            android:textColor="@color/ms_black"
-            android:textSize="12sp"
-            android:text="5 risposte" />
-        <LinearLayout
-            android:id="@+id/cardq_rating"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:minWidth="48dp"
-            android:layout_weight="0"
-            android:gravity="center"
-            android:orientation="horizontal">
             <ImageView
+                android:id="@+id/itemq_star"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="0dp"
-                android:layout_marginEnd="2dp"
-                android:src="@drawable/ic_favorite_black_24dp"
-                android:tint="@color/colorAccent"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:textColor="@color/colorAccent"
-                android:textSize="14sp"
-                android:text="9913"/>
+                android:layout_gravity="bottom"
+                android:layout_weight="0"
+                android:contentDescription="@string/rvq_favorite"
+                android:paddingStart="16dp"
+                android:paddingEnd="0dp"/>
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/cardq_favorite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:layout_weight="0"
-            android:src="@drawable/ic_star_black_24dp"
-            android:tint="@color/colorYellow"/>
     </LinearLayout>
 </LinearLayout>

@@ -4,20 +4,24 @@ import it.unibo.studio.unigo.utils.firebase.Answer;
 
 public class DetailAdapterItem
 {
-    public Answer answer;
-    public String photo;
+    private Answer answer;
+    private String answer_key, photo;
 
-    public DetailAdapterItem() { }
-
-    public DetailAdapterItem(Answer answer, String photo)
+    public DetailAdapterItem(Answer answer, String answer_key, String photo)
     {
         this.answer = answer;
+        this.answer_key = answer_key;
         this.photo = photo;
     }
 
     public Answer getAnswer()
     {
         return answer;
+    }
+
+    public String getAnswerKey()
+    {
+        return answer_key;
     }
 
     public String getPhoto()

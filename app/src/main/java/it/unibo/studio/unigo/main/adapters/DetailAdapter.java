@@ -1,6 +1,7 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,15 +10,22 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import net.cachapa.expandablelayout.ExpandableLayout;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapteritems.DetailAdapterItem;
+import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.Comment;
 
 public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -27,30 +35,28 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private QuestionAdapterItem question;
     private String user_name;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
     private static class questionHolder extends RecyclerView.ViewHolder
     {
         Context context;
-        // Campi del Recycler Item Answer
-        TextView txt1;
+        TextView txtName;
 
         questionHolder(View v)
         {
             super(v);
             context = v.getContext();
-            txt1 = (TextView) v.findViewById(R.id.cardq_name);
+            txtName = (TextView) v.findViewById(R.id.cardq_name);
         }
     }
 
     private static class answerHolder extends RecyclerView.ViewHolder
     {
         Context context;
-        // Campi del Recycler Item Answer
+
         MaterialLetterIcon imgProfile;
         LinearLayout btnComment;
         ExpandableLayout expandableLayout;
+        RecyclerView recyclerViewComment;
+        CommentAdapter cAdapter;
         TextView txtName, txtDesc;
 
         answerHolder(View v)
@@ -62,6 +68,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtDesc = (TextView) v.findViewById(R.id.carda_desc);
             btnComment = (LinearLayout) v.findViewById(R.id.carda_comment);
             expandableLayout = (ExpandableLayout) v.findViewById(R.id.expandable_layout);
+            recyclerViewComment = (RecyclerView) v.findViewById(R.id.recyclerViewComment);
+            recyclerViewComment.setLayoutManager(new LinearLayoutManager(context));
         }
     }
 
@@ -72,17 +80,15 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.user_name = user_name;
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         if (viewType == 1)
-            return new questionHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.card_question, parent, false));
+            return new questionHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.question_detail, parent, false));
         else
             return new answerHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.card_answer, parent, false));
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position)
     {
@@ -92,7 +98,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         {
             case TYPE_QUESTION:
                 questionHolder qh = (questionHolder) holder;
-                qh.txt1.setText(question.getQuestion().desc);
+                qh.txtName.setText(question.getQuestion().desc);
                 break;
 
             case TYPE_ANSWER:
@@ -107,6 +113,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         ah.expandableLayout.toggle();
                     }
                 });
+                // Query recupero commenti
+                initCommentList(ah, answerList.get(position).getAnswerKey());
                 break;
         }
     }
@@ -122,5 +130,34 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemCount()
     {
         return answerList.size();
+    }
+
+    // Metodo per recupereare tutti i commenti di una relativa risposta
+    private void initCommentList(final answerHolder ah, String answer_key)
+    {
+        final List<Comment> commentList = new ArrayList<>();
+
+        Util.getDatabase().getReference("Question").child(question.getQuestionKey()).child("answers").child(answer_key).child("comments").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+
+                while (iterator.hasNext())
+                {
+                    final DataSnapshot comment = iterator.next();
+
+                    commentList.add(comment.getValue(Comment.class));
+                    if (!iterator.hasNext())
+                    {
+                        ah.cAdapter = new CommentAdapter(commentList);
+                        ah.recyclerViewComment.setAdapter(ah.cAdapter);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 }

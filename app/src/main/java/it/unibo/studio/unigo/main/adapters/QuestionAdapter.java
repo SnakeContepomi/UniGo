@@ -21,7 +21,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.QuestionDetailActivity;
+import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 
@@ -29,13 +29,9 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
 {
     private List<QuestionAdapterItem> questionList;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
     static class ViewHolder extends RecyclerView.ViewHolder
     {
         Context context;
-        // Campi del Recycler Item Question
         LinearLayout layout;
         TextView txtTitle, txtCourse, txtDesc, txtDate;
         MaterialLetterIcon imgProfile;
@@ -60,24 +56,18 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         this.questionList = questionList;
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
     public QuestionAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        // create a new view
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycler_item_question, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+                .inflate(R.layout.card_question, parent, false);
 
         return new ViewHolder(v);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position)
     {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
         final QuestionAdapterItem q_item = questionList.get(position);
         final DatabaseReference current_question = Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(q_item.getQuestionKey());
 
@@ -85,7 +75,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             @Override
             public void onClick(View view)
             {
-                Intent intent = new Intent(holder.context, QuestionDetailActivity.class);
+                Intent intent = new Intent(holder.context, DetailActivity.class);
                 Bundle b = new Bundle();
                 b.putSerializable("question", q_item.getQuestion());
                 b.putString("question_key", q_item.getQuestionKey());
@@ -106,7 +96,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 public void onDataChange(DataSnapshot dataSnapshot)
                 {
                     holder.imgProfile.setLetter(dataSnapshot.getValue(String.class));
-                    holder.imgProfile.setShapeColor(getBackgroundColor(holder.context, dataSnapshot.getValue(String.class)));
+                    holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.getValue(String.class)));
                 }
 
                 @Override
@@ -178,69 +168,5 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
     public int getItemCount()
     {
         return questionList.size();
-    }
-
-    // Metodo per ottenere il colore di sfondo per la lettera material, scelto in base alla prima lettera della stringa passata
-    private int getBackgroundColor(Context context, String s)
-    {
-        int[] colors = context.getResources().getIntArray(R.array.colors);
-
-        s.toLowerCase();
-        switch (s.charAt(0))
-        {
-            case 'A':
-                return colors[0];
-            case 'B':
-                return colors[2];
-            case 'C':
-                return colors[4];
-            case 'D':
-                return colors[6];
-            case 'E':
-                return colors[8];
-            case 'F':
-                return colors[10];
-            case 'G':
-                return colors[12];
-            case 'H':
-                return colors[1];
-            case 'I':
-                return colors[3];
-            case 'J':
-                return colors[5];
-            case 'K':
-                return colors[7];
-            case 'L':
-                return colors[9];
-            case 'M':
-                return colors[11];
-            case 'N':
-                return colors[0];
-            case 'O':
-                return colors[2];
-            case 'P':
-                return colors[4];
-            case 'Q':
-                return colors[6];
-            case 'R':
-                return colors[8];
-            case 'S':
-                return colors[10];
-            case 'T':
-                return colors[12];
-            case 'U':
-                return colors[1];
-            case 'V':
-                return colors[3];
-            case 'W':
-                return colors[5];
-            case 'X':
-                return colors[7];
-            case 'Y':
-                return colors[9];
-            case 'Z':
-                return colors[11];
-        }
-        return 0;
     }
 }

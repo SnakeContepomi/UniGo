@@ -10,6 +10,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 
@@ -163,5 +165,69 @@ public class Util
     public static String encodeEmail(String email)
     {
         return email.replace(".", "%2E");
+    }
+
+    // Metodo per ottenere il colore di sfondo per la lettera material, scelto in base alla prima lettera della stringa passata
+    public static int getLetterBackgroundColor(Context context, String s)
+    {
+        int[] colors = context.getResources().getIntArray(R.array.colors);
+
+        s.toLowerCase();
+        switch (s.charAt(0))
+        {
+            case 'A':
+                return colors[0];
+            case 'B':
+                return colors[2];
+            case 'C':
+                return colors[4];
+            case 'D':
+                return colors[6];
+            case 'E':
+                return colors[8];
+            case 'F':
+                return colors[10];
+            case 'G':
+                return colors[12];
+            case 'H':
+                return colors[1];
+            case 'I':
+                return colors[3];
+            case 'J':
+                return colors[5];
+            case 'K':
+                return colors[7];
+            case 'L':
+                return colors[9];
+            case 'M':
+                return colors[11];
+            case 'N':
+                return colors[0];
+            case 'O':
+                return colors[2];
+            case 'P':
+                return colors[4];
+            case 'Q':
+                return colors[6];
+            case 'R':
+                return colors[8];
+            case 'S':
+                return colors[10];
+            case 'T':
+                return colors[12];
+            case 'U':
+                return colors[1];
+            case 'V':
+                return colors[3];
+            case 'W':
+                return colors[5];
+            case 'X':
+                return colors[7];
+            case 'Y':
+                return colors[9];
+            case 'Z':
+                return colors[11];
+        }
+        return 0;
     }
 }

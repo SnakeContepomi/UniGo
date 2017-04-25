@@ -21,7 +21,7 @@ import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
 
-public class QuestionDetailActivity extends AppCompatActivity
+public class DetailActivity extends AppCompatActivity
 {
     private QuestionAdapterItem question;
     private String user_name;
@@ -53,7 +53,7 @@ public class QuestionDetailActivity extends AppCompatActivity
                 onBackPressed();
             }
         });
-        recyclerViewQuestionDetail = (RecyclerView) findViewById(R.id.recyclerViewQuestionDetail);
+        recyclerViewQuestionDetail = (RecyclerView) findViewById(R.id.recyclerViewAnswer);
         recyclerViewQuestionDetail.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         getQuestionUserInfo();
         initAnswerList();
@@ -75,7 +75,7 @@ public class QuestionDetailActivity extends AppCompatActivity
 
     private void initAnswerList()
     {
-        Util.getDatabase().getReference("Question").child(question.getQuestionKey()).child("answers").addListenerForSingleValueEvent(new ValueEventListener() {
+        Util.getDatabase().getReference("Question").child(question.getQuestionKey()).child("answers").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -93,7 +93,7 @@ public class QuestionDetailActivity extends AppCompatActivity
                         public void onDataChange(DataSnapshot dataSnapshot)
                         {
 
-                            answerList.add(new DetailAdapterItem(answer.getValue(Answer.class), dataSnapshot.getValue(String.class)));
+                            answerList.add(new DetailAdapterItem(answer.getValue(Answer.class), answer.getKey(), dataSnapshot.getValue(String.class)));
                             if (!iterator.hasNext())
                             {
                                 mAdapter = new DetailAdapter(answerList, question, user_name);
