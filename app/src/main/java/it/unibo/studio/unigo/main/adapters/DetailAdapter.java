@@ -1,11 +1,13 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import net.cachapa.expandablelayout.ExpandableLayout;
@@ -23,9 +26,6 @@ import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.DetailAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Comment;
-
-import static android.os.Build.VERSION_CODES.M;
-import static java.lang.System.load;
 
 public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -38,7 +38,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         Context context;
         MaterialLetterIcon userPhoto;
-        TextView txtName, txtDate, txtLvl, txtCourse, txtTitle, txtDesc, txtNAnswer;
+        TextView txtName, txtDate, txtLvl, txtCourse, txtTitle, txtDesc, txtNAnswer, txtRating;
+        LinearLayout rating;
+        ImageView imgrating, imgfavorite;
 
         questionHolder(View v)
         {
@@ -52,6 +54,10 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtTitle = (TextView) v.findViewById(R.id.cardq_title);
             txtDesc = (TextView) v.findViewById(R.id.cardq_desc);
             txtNAnswer = (TextView) v.findViewById(R.id.cardq_nanswer);
+            rating = (LinearLayout) v.findViewById(R.id.cardq_rating);
+            imgrating = (ImageView) v.findViewById(R.id.cardq_imgrating);
+            txtRating = (TextView) v.findViewById(R.id.cardq_nrating);
+            imgfavorite = (ImageView) v.findViewById(R.id.cardq_favorite);
         }
     }
 
@@ -103,7 +109,10 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         switch (holder.getItemViewType())
         {
             case TYPE_QUESTION:
-                getQuestionInfo((questionHolder) holder);
+                final questionHolder qh = (questionHolder) holder;
+                getQuestionInfo(qh);
+                initActions(qh);
+                initActionsClickListener(qh);
                 break;
 
             case TYPE_ANSWER:
@@ -150,10 +159,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
-                        Toast.makeText(qh.context,
-                                dataSnapshot.child("name").getValue(String.class), Toast.LENGTH_LONG).show();
                         // Impostazione dei campi relativi all'utente
                         qh.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                        qh.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
                         if (!Util.isNetworkAvailable(qh.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(qh.context.getResources().getString(R.string.empty_profile_pic_url)))
                         {
                             qh.userPhoto.setLetter(dataSnapshot.child("name").getValue(String.class));
@@ -177,6 +185,116 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo che inizializza i colori dei pulsanti "Rating" e "Favorite" della domanda
+    private void initActions(final questionHolder qh)
+    {
+        // Inizializzazione del numero di rating della domanda corrente
+        Util.getDatabase().getReference("Question").child(question_key).child("ratings").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                qh.txtRating.setText(String.valueOf(dataSnapshot.getChildrenCount()));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+        // Inizializzazione della Action "Rating"
+        Util.getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null)
+                {
+                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+                }
+                else
+                {
+                    qh.rating.setClickable(false);
+                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
+                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+        // Inizializzazione della Action "Favorite"
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (dataSnapshot.getValue() == null)
+                    qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+                else
+                    qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorYellow)));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo che inizializza la logica dei pulsanti "Rating" e "Favorite" relativi alla domanda in questione
+    // Il pulsante Rating è cliccabile soltanto una volta
+    // Il pultante Favorite è aggiunger/rimuove la domanda corrente dalla lista dei preferiti
+    private void initActionsClickListener(final questionHolder qh)
+    {
+        // Click Listener relativo alla Action "Rating" (cuore)
+        final DatabaseReference ratingReference = Util.getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
+        qh.rating.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view)
+            {
+                ratingReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        ratingReference.setValue(true);
+                        qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
+                        qh.txtRating.setTextColor((ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent))));
+                        qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
+                        qh.rating.setClickable(false);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
+            }
+        });
+
+        // Click Listener relativo alla Action "Favorite" (stella)
+        final DatabaseReference favoriteReference = Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key);
+        qh.imgfavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                favoriteReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        if (dataSnapshot.getValue() == null)
+                        {
+                            favoriteReference.setValue(true);
+                            qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorYellow)));
+                        }
+                        else
+                        {
+                            favoriteReference.removeValue();
+                            qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
+            }
         });
     }
 

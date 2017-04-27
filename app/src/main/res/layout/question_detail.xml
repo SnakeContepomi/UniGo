@@ -52,7 +52,6 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
                 android:textColor="@color/md_grey_500"
-                android:text="[Grand Master]"
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
@@ -123,19 +122,19 @@
             android:gravity="center"
             android:orientation="horizontal">
             <ImageView
+                android:id="@+id/cardq_imgrating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="0dp"
                 android:layout_marginEnd="2dp"
-                android:src="@drawable/ic_favorite_black_24dp"
-                android:tint="@color/colorAccent"/>
+                android:background="@drawable/ic_favorite_black_24dp"
+                android:contentDescription="@string/detail_rating_desc"/>
             <TextView
+                android:id="@+id/cardq_nrating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textColor="@color/colorAccent"
-                android:textSize="14sp"
-                android:text="9913"/>
+                android:textSize="14sp"/>
         </LinearLayout>
 
         <ImageView
@@ -144,7 +143,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:layout_weight="0"
-            android:src="@drawable/ic_star_black_24dp"
-            android:tint="@color/colorYellow"/>
+            android:background="@drawable/ic_star_black_24dp"
+            android:contentDescription="@string/detail_favorite_desc"/>
     </LinearLayout>
 </LinearLayout>
