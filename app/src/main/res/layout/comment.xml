@@ -30,7 +30,6 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif"
                 android:textColor="@color/ms_black"
-                android:text="Riccardo L."
                 android:textStyle="bold"
                 android:textSize="14sp" />
             <TextView
@@ -39,7 +38,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:fontFamily="sans-serif"
-                android:text="21 Apr"
                 android:textColor="@color/md_grey_500"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -49,7 +47,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
             android:textColor="@color/md_grey_500"
-            android:text="[Grand Master]"
             android:textSize="14sp" />
         <TextView
             android:id="@+id/comment_desc"
@@ -57,7 +54,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
             android:textColor="@color/colorDarkGray"
-            android:textSize="14sp"
-            android:text="Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. "/>
+            android:textSize="14sp"/>
     </LinearLayout>
 </LinearLayout>

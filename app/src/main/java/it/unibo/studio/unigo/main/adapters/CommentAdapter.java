@@ -65,7 +65,7 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 holder.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
-                holder.txtLvl.setText("[Initiate]");
+                holder.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
                 if (!Util.isNetworkAvailable(holder.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(holder.context.getResources().getString(R.string.empty_profile_pic_url)))
                 {
                     holder.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
