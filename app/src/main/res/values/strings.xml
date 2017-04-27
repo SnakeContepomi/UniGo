@@ -105,4 +105,6 @@
     <string name="detail_toolbar">Domanda</string>
     <string name="detail_cardq_course">In ►</string>
     <string name="detail_nanswer">risposte</string>
+    <string name="detail_write_answer">Scrivi una risposta...</string>
+    <string name="detail_write_comment">Scrivi un commento...</string>
 </resources>

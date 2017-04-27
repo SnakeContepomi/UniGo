@@ -79,7 +79,7 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
             public void onCancelled(DatabaseError databaseError) { }
         });
 
-        holder.txtDate.setText(comment.date);
+        holder.txtDate.setText(Util.formatDate(comment.date));
         holder.txtDesc.setText(comment.desc);
     }
 

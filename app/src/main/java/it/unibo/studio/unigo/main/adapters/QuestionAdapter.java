@@ -76,11 +76,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             public void onClick(View view)
             {
                 Intent intent = new Intent(holder.context, DetailActivity.class);
-                Bundle b = new Bundle();
-                b.putSerializable("question", q_item.getQuestion());
-                b.putString("question_key", q_item.getQuestionKey());
-                b.putString("photo_url", q_item.getPhotoUrl());
-                intent.putExtras(b);
+                intent.putExtra("question_key", q_item.getQuestionKey());
                 holder.context.startActivity(intent);
             }
         });
