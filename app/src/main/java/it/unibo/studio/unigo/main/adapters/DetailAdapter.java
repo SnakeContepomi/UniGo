@@ -180,7 +180,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 qh.txtCourse.setText(dataSnapshot.child("course").getValue(String.class));
                 qh.txtTitle.setText(dataSnapshot.child("title").getValue(String.class));
                 qh.txtDesc.setText(dataSnapshot.child("desc").getValue(String.class));
-                qh.txtNAnswer.setText(dataSnapshot.child("answers").getChildrenCount() + " risposte");
+                qh.txtNAnswer.setText(dataSnapshot.child("answers").getChildrenCount() + qh.context.getResources().getString(R.string.detail_nanswer));
             }
 
             @Override
