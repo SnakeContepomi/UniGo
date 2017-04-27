@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
@@ -19,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import net.cachapa.expandablelayout.ExpandableLayout;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -66,11 +66,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         Context context;
 
         MaterialLetterIcon imgProfile;
-        LinearLayout btnComment;
+        LinearLayout like, comment;
         ExpandableLayout expandableLayout;
         RecyclerView recyclerViewComment;
         CommentAdapter cAdapter;
-        TextView txtName, txtDesc;
+        TextView txtName, txtDate, txtLvl, txtDesc;
 
         answerHolder(View v)
         {
@@ -78,8 +78,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             context = v.getContext();
             imgProfile = (MaterialLetterIcon) v.findViewById(R.id.carda_userPhoto);
             txtName = (TextView) v.findViewById(R.id.carda_name);
+            txtDate = (TextView) v.findViewById(R.id.carda_date);
+            txtLvl = (TextView) v.findViewById(R.id.carda_lvl);
             txtDesc = (TextView) v.findViewById(R.id.carda_desc);
-            btnComment = (LinearLayout) v.findViewById(R.id.carda_comment);
+            like = (LinearLayout) v.findViewById(R.id.carda_like);
+            comment = (LinearLayout) v.findViewById(R.id.carda_comment);
             expandableLayout = (ExpandableLayout) v.findViewById(R.id.expandable_layout);
             recyclerViewComment = (RecyclerView) v.findViewById(R.id.recyclerViewComment);
             recyclerViewComment.setLayoutManager(new LinearLayoutManager(context));
@@ -104,8 +107,6 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position)
     {
-        final DetailAdapterItem qd_item = answerList.get(position);
-
         switch (holder.getItemViewType())
         {
             case TYPE_QUESTION:
@@ -117,18 +118,14 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             case TYPE_ANSWER:
                 final answerHolder ah = (answerHolder) holder;
-                Picasso.with(ah.imgProfile.getContext()).load(qd_item.getPhoto()).fit().into(ah.imgProfile);
-                ah.txtName.setText(qd_item.getAnswer().user_key);
-                ah.txtDesc.setText(qd_item.getAnswer().desc);
-                ah.btnComment.setOnClickListener(new View.OnClickListener() {
+                getAnswerInfo(ah, answerList.get(position));
+                ah.comment.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view)
                     {
                         ah.expandableLayout.toggle();
                     }
                 });
-
-                initCommentList(ah, answerList.get(position).getAnswerKey());
                 break;
         }
     }
@@ -296,6 +293,37 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 });
             }
         });
+    }
+
+    // Metodo per recuperare le informazioni di una risposta e del suo autore
+    private void getAnswerInfo(final answerHolder ah, final DetailAdapterItem detailItem)
+    {
+        // Query per recuperare le informazioni dell'autore della risposta
+        Util.getDatabase().getReference("User").child(detailItem.getAnswer().user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (!Util.isNetworkAvailable(ah.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(ah.context.getResources().getString(R.string.empty_profile_pic_url)))
+                {
+                    ah.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
+                    ah.imgProfile.setShapeColor(Util.getLetterBackgroundColor(ah.context, dataSnapshot.child("name").getValue(String.class)));
+                }
+                else
+                    Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).into(ah.imgProfile);
+
+                ah.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                ah.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+        // Impostazione delle informazioni relative alla risposta
+        ah.txtDate.setText(Util.formatDate(detailItem.getAnswer().date));
+        ah.txtDesc.setText(detailItem.getAnswer().desc);
+        // Recupero dei commenti relativi alla risposta corrente
+        initCommentList(ah, detailItem.getAnswerKey());
     }
 
     // Metodo per recupereare tutti i commenti di una relativa risposta
