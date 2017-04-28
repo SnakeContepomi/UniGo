@@ -103,8 +103,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"
                     android:textColor="@color/colorBlue"
-                    android:textSize="14sp"
-                    android:text="57"/>
+                    android:textSize="14sp"/>
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/carda_comment"
@@ -128,8 +127,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"
                     android:textColor="@color/colorIconGray"
-                    android:textSize="14sp"
-                    android:text="123"/>
+                    android:textSize="14sp"/>
             </LinearLayout>
             <View
                 android:layout_width="0dp"

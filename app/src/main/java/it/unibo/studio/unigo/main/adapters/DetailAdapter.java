@@ -39,7 +39,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         Context context;
         MaterialLetterIcon userPhoto;
         TextView txtName, txtDate, txtLvl, txtCourse, txtTitle, txtDesc, txtNAnswer, txtRating;
-        LinearLayout rating;
+        LinearLayout rating, favorite;
         ImageView imgrating, imgfavorite;
 
         questionHolder(View v)
@@ -57,7 +57,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             rating = (LinearLayout) v.findViewById(R.id.cardq_rating);
             imgrating = (ImageView) v.findViewById(R.id.cardq_imgrating);
             txtRating = (TextView) v.findViewById(R.id.cardq_nrating);
-            imgfavorite = (ImageView) v.findViewById(R.id.cardq_favorite);
+            favorite = (LinearLayout) v.findViewById(R.id.cardq_favorite);
+            imgfavorite = (ImageView) v.findViewById(R.id.cardq_imgfavorite);
         }
     }
 
@@ -218,8 +219,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) { }
         });
 
         // Inizializzazione della Action "Favorite"
@@ -268,7 +268,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         // Click Listener relativo alla Action "Favorite" (stella)
         final DatabaseReference favoriteReference = Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key);
-        qh.imgfavorite.setOnClickListener(new View.OnClickListener() {
+        qh.favorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
