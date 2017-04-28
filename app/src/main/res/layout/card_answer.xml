@@ -95,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0dp"
                     android:layout_marginEnd="2dp"
-                    android:src="@drawable/ic_thumb_up_black_24dp"
+                    android:background="@drawable/ic_thumb_up_black_24dp"
                     android:tint="@color/colorBlue"/>
                 <TextView
                     android:id="@+id/carda_txtlike"

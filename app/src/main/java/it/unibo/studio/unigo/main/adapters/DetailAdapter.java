@@ -67,10 +67,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         MaterialLetterIcon imgProfile;
         LinearLayout like, comment;
+        ImageView imgLike, imgComment;
         ExpandableLayout expandableLayout;
         RecyclerView recyclerViewComment;
         CommentAdapter cAdapter;
-        TextView txtName, txtDate, txtLvl, txtDesc;
+        TextView txtName, txtDate, txtLvl, txtDesc, txtLike, txtComment;
 
         answerHolder(View v)
         {
@@ -82,7 +83,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtLvl = (TextView) v.findViewById(R.id.carda_lvl);
             txtDesc = (TextView) v.findViewById(R.id.carda_desc);
             like = (LinearLayout) v.findViewById(R.id.carda_like);
+            imgLike = (ImageView) v.findViewById(R.id.carda_imglike);
+            txtLike = (TextView) v.findViewById(R.id.carda_txtlike);
             comment = (LinearLayout) v.findViewById(R.id.carda_comment);
+            imgComment = (ImageView) v.findViewById(R.id.carda_imgcomment);
+            txtComment = (TextView) v.findViewById(R.id.carda_txtcomment);
             expandableLayout = (ExpandableLayout) v.findViewById(R.id.expandable_layout);
             recyclerViewComment = (RecyclerView) v.findViewById(R.id.recyclerViewComment);
             recyclerViewComment.setLayoutManager(new LinearLayoutManager(context));
@@ -112,20 +117,15 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             case TYPE_QUESTION:
                 final questionHolder qh = (questionHolder) holder;
                 getQuestionInfo(qh);
-                initActions(qh);
-                initActionsClickListener(qh);
+                initQuestionActions(qh);
+                initQuestionActionsClickListener(qh);
                 break;
 
             case TYPE_ANSWER:
                 final answerHolder ah = (answerHolder) holder;
                 getAnswerInfo(ah, answerList.get(position));
-                ah.comment.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        ah.expandableLayout.toggle();
-                    }
-                });
+                initAnswerActions(ah, answerList.get(position));
+                initAnswerActionsClickListener(ah, answerList.get(position));
                 break;
         }
     }
@@ -186,7 +186,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     // Metodo che inizializza i colori dei pulsanti "Rating" e "Favorite" della domanda
-    private void initActions(final questionHolder qh)
+    private void initQuestionActions(final questionHolder qh)
     {
         // Inizializzazione del numero di rating della domanda corrente
         Util.getDatabase().getReference("Question").child(question_key).child("ratings").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -240,8 +240,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     // Metodo che inizializza la logica dei pulsanti "Rating" e "Favorite" relativi alla domanda in questione
     // Il pulsante Rating è cliccabile soltanto una volta
-    // Il pultante Favorite è aggiunger/rimuove la domanda corrente dalla lista dei preferiti
-    private void initActionsClickListener(final questionHolder qh)
+    // Il pultante Favorite permette di aggiungere/rimuovere la domanda corrente dalla lista dei preferiti
+    private void initQuestionActionsClickListener(final questionHolder qh)
     {
         // Click Listener relativo alla Action "Rating" (cuore)
         final DatabaseReference ratingReference = Util.getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
@@ -255,7 +255,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     {
                         ratingReference.setValue(true);
                         qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
-                        qh.txtRating.setTextColor((ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent))));
+                        qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
                         qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
                         qh.rating.setClickable(false);
                     }
@@ -353,6 +353,96 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo che inizializza i colori dei pulsanti "Like" e "Comments" della risposta
+    private void initAnswerActions(final answerHolder ah, final DetailAdapterItem detailItem)
+    {
+        DatabaseReference likeReference = Util.getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes");
+
+        // Verifica se l'utente ha già inserito il "Like" per la risposta corrente
+        likeReference.child(Util.encodeEmail(Util.getCurrentUser().getEmail())).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (dataSnapshot.getValue() == null)
+                {
+                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray)));
+                    ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray))));
+                }
+                else
+                {
+                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                    ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue))));
+                    ah.like.setClickable(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+        // Inizializzazione del numero di "Like" della risposta corrente
+        likeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                ah.txtLike.setText(String.valueOf(dataSnapshot.getChildrenCount()));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+        // Inizializzazione del numero di "Comment" della risposta corrente
+        Util.getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("comments").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                ah.txtComment.setText(String.valueOf(dataSnapshot.getChildrenCount()));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo che inizializza la logica dei pulsanti "Like" e "Comment" relativi alla risposta in questione
+    // Il pulsante Like è cliccabile soltanto una volta
+    // Il pultante Comment permette di mostrare/nascondere i commenti relativi alla risposta corrente
+    private void initAnswerActionsClickListener(final answerHolder ah, final DetailAdapterItem detailItem)
+    {
+        // Click Listener relativo alla Action "Like" (pollice)
+        final DatabaseReference likeReference = Util.getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
+        ah.like.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view)
+            {
+                likeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        likeReference.setValue(true);
+                        ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                        ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                        ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
+                        ah.like.setClickable(false);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
+            }
+        });
+
+        // Click Listener relativo alla Action "Comments"
+        ah.comment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                ah.expandableLayout.toggle();
+            }
         });
     }
 }
