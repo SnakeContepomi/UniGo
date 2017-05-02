@@ -56,17 +56,8 @@ public class DetailActivity extends AppCompatActivity
         // Inizializzazione RecyclerView
         RecyclerView recyclerViewQuestionDetail = (RecyclerView) findViewById(R.id.recyclerViewAnswer);
         recyclerViewQuestionDetail.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        mAdapter = new DetailAdapter(answerList, getIntent().getStringExtra("question_key"));
+        mAdapter = new DetailAdapter(answerList, getIntent().getStringExtra("question_key"), this);
         recyclerViewQuestionDetail.setAdapter(mAdapter);
-        // Inizializzazione Fab
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabDetail);
-        fab.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view)
-            {
-                writeAnswer();
-            }
-        });
 
         initAnswerList();
     }
@@ -104,43 +95,5 @@ public class DetailActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
-    }
-
-    // Metodo per aggiungere una risposta ad una determinata domanda
-    private void writeAnswer()
-    {
-        View dialogLayout = getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
-        if (!Util.isNetworkAvailable(getApplicationContext()) || Util.getCurrentUser().getPhotoUrl().equals(getResources().getString(R.string.empty_profile_pic_url)))
-        {
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(Util.getCurrentUser().getDisplayName());
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(getApplicationContext(), Util.getCurrentUser().getDisplayName()));
-        }
-        else
-            Picasso.with(getApplicationContext())
-                    .load(Util.getCurrentUser().getPhotoUrl())
-                    .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
-        ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(Util.getCurrentUser().getDisplayName());
-        ((EditText)dialogLayout.findViewById(R.id.reply_desc)).setHint(R.string.detail_write_answer);
-        AlertDialog.Builder builder = new AlertDialog.Builder(DetailActivity.this)
-                .setPositiveButton(getString(R.string.alert_dialog_send),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                // Altro
-                                dialog.dismiss();
-                            }
-                        })
-                .setNegativeButton(getString(R.string.alert_dialog_cancel),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                dialog.dismiss();
-                            }
-                        })
-                .setView(dialogLayout)
-                .setCancelable(false);
-        builder.show();
     }
 }

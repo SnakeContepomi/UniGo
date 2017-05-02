@@ -1,20 +1,28 @@
 package it.unibo.studio.unigo.main.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import net.cachapa.expandablelayout.ExpandableLayout;
@@ -25,21 +33,27 @@ import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.DetailAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
+import it.unibo.studio.unigo.utils.firebase.User;
+
+import static it.unibo.studio.unigo.utils.Util.getDatabase;
 
 public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private static final int TYPE_QUESTION = 1;
     private static final int TYPE_ANSWER = 2;
+    private boolean answerAllowed = true;
     private List<DetailAdapterItem> answerList;
-    private String question_key;
+    private String question_key, answerNotSent, commentNotSent;
+    private Activity activity;
 
     private static class questionHolder extends RecyclerView.ViewHolder
     {
         Context context;
         MaterialLetterIcon userPhoto;
         TextView txtName, txtDate, txtLvl, txtCourse, txtTitle, txtDesc, txtNAnswer, txtRating;
-        LinearLayout rating, favorite;
+        LinearLayout rating, favorite, answer;
         ImageView imgrating, imgfavorite;
 
         questionHolder(View v)
@@ -59,6 +73,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtRating = (TextView) v.findViewById(R.id.cardq_nrating);
             favorite = (LinearLayout) v.findViewById(R.id.cardq_favorite);
             imgfavorite = (ImageView) v.findViewById(R.id.cardq_imgfavorite);
+            answer = (LinearLayout) v.findViewById(R.id.cardq_answer);
         }
     }
 
@@ -67,7 +82,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         Context context;
 
         MaterialLetterIcon imgProfile;
-        LinearLayout like, comment;
+        LinearLayout like, layoutComments;
         ImageView imgLike, imgComment;
         ExpandableLayout expandableLayout;
         RecyclerView recyclerViewComment;
@@ -86,19 +101,20 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             like = (LinearLayout) v.findViewById(R.id.carda_like);
             imgLike = (ImageView) v.findViewById(R.id.carda_imglike);
             txtLike = (TextView) v.findViewById(R.id.carda_txtlike);
-            comment = (LinearLayout) v.findViewById(R.id.carda_comment);
-            imgComment = (ImageView) v.findViewById(R.id.carda_imgcomment);
+            layoutComments = (LinearLayout) v.findViewById(R.id.carda_comment);
             txtComment = (TextView) v.findViewById(R.id.carda_txtcomment);
+            imgComment = (ImageView) v.findViewById(R.id.carda_reply);
             expandableLayout = (ExpandableLayout) v.findViewById(R.id.expandable_layout);
             recyclerViewComment = (RecyclerView) v.findViewById(R.id.recyclerViewComment);
             recyclerViewComment.setLayoutManager(new LinearLayoutManager(context));
         }
     }
 
-    public DetailAdapter(List<DetailAdapterItem> answerList, String question_key)
+    public DetailAdapter(List<DetailAdapterItem> answerList, String question_key, Activity activity)
     {
         this.answerList = answerList;
         this.question_key = question_key;
+        this.activity = activity;
     }
 
     @Override
@@ -148,12 +164,12 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void getQuestionInfo(final questionHolder qh)
     {
         // Query per la domanda
-        Util.getDatabase().getReference("Question").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("Question").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 // Query per l'utente
-                Util.getDatabase().getReference("User").child(dataSnapshot.child("user_key").getValue(String.class)).addListenerForSingleValueEvent(new ValueEventListener() {
+                getDatabase().getReference("User").child(dataSnapshot.child("user_key").getValue(String.class)).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
@@ -190,7 +206,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void initQuestionActions(final questionHolder qh)
     {
         // Inizializzazione del numero di rating della domanda corrente
-        Util.getDatabase().getReference("Question").child(question_key).child("ratings").addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("Question").child(question_key).child("ratings").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -202,7 +218,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Inizializzazione della Action "Rating"
-        Util.getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null)
@@ -213,8 +229,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 else
                 {
                     qh.rating.setClickable(false);
-                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
-                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
+                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.primary)));
+                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.primary)));
                 }
             }
 
@@ -223,14 +239,42 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Inizializzazione della Action "Favorite"
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 if (dataSnapshot.getValue() == null)
                     qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
                 else
-                    qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorYellow)));
+                    qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+        // Inizializzazione del comportamento del tasto "Rispondi":
+        // Se la variaible booleana viene impostata a false, significa che l'utente ha già risposto alla domanda e non può più
+        // effettuarne altre
+        getDatabase().getReference("Question").child(question_key).child("answers").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (dataSnapshot.getChildrenCount() == 0)
+                    initReplyQuestionClickListener(qh);
+                else
+                {
+                    final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+
+                    while (iterator.hasNext()) {
+                        final DataSnapshot child = iterator.next();
+
+                        if (child.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                            answerAllowed = false;
+                        if (!iterator.hasNext())
+                            initReplyQuestionClickListener(qh);
+                    }
+                }
             }
 
             @Override
@@ -244,7 +288,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void initQuestionActionsClickListener(final questionHolder qh)
     {
         // Click Listener relativo alla Action "Rating" (cuore)
-        final DatabaseReference ratingReference = Util.getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
+        final DatabaseReference ratingReference = getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
         qh.rating.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view)
@@ -267,7 +311,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Click Listener relativo alla Action "Favorite" (stella)
-        final DatabaseReference favoriteReference = Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key);
+        final DatabaseReference favoriteReference = getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key);
         qh.favorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
@@ -279,7 +323,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         if (dataSnapshot.getValue() == null)
                         {
                             favoriteReference.setValue(true);
-                            qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorYellow)));
+                            qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
                         }
                         else
                         {
@@ -295,11 +339,28 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
     }
 
+    // Inizializzazione del comportamento del pulsante "Rispondi alla domanda":
+    // Se l'utente ha già risposto alla domanda in questione, verrà mostrato un messaggio per informare l'utente che non è possibile
+    // aggiungere ulteriori risposte, altrimenti verrà aperto un alert dialog per inserire la risposta
+    private void initReplyQuestionClickListener(final questionHolder qh)
+    {
+        qh.answer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                if (answerAllowed)
+                    openAnswerDialog();
+                else
+                    Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_answer_done, Snackbar.LENGTH_LONG).show();
+            }
+        });
+    }
+
     // Metodo per recuperare le informazioni di una risposta e del suo autore
     private void getAnswerInfo(final answerHolder ah, final DetailAdapterItem detailItem)
     {
         // Query per recuperare le informazioni dell'autore della risposta
-        Util.getDatabase().getReference("User").child(detailItem.getAnswer().user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("User").child(detailItem.getAnswer().user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -332,7 +393,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         final List<Comment> commentList = new ArrayList<>();
 
         // Query recupero commenti
-        Util.getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).child("comments").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).child("comments").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -359,7 +420,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Metodo che inizializza i colori dei pulsanti "Like" e "Comments" della risposta
     private void initAnswerActions(final answerHolder ah, final DetailAdapterItem detailItem)
     {
-        DatabaseReference likeReference = Util.getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes");
+        DatabaseReference likeReference = getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes");
 
         // Verifica se l'utente ha già inserito il "Like" per la risposta corrente
         likeReference.child(Util.encodeEmail(Util.getCurrentUser().getEmail())).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -396,7 +457,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Inizializzazione del numero di "Comment" della risposta corrente
-        Util.getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("comments").addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("comments").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -414,7 +475,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void initAnswerActionsClickListener(final answerHolder ah, final DetailAdapterItem detailItem)
     {
         // Click Listener relativo alla Action "Like" (pollice)
-        final DatabaseReference likeReference = Util.getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
+        final DatabaseReference likeReference = getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
         ah.like.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view)
@@ -423,11 +484,19 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
-                        likeReference.setValue(true);
-                        ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
-                        ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
-                        ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
-                        ah.like.setClickable(false);
+                        if (Util.encodeEmail(Util.getCurrentUser().getEmail()).equals(detailItem.getAnswer().user_key))
+                            Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_autolike, Snackbar.LENGTH_SHORT).show();
+                        else if (!Util.isNetworkAvailable(activity.getApplicationContext()))
+                            Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_like_without_connection, Snackbar.LENGTH_LONG).show();
+                        else
+                        {
+                            likeReference.setValue(true);
+                            ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                            ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                            ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
+                            ah.like.setClickable(false);
+                            updateExpForLike(detailItem.getAnswer().user_key);
+                        }
                     }
 
                     @Override
@@ -437,12 +506,194 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Click Listener relativo alla Action "Comments"
-        ah.comment.setOnClickListener(new View.OnClickListener() {
+        ah.layoutComments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
                 ah.expandableLayout.toggle();
             }
         });
+
+        ah.imgComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                openCommentDialog(detailItem.getAnswerKey());
+            }
+        });
+    }
+
+    // Metodo per aggiungere una risposta ad una determinata domanda
+    private void openAnswerDialog()
+    {
+        final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
+
+        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || Util.getCurrentUser().getPhotoUrl().equals(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
+        {
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(Util.getCurrentUser().getDisplayName());
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), Util.getCurrentUser().getDisplayName()));
+        }
+        else
+            Picasso.with(activity.getApplicationContext())
+                    .load(Util.getCurrentUser().getPhotoUrl())
+                    .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
+
+        ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(Util.getCurrentUser().getDisplayName());
+        if (answerNotSent != null)
+            ((EditText) dialogLayout.findViewById(R.id.reply_desc)).setText(answerNotSent);
+        else
+            ((EditText)dialogLayout.findViewById(R.id.reply_desc)).setHint(R.string.detail_write_answer);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setPositiveButton(activity.getApplicationContext().getString(R.string.alert_dialog_send),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                if (((EditText)dialogLayout.findViewById(R.id.reply_desc)).getText().toString().equals(""))
+                                    Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_snackbar_reply_cancel, Snackbar.LENGTH_LONG).show();
+                                else if (!Util.isNetworkAvailable(activity.getApplicationContext()))
+                                {
+                                    Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.snackbar_no_internet_connection, Snackbar.LENGTH_LONG).show();
+                                    answerNotSent = ((EditText) dialogLayout.findViewById(R.id.reply_desc)).getText().toString();
+                                }
+                                else
+                                {
+                                    writeAnswer(((EditText) dialogLayout.findViewById(R.id.reply_desc)).getText().toString());
+                                    answerNotSent = null;
+                                }
+                            }
+                        })
+                .setNegativeButton(activity.getApplicationContext().getString(R.string.alert_dialog_cancel),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
+                            }
+                        })
+                .setView(dialogLayout)
+                .setCancelable(false);
+        builder.show();
+    }
+
+    // Metodo per aggiungere un commento alla risposta corrente
+    private void openCommentDialog(final String answer_key)
+    {
+        final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
+
+        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || Util.getCurrentUser().getPhotoUrl().equals(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
+        {
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(Util.getCurrentUser().getDisplayName());
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), Util.getCurrentUser().getDisplayName()));
+        }
+        else
+            Picasso.with(activity.getApplicationContext())
+                    .load(Util.getCurrentUser().getPhotoUrl())
+                    .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
+
+        ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(Util.getCurrentUser().getDisplayName());
+        if (commentNotSent != null)
+            ((EditText) dialogLayout.findViewById(R.id.reply_desc)).setText(commentNotSent);
+        else
+            ((EditText)dialogLayout.findViewById(R.id.reply_desc)).setHint(R.string.detail_write_comment);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setPositiveButton(activity.getApplicationContext().getString(R.string.alert_dialog_send),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                if (((EditText)dialogLayout.findViewById(R.id.reply_desc)).getText().toString().equals(""))
+                                    Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_snackbar_reply_cancel, Snackbar.LENGTH_LONG).show();
+                                else
+                                {
+                                    writeComment(((EditText) dialogLayout.findViewById(R.id.reply_desc)).getText().toString(), answer_key);
+                                    commentNotSent = null;
+                                }
+                            }
+                        })
+                .setNegativeButton(activity.getApplicationContext().getString(R.string.alert_dialog_cancel),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
+                            }
+                        })
+                .setView(dialogLayout)
+                .setCancelable(false);
+        builder.show();
+    }
+
+    // Metodo per inserire una risposta nel database e collegarlo al rispettivo autore
+    private void writeAnswer(String desc)
+    {
+        String answer_key = Util.getDatabase().getReference("Question").child(question_key).child("answers").push().getKey();
+
+        Util.getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).setValue(
+                new Answer(Util.encodeEmail(Util.getCurrentUser().getEmail()), desc));
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("answers").child(answer_key).setValue(true);
+        updateExpForAnswer();
+    }
+
+    // Metodo per inserire un commento ad una risposta e collegarlo al rispettivo autore
+    private void writeComment(String desc, String answer_key)
+    {
+        String comment_key = Util.getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).child("comments").push().getKey();
+
+        Util.getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).child("comments").child(comment_key).setValue(
+                new Comment(Util.encodeEmail(Util.getCurrentUser().getEmail()), desc));
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("comments").child(comment_key).setValue(true);
+    }
+
+    // Metodo che viene utilizzato per aggiungere i crediti a fronte di una risposta data e di aumentare l'exp dell'utente
+    private void updateExpForAnswer()
+    {
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail()))
+            .runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData)
+                {
+                    User u = mutableData.getValue(User.class);
+                    if (u == null)
+                        return Transaction.success(mutableData);
+
+                    u.credits += Util.CREDITS_ANSWER;
+                    u.exp += Util.EXP_ANSWER;
+                    mutableData.setValue(u);
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot)
+                {
+                    if (success)
+                        Toast.makeText(activity.getApplicationContext(), R.string.detail_toast_answer, Toast.LENGTH_LONG).show();
+                }
+            });
+    }
+
+    // Metodo che viene utilizzato per aggiungere punti esperienza all'utente che ha ricevuto il "like"
+    private void updateExpForLike(String user_key)
+    {
+        Util.getDatabase().getReference("User").child(user_key)
+            .runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData)
+                {
+                    User u = mutableData.getValue(User.class);
+                    if (u == null)
+                        return Transaction.success(mutableData);
+
+                    u.exp += Util.EXP_LIKE;
+                    u.credits += Util.CREDITS_LIKE;
+                    mutableData.setValue(u);
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) { }
+            });
     }
 }

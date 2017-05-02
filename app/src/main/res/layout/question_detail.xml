@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
     android:orientation="vertical">
@@ -119,6 +119,7 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:minWidth="48dp"
+            android:paddingEnd="12dp"
             android:layout_weight="0"
             android:gravity="center"
             android:orientation="horizontal">
@@ -130,12 +131,13 @@
                 android:layout_marginEnd="2dp"
                 android:background="@drawable/ic_favorite_black_24dp"
                 android:contentDescription="@string/detail_rating_desc"/>
+
             <TextView
                 android:id="@+id/cardq_nrating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -152,20 +154,18 @@
                 android:contentDescription="@string/detail_favorite_desc"/>
         </LinearLayout>
 
-        <Button
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:id="@+id/cardq_btnAnswer"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/cardq_answer"
+            android:layout_width="48dp"
             android:layout_height="48dp"
-            android:minWidth="88dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif-medium"
-            android:text="@string/detail_answer"
-            android:textColor="@color/colorDarkGray"
-            android:theme="@style/FlatButton"/>
+            android:gravity="center"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tint="@color/colorDarkGray"
+                android:src="@drawable/ic_create_black_24dp"
+                android:contentDescription="@string/detail_answer"/>
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

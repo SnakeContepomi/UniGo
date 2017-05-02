@@ -110,4 +110,9 @@
     <string name="detail_write_comment">Scrivi un commento…</string>
     <string name="detail_rating_desc">Importanza</string>
     <string name="detail_favorite_desc">Preferiti</string>
+    <string name="detail_error_answer_done">Hai già risposto a questa domanda</string>
+    <string name="detail_snackbar_reply_cancel">Inserimento annullato</string>
+    <string name="detail_toast_answer">Risposta effettuata: +10 Exp!</string>
+    <string name="detail_error_autolike">Non è possibile votare le proprie risposte</string>
+    <string name="detail_error_like_without_connection">Assicurati di essere connesso per effettuare operazioni di rete</string>
 </resources>

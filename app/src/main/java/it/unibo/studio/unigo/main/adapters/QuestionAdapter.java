@@ -120,7 +120,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 else
                 {
                     holder.imgIcon.setBackgroundResource(R.drawable.ic_star_black_24dp);
-                    holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.colorYellow)));
+                    holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.colorAmber)));
                 }
             }
 
@@ -142,7 +142,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                         {
                             current_question.setValue(true);
                             holder.imgIcon.setBackgroundResource(R.drawable.ic_star_black_24dp);
-                            holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.colorYellow)));
+                            holder.imgIcon.setBackgroundTintList(ColorStateList.valueOf(holder.imgIcon.getContext().getResources().getColor(R.color.colorAmber)));
                         }
                         // Se la domanda è già nei preferiti, essa viene rimossa
                         else

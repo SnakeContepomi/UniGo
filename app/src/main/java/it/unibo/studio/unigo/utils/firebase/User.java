@@ -10,6 +10,8 @@ public class User
     public int exp, credits;
     public HashMap<String, Boolean> questions;
     public HashMap<String, Boolean> favorites;
+    public HashMap<String, Boolean> answers;
+    public HashMap<String, Boolean> comments;
 
     public User() { }
 
