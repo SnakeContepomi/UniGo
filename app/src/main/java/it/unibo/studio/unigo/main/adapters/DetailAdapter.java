@@ -8,7 +8,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +39,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private static final int TYPE_QUESTION = 1;
     private static final int TYPE_ANSWER = 2;
+    private static final int UPDATE_CODE_RATING = 1;
+    private static final int UPDATE_CODE_ANSWER = 2;
+
     private boolean answerAllowed = true;
     private Question question;
     private List<Answer> answerList;
@@ -173,11 +175,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             {
                 case TYPE_QUESTION:
                     questionHolder qh = (questionHolder) holder;
-                    if (payload.get(0) instanceof String)
-                        switch (String.valueOf(payload.get(0)))
+                    if (payload.get(0) instanceof Integer)
+                        switch ((Integer) payload.get(0))
                         {
                             // Aggiornamento del numero di rating
-                            case "ratings":
+                            case UPDATE_CODE_RATING:
                                 if (question.ratings != null)
                                     qh.txtRating.setText(String.valueOf(question.ratings.size()));
                                 else
@@ -657,6 +659,6 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void refreshRatings(Question question)
     {
         this.question = question;
-        notifyItemChanged(0, "ratings");
+        notifyItemChanged(0, new Integer(UPDATE_CODE_RATING));
     }
 }
