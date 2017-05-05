@@ -1,5 +1,6 @@
 package it.unibo.studio.unigo.main;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -153,7 +154,11 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_CODE_POST)
+        {
             sheetLayout.contractFab();
+            if (resultCode == RESULT_OK && Util.isHomeFragmentVisible())
+                Util.getHomeFragment().updateElement(0);
+        }
     }
 
     // Creazione della nuova activity con animazione
@@ -188,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void set(ImageView imageView, Uri uri, Drawable placeholder)
             {
-                Picasso.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
+                Picasso.with(imageView.getContext()).load(uri).placeholder(placeholder).fit().into(imageView);
             }
             @Override
             public void cancel(ImageView imageView)

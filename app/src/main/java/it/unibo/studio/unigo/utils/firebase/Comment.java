@@ -4,7 +4,9 @@ import it.unibo.studio.unigo.utils.Util;
 
 public class Comment
 {
-    public String user_key, desc, date;
+    public String user_key;
+    public String desc;
+    public String date;
 
     public Comment() { }
 

@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,17 +25,14 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import net.cachapa.expandablelayout.ExpandableLayout;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.adapteritems.DetailAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
+import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
-
 import static it.unibo.studio.unigo.utils.Util.getDatabase;
 
 public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -44,8 +40,10 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int TYPE_QUESTION = 1;
     private static final int TYPE_ANSWER = 2;
     private boolean answerAllowed = true;
-    private List<DetailAdapterItem> answerList;
-    private String question_key, answerNotSent, commentNotSent;
+    private Question question;
+    private List<Answer> answerList;
+    private List<String> answerKeyList;
+    private String questionKey, answerNotSent, commentNotSent;
     private Activity activity;
 
     private static class questionHolder extends RecyclerView.ViewHolder
@@ -110,11 +108,23 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    public DetailAdapter(List<DetailAdapterItem> answerList, String question_key, Activity activity)
+    public DetailAdapter(Question question, String questionKey, Activity activity)
     {
-        this.answerList = answerList;
-        this.question_key = question_key;
+        this.question = question;
+        this.questionKey = questionKey;
         this.activity = activity;
+        answerList = new ArrayList<>();
+        answerKeyList = new ArrayList<>();
+
+        answerList.add(null);
+        answerKeyList.add(null);
+        if (question.answers != null)
+        {
+            for (String key : question.answers.keySet()) {
+                answerList.add(question.answers.get(key));
+                answerKeyList.add(key);
+            }
+        }
     }
 
     @Override
@@ -134,15 +144,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             case TYPE_QUESTION:
                 final questionHolder qh = (questionHolder) holder;
                 getQuestionInfo(qh);
-                initQuestionActions(qh);
-                initQuestionActionsClickListener(qh);
+                initActionRating(qh);
+                initActionFavorite(qh);
+                initActionQuestionReply(qh);
                 break;
 
             case TYPE_ANSWER:
                 final answerHolder ah = (answerHolder) holder;
                 getAnswerInfo(ah, answerList.get(position));
-                initAnswerActions(ah, answerList.get(position));
-                initAnswerActionsClickListener(ah, answerList.get(position));
+                initActionLike(ah, answerList.get(position), answerKeyList.get(position));
+                initActionComments(ah, answerList.get(position));
+                initActionAnswerReply(ah, answerKeyList.get(position));
                 break;
         }
     }
@@ -163,83 +175,82 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Metodo per recuperare i dettagli della domanda e dell'utente che l'ha effettuata
     private void getQuestionInfo(final questionHolder qh)
     {
-        // Query per la domanda
-        getDatabase().getReference("Question").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        // Query per l'utente
+        getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                // Query per l'utente
-                getDatabase().getReference("User").child(dataSnapshot.child("user_key").getValue(String.class)).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                        // Impostazione dei campi relativi all'utente
-                        qh.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
-                        qh.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
-                        if (!Util.isNetworkAvailable(qh.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(qh.context.getResources().getString(R.string.empty_profile_pic_url)))
-                        {
-                            qh.userPhoto.setLetter(dataSnapshot.child("name").getValue(String.class));
-                            qh.userPhoto.setShapeColor(Util.getLetterBackgroundColor(qh.context, dataSnapshot.child("name").getValue(String.class)));
-                        }
-                        else
-                            Picasso.with(qh.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).into(qh.userPhoto);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) { }
-                });
-
-                // Impostazione dei campi relativi alla domanda
-                qh.txtDate.setText(Util.formatDate(dataSnapshot.child("date").getValue(String.class)));
-                qh.txtCourse.setText(dataSnapshot.child("course").getValue(String.class));
-                qh.txtTitle.setText(dataSnapshot.child("title").getValue(String.class));
-                qh.txtDesc.setText(dataSnapshot.child("desc").getValue(String.class));
-                qh.txtNAnswer.setText(dataSnapshot.child("answers").getChildrenCount() + qh.context.getResources().getString(R.string.detail_nanswer));
+                // Impostazione dei campi relativi all'utente
+                qh.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                qh.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
+                if (!Util.isNetworkAvailable(qh.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(qh.context.getResources().getString(R.string.empty_profile_pic_url)))
+                {
+                    qh.userPhoto.setLetter(dataSnapshot.child("name").getValue(String.class));
+                    qh.userPhoto.setShapeColor(Util.getLetterBackgroundColor(qh.context, dataSnapshot.child("name").getValue(String.class)));
+                }
+                else
+                    Picasso.with(qh.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).fit().into(qh.userPhoto);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+
+        // Impostazione dei campi relativi alla domanda
+        qh.txtDate.setText(Util.formatDate(question.date));
+        qh.txtCourse.setText(question.course);
+        qh.txtTitle.setText(question.title);
+        qh.txtDesc.setText(question.desc);
+        if (question.answers != null)
+            qh.txtNAnswer.setText(question.answers.size() + qh.context.getResources().getString(R.string.detail_nanswer));
+        else
+            qh.txtNAnswer.setText("0" + qh.context.getResources().getString(R.string.detail_nanswer));
     }
 
-    // Metodo che inizializza i colori dei pulsanti "Rating" e "Favorite" della domanda
-    private void initQuestionActions(final questionHolder qh)
+    // Metodo che inizializza la logica del pulsante "Rating" relativo alla domanda in questione
+    // Il pulsante Rating è cliccabile soltanto una volta
+    private void initActionRating(final questionHolder qh)
     {
-        // Inizializzazione del numero di rating della domanda corrente
-        getDatabase().getReference("Question").child(question_key).child("ratings").addListenerForSingleValueEvent(new ValueEventListener() {
+        // Click Listener relativo alla Action "Rating" (cuore)
+        qh.rating.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onClick(View view)
             {
-                qh.txtRating.setText(String.valueOf(dataSnapshot.getChildrenCount()));
+                Util.getDatabase().getReference("Question").child(questionKey).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
+                qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
+                qh.rating.setClickable(false);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
         });
 
         // Inizializzazione della Action "Rating"
-        getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() == null)
+        qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+        qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+        if (question.ratings != null)
+        {
+            // Inizializzazione del numero di rating della domanda corrente
+            qh.txtRating.setText(String.valueOf(question.ratings.size()));
+
+            for (String key : question.ratings.keySet())
+                if (key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
                 {
-                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
-                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
-                }
-                else
-                {
+                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                     qh.rating.setClickable(false);
-                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.primary)));
-                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.primary)));
+                    break;
                 }
-            }
+        }
+        else
+            qh.txtRating.setText("0");
+    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-
+    // Metodo che inizializza la logica del pulsante "Favorite" relativo alla domanda in questione
+    // Il pultante Favorite permette di aggiungere/rimuovere la domanda corrente dalla lista dei preferiti
+    private void initActionFavorite(final questionHolder qh)
+    {
         // Inizializzazione della Action "Favorite"
-        getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(questionKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -253,65 +264,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             public void onCancelled(DatabaseError databaseError) { }
         });
 
-        // Inizializzazione del comportamento del tasto "Rispondi":
-        // Se la variaible booleana viene impostata a false, significa che l'utente ha già risposto alla domanda e non può più
-        // effettuarne altre
-        getDatabase().getReference("Question").child(question_key).child("answers").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                if (dataSnapshot.getChildrenCount() == 0)
-                    initReplyQuestionClickListener(qh);
-                else
-                {
-                    final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
-
-                    while (iterator.hasNext()) {
-                        final DataSnapshot child = iterator.next();
-
-                        if (child.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                            answerAllowed = false;
-                        if (!iterator.hasNext())
-                            initReplyQuestionClickListener(qh);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-    }
-
-    // Metodo che inizializza la logica dei pulsanti "Rating" e "Favorite" relativi alla domanda in questione
-    // Il pulsante Rating è cliccabile soltanto una volta
-    // Il pultante Favorite permette di aggiungere/rimuovere la domanda corrente dalla lista dei preferiti
-    private void initQuestionActionsClickListener(final questionHolder qh)
-    {
-        // Click Listener relativo alla Action "Rating" (cuore)
-        final DatabaseReference ratingReference = getDatabase().getReference("Question").child(question_key).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
-        qh.rating.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view)
-            {
-                ratingReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                        ratingReference.setValue(true);
-                        qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
-                        qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAccent)));
-                        qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
-                        qh.rating.setClickable(false);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) { }
-                });
-            }
-        });
-
         // Click Listener relativo alla Action "Favorite" (stella)
-        final DatabaseReference favoriteReference = getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(question_key);
+        final DatabaseReference favoriteReference = getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(questionKey);
         qh.favorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
@@ -342,8 +296,16 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Inizializzazione del comportamento del pulsante "Rispondi alla domanda":
     // Se l'utente ha già risposto alla domanda in questione, verrà mostrato un messaggio per informare l'utente che non è possibile
     // aggiungere ulteriori risposte, altrimenti verrà aperto un alert dialog per inserire la risposta
-    private void initReplyQuestionClickListener(final questionHolder qh)
+    private void initActionQuestionReply(final questionHolder qh)
     {
+        // Inizializzazione del comportamento del tasto "Rispondi":
+        // Se la variaible booleana viene impostata a false, significa che l'utente ha già risposto alla domanda e non può più
+        // effettuarne altre
+        if (question.answers != null)
+            for(String key : question.answers.keySet())
+                if (question.answers.get(key).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                    answerAllowed = false;
+
         qh.answer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
@@ -357,10 +319,10 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     // Metodo per recuperare le informazioni di una risposta e del suo autore
-    private void getAnswerInfo(final answerHolder ah, final DetailAdapterItem detailItem)
+    private void getAnswerInfo(final answerHolder ah, final Answer answer)
     {
         // Query per recuperare le informazioni dell'autore della risposta
-        getDatabase().getReference("User").child(detailItem.getAnswer().user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        getDatabase().getReference("User").child(answer.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -370,7 +332,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     ah.imgProfile.setShapeColor(Util.getLetterBackgroundColor(ah.context, dataSnapshot.child("name").getValue(String.class)));
                 }
                 else
-                    Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).into(ah.imgProfile);
+                    Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).fit().into(ah.imgProfile);
 
                 ah.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                 ah.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
@@ -381,129 +343,80 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Impostazione delle informazioni relative alla risposta
-        ah.txtDate.setText(Util.formatDate(detailItem.getAnswer().date));
-        ah.txtDesc.setText(detailItem.getAnswer().desc);
+        ah.txtDate.setText(Util.formatDate(answer.date));
+        ah.txtDesc.setText(answer.desc);
         // Recupero dei commenti relativi alla risposta corrente
-        initCommentList(ah, detailItem.getAnswerKey());
+        initCommentList(ah, answer);
     }
 
     // Metodo per recupereare tutti i commenti di una relativa risposta
-    private void initCommentList(final answerHolder ah, String answer_key)
+    private void initCommentList(final answerHolder ah, Answer answer)
     {
-        final List<Comment> commentList = new ArrayList<>();
+        List<Comment> commentList = new ArrayList<>();
 
-        // Query recupero commenti
-        getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).child("comments").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+        if (answer.comments != null)
+            for(String key : answer.comments.keySet())
+                commentList.add(answer.comments.get(key));
 
-                while (iterator.hasNext())
-                {
-                    final DataSnapshot comment = iterator.next();
-
-                    commentList.add(comment.getValue(Comment.class));
-                    if (!iterator.hasNext())
-                    {
-                        ah.cAdapter = new CommentAdapter(commentList);
-                        ah.recyclerViewComment.setAdapter(ah.cAdapter);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
+        ah.cAdapter = new CommentAdapter(commentList);
+        ah.recyclerViewComment.setAdapter(ah.cAdapter);
     }
 
-    // Metodo che inizializza i colori dei pulsanti "Like" e "Comments" della risposta
-    private void initAnswerActions(final answerHolder ah, final DetailAdapterItem detailItem)
-    {
-        DatabaseReference likeReference = getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes");
-
-        // Verifica se l'utente ha già inserito il "Like" per la risposta corrente
-        likeReference.child(Util.encodeEmail(Util.getCurrentUser().getEmail())).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                if (dataSnapshot.getValue() == null)
-                {
-                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray)));
-                    ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray))));
-                }
-                else
-                {
-                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
-                    ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue))));
-                    ah.like.setClickable(false);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-
-        // Inizializzazione del numero di "Like" della risposta corrente
-        likeReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                ah.txtLike.setText(String.valueOf(dataSnapshot.getChildrenCount()));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-
-        // Inizializzazione del numero di "Comment" della risposta corrente
-        getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("comments").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                ah.txtComment.setText(String.valueOf(dataSnapshot.getChildrenCount()));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-    }
-
-    // Metodo che inizializza la logica dei pulsanti "Like" e "Comment" relativi alla risposta in questione
-    // Il pulsante Like è cliccabile soltanto una volta
-    // Il pultante Comment permette di mostrare/nascondere i commenti relativi alla risposta corrente
-    private void initAnswerActionsClickListener(final answerHolder ah, final DetailAdapterItem detailItem)
+    // Metodo che inizializza la logica del pulsante "Like" relativo alla risposta in questione
+    // Il pultante Like è cliccabile soltanto una volta e fornisce punti e crediti all'autore della domanda
+    private void initActionLike(final answerHolder ah, final Answer answer, final String answerKey)
     {
         // Click Listener relativo alla Action "Like" (pollice)
-        final DatabaseReference likeReference = getDatabase().getReference("Question").child(question_key).child("answers").child(detailItem.getAnswerKey()).child("likes").child(Util.encodeEmail(Util.getCurrentUser().getEmail()));
         ah.like.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view)
             {
-                likeReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot)
-                    {
-                        if (Util.encodeEmail(Util.getCurrentUser().getEmail()).equals(detailItem.getAnswer().user_key))
-                            Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_autolike, Snackbar.LENGTH_SHORT).show();
-                        else if (!Util.isNetworkAvailable(activity.getApplicationContext()))
-                            Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_like_without_connection, Snackbar.LENGTH_LONG).show();
-                        else
-                        {
-                            likeReference.setValue(true);
-                            ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
-                            ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
-                            ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
-                            ah.like.setClickable(false);
-                            updateExpForLike(detailItem.getAnswer().user_key);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) { }
-                });
+                if (Util.encodeEmail(Util.getCurrentUser().getEmail()).equals(answer.user_key))
+                    Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_autolike, Snackbar.LENGTH_SHORT).show();
+                else if (!Util.isNetworkAvailable(activity.getApplicationContext()))
+                    Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_like_without_connection, Snackbar.LENGTH_LONG).show();
+                else
+                {
+                    Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("likes").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
+                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                    ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                    ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
+                    ah.like.setClickable(false);
+                    updateExpForLike(answer.user_key);
+                }
             }
         });
+
+        // Verifica se l'utente ha già inserito il "Like" per la risposta corrente
+        ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray)));
+        ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray))));
+        if (answer.likes != null)
+        {
+            // Inizializzazione del numero di "Like" della risposta corrente
+            ah.txtLike.setText(String.valueOf(answer.likes.size()));
+
+            for (String key : answer.likes.keySet())
+                if (key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                {
+                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                    ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue))));
+                    ah.like.setClickable(false);
+                    break;
+                }
+        }
+        else
+            ah.txtLike.setText("0");
+    }
+
+    // Metodo che inizializza la logica del pulsante "Comment" relativo alla risposta in questione
+    // Il pultante Comment permette di mostrare/nascondere i commenti relativi alla risposta corrente
+    private void initActionComments(final answerHolder ah, final Answer answer)
+    {
+        // Inizializzazione del numero di "Comment" della risposta corrente
+        if(answer.comments != null)
+            ah.txtComment.setText(String.valueOf(answer.comments.size()));
+        else
+            ah.txtComment.setText("0");
 
         // Click Listener relativo alla Action "Comments"
         ah.layoutComments.setOnClickListener(new View.OnClickListener() {
@@ -513,12 +426,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 ah.expandableLayout.toggle();
             }
         });
+    }
 
+    // Metodo che inizializza la logica del pulsante "Aggiungi commento" relativo alla risposta in questione
+    private void initActionAnswerReply(final answerHolder ah, final String answerKey)
+    {
+        // Click Listener relativo al tasto "Commenta"
         ah.imgComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                openCommentDialog(detailItem.getAnswerKey());
+                openCommentDialog(answerKey);
             }
         });
     }
@@ -536,6 +454,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         else
             Picasso.with(activity.getApplicationContext())
                     .load(Util.getCurrentUser().getPhotoUrl())
+                    .fit()
                     .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
 
         ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(Util.getCurrentUser().getDisplayName());
@@ -578,7 +497,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     // Metodo per aggiungere un commento alla risposta corrente
-    private void openCommentDialog(final String answer_key)
+    private void openCommentDialog(final String answerKey)
     {
         final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
 
@@ -590,6 +509,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         else
             Picasso.with(activity.getApplicationContext())
                     .load(Util.getCurrentUser().getPhotoUrl())
+                    .fit()
                     .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
 
         ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(Util.getCurrentUser().getDisplayName());
@@ -608,7 +528,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                     Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_snackbar_reply_cancel, Snackbar.LENGTH_LONG).show();
                                 else
                                 {
-                                    writeComment(((EditText) dialogLayout.findViewById(R.id.reply_desc)).getText().toString(), answer_key);
+                                    writeComment(((EditText) dialogLayout.findViewById(R.id.reply_desc)).getText().toString(), answerKey);
                                     commentNotSent = null;
                                 }
                             }
@@ -629,20 +549,20 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Metodo per inserire una risposta nel database e collegarlo al rispettivo autore
     private void writeAnswer(String desc)
     {
-        String answer_key = Util.getDatabase().getReference("Question").child(question_key).child("answers").push().getKey();
+        String answer_key = Util.getDatabase().getReference("Question").child(questionKey).child("answers").push().getKey();
 
-        Util.getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).setValue(
+        Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answer_key).setValue(
                 new Answer(Util.encodeEmail(Util.getCurrentUser().getEmail()), desc));
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("answers").child(answer_key).setValue(true);
         updateExpForAnswer();
     }
 
     // Metodo per inserire un commento ad una risposta e collegarlo al rispettivo autore
-    private void writeComment(String desc, String answer_key)
+    private void writeComment(String desc, String answerKey)
     {
-        String comment_key = Util.getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).child("comments").push().getKey();
+        String comment_key = Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("comments").push().getKey();
 
-        Util.getDatabase().getReference("Question").child(question_key).child("answers").child(answer_key).child("comments").child(comment_key).setValue(
+        Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("comments").child(comment_key).setValue(
                 new Comment(Util.encodeEmail(Util.getCurrentUser().getEmail()), desc));
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("comments").child(comment_key).setValue(true);
     }
