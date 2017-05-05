@@ -72,10 +72,8 @@ public class SocialFragment extends Fragment
 
                 while (iterator.hasNext())
                 {
-                    Log.d("Prova", "user");
-                    DataSnapshot user = iterator.next();
-                    User u = user.getValue(User.class);
-                    userList.add(u);
+                    DataSnapshot child = iterator.next();
+                    userList.add(child.getValue(User.class));
                     if (!iterator.hasNext())
                     {
                         sortUserList();
