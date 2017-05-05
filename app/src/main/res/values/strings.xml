@@ -104,7 +104,7 @@
 
     <string name="detail_toolbar">Domanda</string>
     <string name="detail_cardq_course">In ►</string>
-    <string name="detail_nanswer">&#160;risposte</string>
+    <string name="detail_nanswer">%1$d risposte</string>
     <string name="detail_answer">Rispondi</string>
     <string name="detail_write_answer">Scrivi una risposta…</string>
     <string name="detail_write_comment">Scrivi un commento…</string>
@@ -113,6 +113,6 @@
     <string name="detail_error_answer_done">Hai già risposto a questa domanda</string>
     <string name="detail_snackbar_reply_cancel">Inserimento annullato</string>
     <string name="detail_toast_answer">Risposta effettuata: +10 Exp!</string>
-    <string name="detail_error_autolike">Non è possibile votare le proprie risposte</string>
+    <string name="detail_error_autolike">Non è consentito votare le proprie risposte</string>
     <string name="detail_error_like_without_connection">Assicurati di essere connesso per effettuare operazioni di rete</string>
 </resources>

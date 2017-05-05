@@ -8,7 +8,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -181,7 +180,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         {
                             // Aggiornamento del numero di risposte
                             case UPDATE_CODE_ANSWER:
-                                qh.txtNAnswer.setText((answerList.size() - 1) + qh.context.getResources().getString(R.string.detail_nanswer));
+                                qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, (answerList.size() - 1)));
                                 break;
 
                             // Aggiornamento del numero di rating
@@ -245,10 +244,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         qh.txtCourse.setText(question.course);
         qh.txtTitle.setText(question.title);
         qh.txtDesc.setText(question.desc);
-        if (answerList.size() > 1)
-            qh.txtNAnswer.setText((answerList.size() - 1) + qh.context.getResources().getString(R.string.detail_nanswer));
-        else
-            qh.txtNAnswer.setText("0" + qh.context.getResources().getString(R.string.detail_nanswer));
+        qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, (answerList.size() - 1)));
     }
 
     // Metodo che inizializza la logica del pulsante "Rating" relativo alla domanda in questione
