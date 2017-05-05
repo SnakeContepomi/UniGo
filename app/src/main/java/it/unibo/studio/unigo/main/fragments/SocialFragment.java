@@ -73,7 +73,7 @@ public class SocialFragment extends Fragment
                 while (iterator.hasNext())
                 {
                     Log.d("Prova", "user");
-                    final DataSnapshot user = iterator.next();
+                    DataSnapshot user = iterator.next();
                     User u = user.getValue(User.class);
                     userList.add(u);
                     if (!iterator.hasNext())

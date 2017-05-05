@@ -59,7 +59,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
             holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, user.name));
         }
         else
-            Picasso.with(holder.context).load(user.photoUrl).into(holder.imgProfile);
+            Picasso.with(holder.context).load(user.photoUrl).fit().into(holder.imgProfile);
 
         holder.txtName.setText(user.name + " " + user.lastName);
     }

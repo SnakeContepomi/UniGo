@@ -68,6 +68,7 @@ public class DetailActivity extends AppCompatActivity
         recyclerViewQuestionDetail.setAdapter(mAdapter);
     }
 
+    // Listener sui cambiamenti della domanda in questione per poter efettuare l'aggiornamento realtime della GUI
     private void initQuestionChangeListener()
     {
         final DatabaseReference questionReference = Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key"));
