@@ -31,7 +31,6 @@ public class SocialFragment extends Fragment
     LinearLayout loadingLayout;
     private FastScrollRecyclerView mRecyclerView;
     private UserAdapter mAdapter;
-    private DividerItemDecoration divider;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -56,7 +55,7 @@ public class SocialFragment extends Fragment
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setFastScrollEnabled(true);
 
-        divider = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        DividerItemDecoration divider = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         divider.setDrawable(v.getContext().getDrawable(R.drawable.item_divider));
 
         setRecyclerViewVisibility(false);
