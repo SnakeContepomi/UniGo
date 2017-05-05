@@ -33,6 +33,8 @@ import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
+
+import static android.R.attr.key;
 import static it.unibo.studio.unigo.utils.Util.getDatabase;
 
 public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -41,6 +43,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int TYPE_ANSWER = 2;
     private static final int UPDATE_CODE_ANSWER = 1;
     private static final int UPDATE_CODE_RATING = 2;
+    private static final int UPDATE_CODE_LIKES = 3;
 
     private boolean answerAllowed = true;
     private Question question;
@@ -122,12 +125,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         answerList.add(null);
         answerKeyList.add(null);
         if (question.answers != null)
-        {
-            for (String key : question.answers.keySet()) {
+            for (String key : question.answers.keySet())
+            {
                 answerList.add(question.answers.get(key));
                 answerKeyList.add(key);
             }
-        }
     }
 
     @Override
@@ -198,6 +200,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
                 case TYPE_ANSWER:
                     final answerHolder ah = (answerHolder) holder;
+                    if (payload.get(0) instanceof Integer)
+                        switch ((Integer) payload.get(0))
+                        {
+                            // Aggiornamento del numero di likes
+                            case UPDATE_CODE_LIKES:
+                                ah.txtLike.setText(String.valueOf(answerList.get(position).likes.size()));
+                                break;
+
+                            default:
+                                break;
+                        }
                     break;
             }
     }
@@ -661,7 +674,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void refreshRating(Question question)
     {
         this.question = question;
-        notifyItemChanged(0, new Integer(UPDATE_CODE_RATING));
+        notifyItemChanged(0, Integer.valueOf(UPDATE_CODE_RATING));
     }
 
     // Metodo per aggiornare in tempo reale l'aggiunta di una domanda nuova
@@ -670,7 +683,42 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         answerList.add(answer);
         answerKeyList.add(answerKey);
         notifyItemInserted(answerList.size() - 1);
-        notifyItemChanged(0, new Integer(UPDATE_CODE_ANSWER));
+        notifyItemChanged(0, Integer.valueOf(UPDATE_CODE_ANSWER));
+    }
+
+    // Metodo per aggiornare in tempo reale l'aggiunta di un like ad una risposta
+    public void refreshAnswerLikes(Answer answer, String answerKey, String likeKey)
+    {
+        int position;
+
+        // Recupero della posizione della risposta modificata
+        for(position = 0; position < answerKeyList.size(); position++)
+            if (answerKey.equals(answerKeyList.get(position)))
+                break;
+
+        // Aggiornamento grafico del numero di like
+        if (answerList.get(position).likes != null)
+        {
+            // Se la chiave del like passato come parametro non è presente tra i like della risposta,
+            // quest'ultima viene aggiornata (se è già presente, si tratta del trigget iniziale della query di firebase)
+            boolean likeIsNew = true;
+            for(String key : answerList.get(position).likes.keySet())
+                if (likeKey.equals(key))
+                {
+                    likeIsNew = false;
+                    break;
+                }
+            if (likeIsNew)
+            {
+                answerList.set(position, answer);
+                notifyItemChanged(position, Integer.valueOf(UPDATE_CODE_LIKES));
+            }
+        }
+        else
+        {
+            answerList.set(position, answer);
+            notifyItemChanged(position, Integer.valueOf(UPDATE_CODE_LIKES));
+        }
     }
 
     // Metodo utilizzato per sapere se la risposta passata come parametro è già presente nella lista
