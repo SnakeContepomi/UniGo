@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,8 +40,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private static final int TYPE_QUESTION = 1;
     private static final int TYPE_ANSWER = 2;
-    private static final int UPDATE_CODE_RATING = 1;
-    private static final int UPDATE_CODE_ANSWER = 2;
+    private static final int UPDATE_CODE_ANSWER = 1;
+    private static final int UPDATE_CODE_RATING = 2;
 
     private boolean answerAllowed = true;
     private Question question;
@@ -162,7 +163,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    // Aggiornamento parziale di uno o più elementi della recyclerview
+    // Aggiornamento parziale di uno o più elementi della recyclerview in realtime
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position, List<Object> payload)
     {
@@ -178,6 +179,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     if (payload.get(0) instanceof Integer)
                         switch ((Integer) payload.get(0))
                         {
+                            // Aggiornamento del numero di risposte
+                            case UPDATE_CODE_ANSWER:
+                                qh.txtNAnswer.setText((answerList.size() - 1) + qh.context.getResources().getString(R.string.detail_nanswer));
+                                break;
+
                             // Aggiornamento del numero di rating
                             case UPDATE_CODE_RATING:
                                 if (question.ratings != null)
@@ -239,8 +245,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         qh.txtCourse.setText(question.course);
         qh.txtTitle.setText(question.title);
         qh.txtDesc.setText(question.desc);
-        if (question.answers != null)
-            qh.txtNAnswer.setText(question.answers.size() + qh.context.getResources().getString(R.string.detail_nanswer));
+        if (answerList.size() > 1)
+            qh.txtNAnswer.setText((answerList.size() - 1) + qh.context.getResources().getString(R.string.detail_nanswer));
         else
             qh.txtNAnswer.setText("0" + qh.context.getResources().getString(R.string.detail_nanswer));
     }
@@ -656,9 +662,26 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     // Metodo per aggiornare in tempo reale il numero di rating della domanda
-    public void refreshRatings(Question question)
+    public void refreshRating(Question question)
     {
         this.question = question;
         notifyItemChanged(0, new Integer(UPDATE_CODE_RATING));
+    }
+
+    // Metodo per aggiornare in tempo reale l'aggiunta di una domanda nuova
+    public void refreshNewAnswer(Answer answer, String answerKey)
+    {
+        answerList.add(answer);
+        answerKeyList.add(answerKey);
+        notifyItemInserted(answerList.size() - 1);
+        notifyItemChanged(0, new Integer(UPDATE_CODE_ANSWER));
+    }
+
+    // Metodo utilizzato per sapere se la risposta passata come parametro è già presente nella lista
+    public boolean containsAnswerKey(String answerKey)
+    {
+        for(String key : answerKeyList)
+            if (answerKey.equals(key)) return true;
+        return false;
     }
 }

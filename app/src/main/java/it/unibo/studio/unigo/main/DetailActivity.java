@@ -11,10 +11,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import java.util.Iterator;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapters.DetailAdapter;
 import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
 public class DetailActivity extends AppCompatActivity
@@ -74,6 +74,15 @@ public class DetailActivity extends AppCompatActivity
         final DatabaseReference questionReference = Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key"));
 
         // Refresh in realtime del rating della domanda
+        setRatingOnChangeListener(questionReference);
+
+        // Aggiunta/modifica in realtime di una risposta
+        setAnswerChangeListener(questionReference);
+    }
+
+    // Refresh in realtime del rating della domanda
+    private void setRatingOnChangeListener(DatabaseReference questionReference)
+    {
         questionReference.child("ratings").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
@@ -84,40 +93,27 @@ public class DetailActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+    }
 
-        questionReference.child("answers").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+    // Aggiunta/modifica in realtime di una risposta
+    private void setAnswerChangeListener(DatabaseReference questionReference)
+    {
+        questionReference.child("answers").orderByKey().addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
-                final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
-
-                while (iterator.hasNext())
-                {
-                    final DataSnapshot child = iterator.next();
-
-                    if (!iterator.hasNext())
-                        questionReference.child("answers").orderByKey().startAt(child.getKey()).addChildEventListener(new ChildEventListener() {
-                            @Override
-                            public void onChildAdded(DataSnapshot dataSnapshot, String s)
-                            {
-                                //mAdapter.notifyDataSetChanged();
-                                //mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
-                            }
-
-                            @Override
-                            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
-
-                            @Override
-                            public void onChildRemoved(DataSnapshot dataSnapshot) { }
-
-                            @Override
-                            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) { }
-                        });
-                }
+                if (!mAdapter.containsAnswerKey(dataSnapshot.getKey()))
+                    refreshNewAnswer(dataSnapshot.getValue(Answer.class), dataSnapshot.getKey());
             }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
@@ -131,11 +127,17 @@ public class DetailActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                mAdapter.refreshRatings(dataSnapshot.getValue(Question.class));
+                mAdapter.refreshRating(dataSnapshot.getValue(Question.class));
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+    }
+
+    // Metodo per aggiornare la GUI aggiungendo l'ultima domanda inserita
+    private void refreshNewAnswer(Answer answer, String answerKey)
+    {
+        mAdapter.refreshNewAnswer(answer, answerKey);
     }
 }
