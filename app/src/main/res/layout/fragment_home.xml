@@ -21,6 +21,4 @@
             wheel:matProg_barColor="#5588FF"
             wheel:matProg_progressIndeterminate="true"/>
     </LinearLayout>
-
-
 </LinearLayout>

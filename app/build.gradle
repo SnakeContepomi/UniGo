@@ -47,6 +47,8 @@ dependencies {
     compile 'com.github.akashandroid90:imageletter:1.8@aar'
     // Material circular fab reveal animation
     compile 'com.github.coyarzun89:fabtransitionactivity:0.2.0'
+    // Material FastScrolView
+    compile 'com.l4digital.fastscroll:fastscroll:1.0.3'
     // Libreria su cui si basa fabtransitionactivity
     compile('com.github.ozodrukh:CircularReveal:2.0.1@aar') { transitive = true }
     // Image Loader
@@ -57,7 +59,19 @@ dependencies {
     compile 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
     // Expandable Layout
     compile 'net.cachapa.expandablelayout:expandablelayout:2.8'
+    // Apache library used to sort custom objects
+    compile 'org.apache.commons:commons-lang3:3.5'
 }
 
-
 apply plugin: 'com.google.gms.google-services'
+
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '25.3.0'
+            }
+        }
+    }
+}

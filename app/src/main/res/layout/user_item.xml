@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <com.github.akashandroid90.imageletter.MaterialLetterIcon
+        android:id="@+id/itemp_photo"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/empty_profile_pic"/>
+    <TextView
+        android:id="@+id/itemp_name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:fontFamily="sans-serif"
+        android:textSize="16sp"
+        android:textColor="@color/ms_black"
+        android:gravity="center_vertical"
+        android:lines="1" />
+</LinearLayout>
