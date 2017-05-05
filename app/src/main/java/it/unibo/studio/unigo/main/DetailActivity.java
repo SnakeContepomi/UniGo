@@ -78,7 +78,7 @@ public class DetailActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-               // mAdapter.notifyItemChanged(0);
+                refreshRating();
             }
 
             @Override
@@ -124,26 +124,14 @@ public class DetailActivity extends AppCompatActivity
         });
     }
 
-    private void refreshGUI()
+    // Metodo per aggiornare la domanda corrente (per recuperare il valore aggiornato di rating, num domande, etc..)
+    private void refreshRating()
     {
-        mAdapter.notifyDataSetChanged();
-    }
-
-    private void refreshList()
-    {
-        //answerList.clear();
-        Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key")).child("answers").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+        Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key")).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
-
-                while (iterator.hasNext())
-                {
-                    iterator.next();
-                    //if (!iterator.hasNext())
-                        //answerList.add(new DetailAdapterItem(dataSnapshot.getValue(Answer.class), dataSnapshot.getKey(), ))
-                }
+                mAdapter.refreshRatings(dataSnapshot.getValue(Question.class));
             }
 
             @Override

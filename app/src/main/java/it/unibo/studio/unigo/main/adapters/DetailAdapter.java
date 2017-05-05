@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -157,6 +158,41 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 initActionAnswerReply(ah, answerKeyList.get(position));
                 break;
         }
+    }
+
+    // Aggiornamento parziale di uno o più elementi della recyclerview
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position, List<Object> payload)
+    {
+        // Aggiornamento totale
+        if (payload.isEmpty())
+            onBindViewHolder(holder, position);
+        // Aggiornamento parziale
+        else
+            switch (holder.getItemViewType())
+            {
+                case TYPE_QUESTION:
+                    questionHolder qh = (questionHolder) holder;
+                    if (payload.get(0) instanceof String)
+                        switch (String.valueOf(payload.get(0)))
+                        {
+                            // Aggiornamento del numero di rating
+                            case "ratings":
+                                if (question.ratings != null)
+                                    qh.txtRating.setText(String.valueOf(question.ratings.size()));
+                                else
+                                    qh.txtRating.setText("0");
+                                break;
+
+                            default:
+                                break;
+                        }
+                    break;
+
+                case TYPE_ANSWER:
+                    final answerHolder ah = (answerHolder) holder;
+                    break;
+            }
     }
 
     // Se la posizione è la prima, l'oggetto viene gestito come Question, altrimenti come Answer
@@ -615,5 +651,12 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 @Override
                 public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) { }
             });
+    }
+
+    // Metodo per aggiornare in tempo reale il numero di rating della domanda
+    public void refreshRatings(Question question)
+    {
+        this.question = question;
+        notifyItemChanged(0, "ratings");
     }
 }
