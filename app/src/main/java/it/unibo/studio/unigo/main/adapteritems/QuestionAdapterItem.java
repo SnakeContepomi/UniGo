@@ -5,13 +5,12 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 public class QuestionAdapterItem
 {
     private Question question;
-    private String question_key, photo;
+    private String question_key;
 
-    public QuestionAdapterItem(Question question, String questionKey, String photoUrl)
+    public QuestionAdapterItem(Question question, String questionKey)
     {
         this.question = question;
         this.question_key = questionKey;
-        this.photo = photoUrl;
     }
 
     public Question getQuestion()
@@ -22,10 +21,5 @@ public class QuestionAdapterItem
     public String getQuestionKey()
     {
         return question_key;
-    }
-
-    public String getPhotoUrl()
-    {
-        return photo;
     }
 }

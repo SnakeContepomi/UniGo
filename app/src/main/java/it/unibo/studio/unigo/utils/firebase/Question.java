@@ -1,6 +1,7 @@
 package it.unibo.studio.unigo.utils.firebase;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 import it.unibo.studio.unigo.utils.Util;
 
@@ -12,6 +13,8 @@ public class Question implements Serializable
     public String date;
     public String user_key;
     public String course_key;
+    public HashMap<String, Answer> answers;
+    public HashMap<String, Boolean> ratings;
 
     public Question() { }
 

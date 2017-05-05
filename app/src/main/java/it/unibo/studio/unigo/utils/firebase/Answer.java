@@ -10,6 +10,7 @@ public class Answer
     public String desc;
     public String date;
     public HashMap<String, Boolean> likes;
+    public HashMap<String, Comment> comments;
 
     public Answer() { }
 

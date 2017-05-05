@@ -1,5 +1,6 @@
 package it.unibo.studio.unigo.main;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -43,6 +44,13 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     {
         overridePendingTransition(R.anim.activity_no_animation, R.anim.activity_close_translate_to_bottom);
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        setResult(Activity.RESULT_CANCELED);
     }
 
     // Listener sul pulsante di invio del nuovo post
@@ -240,6 +248,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 linkPostToUser(key);
                 dialog.dismiss();
                 Toast.makeText(getApplicationContext(), R.string.toast_post_sent, Toast.LENGTH_LONG).show();
+                setResult(Activity.RESULT_OK);
                 finish();
             }
         });

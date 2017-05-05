@@ -12,6 +12,8 @@ import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -66,13 +68,12 @@ public class BackgroundService extends Service
         if (Util.CURRENT_COURSE_KEY == null)
         {
             // Query per recuperare la chiave del corso
-            Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail()))
+            Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("courseKey")
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot)
                         {
-                            User u = dataSnapshot.getValue(User.class);
-                            Util.CURRENT_COURSE_KEY = u.courseKey;
+                            Util.CURRENT_COURSE_KEY = dataSnapshot.getValue(String.class);
 
                             Util.getQuestionList().clear();
                             // Query per recuperare tutte le chiavi delle domande che fanno parte di quel corso, ordinate cronologicamente
@@ -175,33 +176,23 @@ public class BackgroundService extends Service
     // se il fragment Home risulta visibile
     private void addQuestionIntoList(final Question question, final String question_key, final boolean execStartQuestionListener)
     {
-        // Viene recuperato l'utente che ha effettuato la domanda, in modo da caricare la sua foto profilo
-        Util.getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                // Aggiunta della domanda alla lista in Util
-                Util.getQuestionList().add(0, new QuestionAdapterItem(question, question_key, dataSnapshot.getValue(User.class).photoUrl));
+        // Aggiunta della domanda alla lista in Util
+        Util.getQuestionList().add(0, new QuestionAdapterItem(question, question_key));
 
-                // Aggiornamento della recyclerView di Home fragment se è visibile
-                if (Util.isHomeFragmentVisible())
-                    Util.getHomeFragment().updateElement(0);
-                // Viene memorizzata la chiave della domanda nella shared preferences per evitare che, al prossimo avvio dell'app,
-                // quest'ultima non triggheri le notifiche
-                updateLastQuestionRead(question_key);
-                // Viene agganciata alla domanda un listener su eventuali modifiche
-                addOnChangeListenerToQuestion(question_key);
-                if (execStartQuestionListener)
-                {
-                    startQuestionListener();
-                    if (Util.isHomeFragmentVisible())
-                        Util.getHomeFragment().loadQuestionFromList();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
+        // Aggiornamento della recyclerView di Home fragment se è visibile
+        if (Util.isHomeFragmentVisible())
+            Util.getHomeFragment().updateElement(0);
+        // Viene memorizzata la chiave della domanda nella shared preferences per evitare che, al prossimo avvio dell'app,
+        // quest'ultima non triggheri le notifiche
+        updateLastQuestionRead(question_key);
+        // Viene agganciata alla domanda un listener su eventuali modifiche
+        addOnChangeListenerToQuestion(question_key);
+        if (execStartQuestionListener)
+        {
+            startQuestionListener();
+            if (Util.isHomeFragmentVisible())
+                Util.getHomeFragment().loadQuestionFromList();
+        }
     }
 
     // Metodo per agganciare ad una domanda il listener sui suoi cambiamenti
