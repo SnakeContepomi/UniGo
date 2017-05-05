@@ -180,7 +180,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         {
                             // Aggiornamento del numero di risposte
                             case UPDATE_CODE_ANSWER:
-                                qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, (answerList.size() - 1)));
+                                qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, answerList.size() - 1));
                                 break;
 
                             // Aggiornamento del numero di rating
@@ -244,7 +244,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         qh.txtCourse.setText(question.course);
         qh.txtTitle.setText(question.title);
         qh.txtDesc.setText(question.desc);
-        qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, (answerList.size() - 1)));
+        qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, answerList.size() - 1));
     }
 
     // Metodo che inizializza la logica del pulsante "Rating" relativo alla domanda in questione
