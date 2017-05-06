@@ -13,6 +13,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+
+import org.apache.commons.lang3.builder.CompareToBuilder;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
@@ -48,6 +53,7 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
     {
         this.commentList = commentList;
         this.commentKeyList = commentKeyList;
+        sortCommentList();
     }
 
     @Override
@@ -114,5 +120,17 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
         for(String key : commentKeyList)
             if (commentKey.equals(key)) return true;
         return false;
+    }
+
+    // Metodo per ordinare cronologicamente la lista dei commenti
+    private void sortCommentList()
+    {
+        Collections.sort(commentList, new Comparator<Comment>() {
+            @Override
+            public int compare(Comment comment1, Comment comment2)
+            {
+                return new CompareToBuilder().append(comment1.date, comment2.date).toComparison();
+            }
+        });
     }
 }

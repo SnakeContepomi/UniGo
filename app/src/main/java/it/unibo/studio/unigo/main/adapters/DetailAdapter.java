@@ -160,7 +160,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 final answerHolder ah = (answerHolder) holder;
                 getAnswerInfo(ah, answerList.get(position));
                 initActionLike(ah, answerList.get(position), answerKeyList.get(position));
-                initActionComments(ah, answerList.get(position));
+                initActionComments(ah);
                 initActionAnswerReply(ah, answerKeyList.get(position));
                 break;
         }
@@ -475,7 +475,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     // Metodo che inizializza la logica del pulsante "Comment" relativo alla risposta in questione
     // Il pultante Comment permette di mostrare/nascondere i commenti relativi alla risposta corrente
-    private void initActionComments(final answerHolder ah, final Answer answer)
+    private void initActionComments(final answerHolder ah)
     {
         // Inizializzazione del numero di "Comment" della risposta corrente
         ah.txtComment.setText(String.valueOf(ah.commentList.size()));
@@ -727,13 +727,13 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             if (likeIsNew)
             {
                 answerList.set(position, answer);
-                notifyItemChanged(position, Integer.valueOf(UPDATE_CODE_LIKES));
+                notifyItemChanged(position, UPDATE_CODE_LIKES);
             }
         }
         else
         {
             answerList.set(position, answer);
-            notifyItemChanged(position, Integer.valueOf(UPDATE_CODE_LIKES));
+            notifyItemChanged(position, UPDATE_CODE_LIKES);
         }
     }
 
