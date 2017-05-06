@@ -5,17 +5,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import java.util.Iterator;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapters.DetailAdapter;
 import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.Answer;
+import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
+
+import static it.unibo.studio.unigo.R.layout.comment;
 
 public class DetailActivity extends AppCompatActivity
 {
@@ -74,49 +78,20 @@ public class DetailActivity extends AppCompatActivity
         final DatabaseReference questionReference = Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key"));
 
         // Refresh in realtime del rating della domanda
+        setRatingOnChangeListener(questionReference);
+
+        // Aggiunta/modifica in realtime di una risposta
+        setAnswerOnAddListener(questionReference);
+    }
+
+    // Refresh in realtime del rating della domanda
+    private void setRatingOnChangeListener(DatabaseReference questionReference)
+    {
         questionReference.child("ratings").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-               // mAdapter.notifyItemChanged(0);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-
-        questionReference.child("answers").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
-
-                while (iterator.hasNext())
-                {
-                    final DataSnapshot child = iterator.next();
-
-                    if (!iterator.hasNext())
-                        questionReference.child("answers").orderByKey().startAt(child.getKey()).addChildEventListener(new ChildEventListener() {
-                            @Override
-                            public void onChildAdded(DataSnapshot dataSnapshot, String s)
-                            {
-                                //mAdapter.notifyDataSetChanged();
-                                //mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
-                            }
-
-                            @Override
-                            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
-
-                            @Override
-                            public void onChildRemoved(DataSnapshot dataSnapshot) { }
-
-                            @Override
-                            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) { }
-                        });
-                }
+                refreshRating();
             }
 
             @Override
@@ -124,26 +99,104 @@ public class DetailActivity extends AppCompatActivity
         });
     }
 
-    private void refreshGUI()
+    // Aggiunta/modifica in realtime di una risposta
+    private void setAnswerOnAddListener(DatabaseReference questionReference)
     {
-        mAdapter.notifyDataSetChanged();
+        questionReference.child("answers").orderByKey().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                // Se la risposta non è presente nella GUI, allora viene aggiunta
+                if (!mAdapter.containsAnswerKey(dataSnapshot.getKey()))
+                    mAdapter.refreshNewAnswer(dataSnapshot.getValue(Answer.class), dataSnapshot.getKey());
+
+                // Per ogni risposta alla domanda viene avviato il listener sui suoi cambiamenti (like/commenti)
+                setAnswerOnChangeListener(dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 
-    private void refreshList()
+    // Metodo per attacare un listener ad ogni risposta della domanda per individuarne i cambiamenti (like/commenti)
+    private void setAnswerOnChangeListener(final String answerKey)
     {
-        //answerList.clear();
-        Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key")).child("answers").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+        // Listener sui like della risposta
+        Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key")).child("answers").child(answerKey).child("likes").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                refreshAnswerLikes(answerKey, dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+        // Listener sui commenti della risposta
+        Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key")).child("answers").child(answerKey).child("comments").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                mAdapter.refreshAnswerComments(answerKey, dataSnapshot.getValue(Comment.class), dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo per aggiornare il numero di rating della domanda corrente
+    private void refreshRating()
+    {
+        Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key")).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                final Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+                mAdapter.refreshRating(dataSnapshot.getValue(Question.class));
+            }
 
-                while (iterator.hasNext())
-                {
-                    iterator.next();
-                    //if (!iterator.hasNext())
-                        //answerList.add(new DetailAdapterItem(dataSnapshot.getValue(Answer.class), dataSnapshot.getKey(), ))
-                }
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo per aggiornare la domanda corrente (per recuperare il valore aggiornato di rating, num domande, etc..)
+    private void refreshAnswerLikes(String answerKey, final String likeKey)
+    {
+        Util.getDatabase().getReference("Question").child(getIntent().getStringExtra("question_key")).child("answers").child(answerKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                mAdapter.refreshAnswerLikes(dataSnapshot.getValue(Answer.class), dataSnapshot.getKey(), likeKey);
             }
 
             @Override

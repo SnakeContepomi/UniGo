@@ -89,7 +89,7 @@ public class SocialFragment extends Fragment
 
     }
 
-    // Metodo per caricare la lista degli utenti nella RecyclerView
+    // Metodo per ordinare la lista degli utenti prima sul campo nome, poi sul cognome
     private void sortUserList()
     {
         Collections.sort(userList, new Comparator<User>() {

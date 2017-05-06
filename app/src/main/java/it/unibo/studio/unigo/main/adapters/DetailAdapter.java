@@ -39,11 +39,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private static final int TYPE_QUESTION = 1;
     private static final int TYPE_ANSWER = 2;
+    private static final int UPDATE_CODE_ANSWER = 1;
+    private static final int UPDATE_CODE_RATING = 2;
+    private static final int UPDATE_CODE_LIKES = 3;
+    private static final int UPDATE_CODE_COMMENTS = 4;
+
     private boolean answerAllowed = true;
     private Question question;
     private List<Answer> answerList;
     private List<String> answerKeyList;
-    private String questionKey, answerNotSent, commentNotSent;
+    private Comment newComment;
+    private String questionKey, answerNotSent, commentNotSent, newCommentKey;
     private Activity activity;
 
     private static class questionHolder extends RecyclerView.ViewHolder
@@ -78,6 +84,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static class answerHolder extends RecyclerView.ViewHolder
     {
         Context context;
+        List<Comment> commentList;
+        List<String> commentKeyList;
 
         MaterialLetterIcon imgProfile;
         LinearLayout like, layoutComments;
@@ -119,12 +127,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         answerList.add(null);
         answerKeyList.add(null);
         if (question.answers != null)
-        {
-            for (String key : question.answers.keySet()) {
+            for (String key : question.answers.keySet())
+            {
                 answerList.add(question.answers.get(key));
                 answerKeyList.add(key);
             }
-        }
     }
 
     @Override
@@ -153,10 +160,67 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 final answerHolder ah = (answerHolder) holder;
                 getAnswerInfo(ah, answerList.get(position));
                 initActionLike(ah, answerList.get(position), answerKeyList.get(position));
-                initActionComments(ah, answerList.get(position));
+                initActionComments(ah);
                 initActionAnswerReply(ah, answerKeyList.get(position));
                 break;
         }
+    }
+
+    // Aggiornamento parziale di uno o più elementi della recyclerview in realtime
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position, List<Object> payload)
+    {
+        // Aggiornamento totale
+        if (payload.isEmpty())
+            onBindViewHolder(holder, position);
+        // Aggiornamento parziale
+        else
+            switch (holder.getItemViewType())
+            {
+                case TYPE_QUESTION:
+                    questionHolder qh = (questionHolder) holder;
+                    if (payload.get(0) instanceof Integer)
+                        switch ((Integer) payload.get(0))
+                        {
+                            // Aggiornamento del numero di risposte
+                            case UPDATE_CODE_ANSWER:
+                                qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, answerList.size() - 1));
+                                break;
+
+                            // Aggiornamento del numero di rating
+                            case UPDATE_CODE_RATING:
+                                if (question.ratings != null)
+                                    qh.txtRating.setText(String.valueOf(question.ratings.size()));
+                                else
+                                    qh.txtRating.setText("0");
+                                break;
+
+                            default:
+                                break;
+                        }
+                    break;
+
+                case TYPE_ANSWER:
+                    final answerHolder ah = (answerHolder) holder;
+                    if (payload.get(0) instanceof Integer)
+                        switch ((Integer) payload.get(0))
+                        {
+                            // Aggiornamento del numero di likes
+                            case UPDATE_CODE_LIKES:
+                                ah.txtLike.setText(String.valueOf(answerList.get(position).likes.size()));
+                                break;
+
+                            // Aggiornamento del numero di commenti
+                            case UPDATE_CODE_COMMENTS:
+                                ah.cAdapter.refreshAnswerComments(newComment, newCommentKey);
+                                ah.txtComment.setText(String.valueOf(ah.commentList.size()));
+                                break;
+
+                            default:
+                                break;
+                        }
+                    break;
+            }
     }
 
     // Se la posizione è la prima, l'oggetto viene gestito come Question, altrimenti come Answer
@@ -201,10 +265,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         qh.txtCourse.setText(question.course);
         qh.txtTitle.setText(question.title);
         qh.txtDesc.setText(question.desc);
-        if (question.answers != null)
-            qh.txtNAnswer.setText(question.answers.size() + qh.context.getResources().getString(R.string.detail_nanswer));
-        else
-            qh.txtNAnswer.setText("0" + qh.context.getResources().getString(R.string.detail_nanswer));
+        qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, answerList.size() - 1));
     }
 
     // Metodo che inizializza la logica del pulsante "Rating" relativo alla domanda in questione
@@ -352,13 +413,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Metodo per recupereare tutti i commenti di una relativa risposta
     private void initCommentList(final answerHolder ah, Answer answer)
     {
-        List<Comment> commentList = new ArrayList<>();
+        ah.commentList = new ArrayList<>();
+        ah.commentKeyList = new ArrayList<>();
 
         if (answer.comments != null)
             for(String key : answer.comments.keySet())
-                commentList.add(answer.comments.get(key));
+            {
+                ah.commentList.add(answer.comments.get(key));
+                ah.commentKeyList.add(key);
+            }
 
-        ah.cAdapter = new CommentAdapter(commentList);
+        ah.cAdapter = new CommentAdapter(ah.commentList, ah.commentKeyList);
         ah.recyclerViewComment.setAdapter(ah.cAdapter);
     }
 
@@ -410,20 +475,24 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     // Metodo che inizializza la logica del pulsante "Comment" relativo alla risposta in questione
     // Il pultante Comment permette di mostrare/nascondere i commenti relativi alla risposta corrente
-    private void initActionComments(final answerHolder ah, final Answer answer)
+    private void initActionComments(final answerHolder ah)
     {
         // Inizializzazione del numero di "Comment" della risposta corrente
-        if(answer.comments != null)
-            ah.txtComment.setText(String.valueOf(answer.comments.size()));
-        else
-            ah.txtComment.setText("0");
+        ah.txtComment.setText(String.valueOf(ah.commentList.size()));
 
         // Click Listener relativo alla Action "Comments"
         ah.layoutComments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                ah.expandableLayout.toggle();
+                if (ah.expandableLayout.isExpanded())
+                    ah.expandableLayout.collapse();
+                else
+                {
+                    ah.expandableLayout.expand();
+                    ah.cAdapter = new CommentAdapter(ah.commentList, ah.commentKeyList);
+                    ah.recyclerViewComment.setAdapter(ah.cAdapter);
+                }
             }
         });
     }
@@ -615,5 +684,79 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 @Override
                 public void onComplete(DatabaseError databaseError, boolean success, DataSnapshot dataSnapshot) { }
             });
+    }
+
+    // Metodo per aggiornare in tempo reale il numero di rating della domanda
+    public void refreshRating(Question question)
+    {
+        this.question = question;
+        notifyItemChanged(0, UPDATE_CODE_RATING);
+    }
+
+    // Metodo per aggiornare in tempo reale l'aggiunta di una domanda nuova
+    public void refreshNewAnswer(Answer answer, String answerKey)
+    {
+        answerList.add(answer);
+        answerKeyList.add(answerKey);
+        notifyItemInserted(answerList.size() - 1);
+        notifyItemChanged(0, UPDATE_CODE_ANSWER);
+    }
+
+    // Metodo per aggiornare in tempo reale l'aggiunta di un like ad una risposta
+    public void refreshAnswerLikes(Answer answer, String answerKey, String likeKey)
+    {
+        int position;
+
+        // Recupero della posizione della risposta modificata
+        for(position = 0; position < answerKeyList.size(); position++)
+            if (answerKey.equals(answerKeyList.get(position)))
+                break;
+
+        // Aggiornamento grafico del numero di like
+        if (answerList.get(position).likes != null)
+        {
+            // Se la chiave del like passato come parametro non è presente tra i like della risposta,
+            // quest'ultima viene aggiornata (se è già presente, si tratta del trigget iniziale della query di firebase)
+            boolean likeIsNew = true;
+            for(String key : answerList.get(position).likes.keySet())
+                if (likeKey.equals(key))
+                {
+                    likeIsNew = false;
+                    break;
+                }
+            if (likeIsNew)
+            {
+                answerList.set(position, answer);
+                notifyItemChanged(position, UPDATE_CODE_LIKES);
+            }
+        }
+        else
+        {
+            answerList.set(position, answer);
+            notifyItemChanged(position, UPDATE_CODE_LIKES);
+        }
+    }
+
+    // Metodo per aggiornare in tempo reale l'aggiunta di un like ad una risposta
+    public void refreshAnswerComments(String answerKey, Comment comment, String commentKey)
+    {
+        int position;
+
+        // Recupero della posizione della risposta modificata
+        for(position = 0; position < answerKeyList.size(); position++)
+            if (answerKey.equals(answerKeyList.get(position)))
+                break;
+
+        newComment = comment;
+        newCommentKey = commentKey;
+        notifyItemChanged(position, UPDATE_CODE_COMMENTS);
+    }
+
+    // Metodo utilizzato per sapere se la risposta passata come parametro è già presente nella lista
+    public boolean containsAnswerKey(String answerKey)
+    {
+        for(String key : answerKeyList)
+            if (answerKey.equals(key)) return true;
+        return false;
     }
 }
