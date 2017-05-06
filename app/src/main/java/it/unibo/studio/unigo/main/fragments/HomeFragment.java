@@ -2,10 +2,8 @@ package it.unibo.studio.unigo.main.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +15,6 @@ public class HomeFragment extends Fragment
 {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private DividerItemDecoration divider;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -52,8 +49,6 @@ public class HomeFragment extends Fragment
         // Inizializzazione adapter della lista delle domande
         mAdapter = new QuestionAdapter(Util.getQuestionList());
         mRecyclerView.setAdapter(mAdapter);
-        divider = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
-        divider.setDrawable(v.getContext().getDrawable(R.drawable.item_divider));
         loadQuestionFromList();
     }
 
@@ -63,10 +58,7 @@ public class HomeFragment extends Fragment
         if (Util.getQuestionList().size() != 0)
         {
             for(int i = 0; i < Util.getQuestionList().size(); i++)
-            {
-                mRecyclerView.addItemDecoration(divider);
                 mAdapter.notifyItemInserted(i);
-            }
             setRecyclerViewVisibility(true);
         }
     }
