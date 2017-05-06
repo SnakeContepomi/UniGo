@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -18,8 +17,6 @@ import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
-
-import static it.unibo.studio.unigo.R.layout.comment;
 
 public class DetailActivity extends AppCompatActivity
 {

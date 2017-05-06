@@ -101,7 +101,7 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
     }
 
     // Metodo per aggiornare in tempo reale l'aggiunta di un commento ad una risposta
-    public void refreshAnswerComments(Comment comment, String commentKey)
+    void refreshAnswerComments(Comment comment, String commentKey)
     {
         // Aggiornamento grafico del numero di commenti
         // Aggiunta di commento in coda, evitando quelli trigghetari all'avvio del listener di firebase
