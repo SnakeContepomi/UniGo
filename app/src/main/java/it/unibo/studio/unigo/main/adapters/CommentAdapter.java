@@ -2,7 +2,6 @@ package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +12,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
-
 import org.apache.commons.lang3.builder.CompareToBuilder;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -107,7 +104,6 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
         // Aggiunta di commento in coda, evitando quelli trigghetari all'avvio del listener di firebase
         if (!commentExists(commentKey))
         {
-            Log.d("prova", "aaa");
             commentList.add(comment);
             commentKeyList.add(commentKey);
             notifyItemInserted(commentList.size() - 1);

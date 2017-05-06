@@ -22,6 +22,7 @@ public class DetailActivity extends AppCompatActivity
 {
     private Question question;
     private DetailAdapter mAdapter;
+    private RecyclerView recyclerViewQuestionDetail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -61,7 +62,7 @@ public class DetailActivity extends AppCompatActivity
             }
         });
         // Inizializzazione RecyclerView
-        RecyclerView recyclerViewQuestionDetail = (RecyclerView) findViewById(R.id.recyclerViewAnswer);
+        recyclerViewQuestionDetail = (RecyclerView) findViewById(R.id.recyclerViewAnswer);
         recyclerViewQuestionDetail.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         mAdapter = new DetailAdapter(question, getIntent().getStringExtra("question_key"), this);
