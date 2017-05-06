@@ -16,6 +16,7 @@ import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapters.DetailAdapter;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
+import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
 import static it.unibo.studio.unigo.R.layout.comment;
@@ -156,7 +157,7 @@ public class DetailActivity extends AppCompatActivity
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
-                //mAdapter.refreshAnswerLikes(answer, answerKey);
+                mAdapter.refreshAnswerComments(answerKey, dataSnapshot.getValue(Comment.class), dataSnapshot.getKey());
             }
 
             @Override

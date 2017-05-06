@@ -2,6 +2,7 @@ package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +18,12 @@ import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 
+import static it.unibo.studio.unigo.R.layout.comment;
+
 class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
 {
     private List<Comment> commentList;
+    private List<String> commentKeyList;
 
     static class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -40,16 +44,17 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
         }
     }
 
-    CommentAdapter(List<Comment> commentList)
+    CommentAdapter(List<Comment> commentList, List<String> commentKeyList)
     {
         this.commentList = commentList;
+        this.commentKeyList = commentKeyList;
     }
 
     @Override
     public CommentAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.comment, parent, false);
+                .inflate(comment, parent, false);
 
         return new ViewHolder(v);
     }
@@ -87,5 +92,27 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
     public int getItemCount()
     {
         return commentList.size();
+    }
+
+    // Metodo per aggiornare in tempo reale l'aggiunta di un commento ad una risposta
+    public void refreshAnswerComments(Comment comment, String commentKey)
+    {
+        // Aggiornamento grafico del numero di commenti
+        // Aggiunta di commento in coda, evitando quelli trigghetari all'avvio del listener di firebase
+        if (!commentExists(commentKey))
+        {
+            Log.d("prova", "aaa");
+            commentList.add(comment);
+            commentKeyList.add(commentKey);
+            notifyItemInserted(commentList.size() - 1);
+        }
+    }
+
+    // Metodo utilizzato per sapere se il commento passato come parametro è già presente nella lista
+    private boolean commentExists(String commentKey)
+    {
+        for(String key : commentKeyList)
+            if (commentKey.equals(key)) return true;
+        return false;
     }
 }

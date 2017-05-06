@@ -33,8 +33,6 @@ import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
-
-import static android.R.attr.key;
 import static it.unibo.studio.unigo.utils.Util.getDatabase;
 
 public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -44,12 +42,14 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int UPDATE_CODE_ANSWER = 1;
     private static final int UPDATE_CODE_RATING = 2;
     private static final int UPDATE_CODE_LIKES = 3;
+    private static final int UPDATE_CODE_COMMENTS = 4;
 
     private boolean answerAllowed = true;
     private Question question;
     private List<Answer> answerList;
     private List<String> answerKeyList;
-    private String questionKey, answerNotSent, commentNotSent;
+    private Comment newComment;
+    private String questionKey, answerNotSent, commentNotSent, newCommentKey;
     private Activity activity;
 
     private static class questionHolder extends RecyclerView.ViewHolder
@@ -84,6 +84,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static class answerHolder extends RecyclerView.ViewHolder
     {
         Context context;
+        List<Comment> commentList;
+        List<String> commentKeyList;
 
         MaterialLetterIcon imgProfile;
         LinearLayout like, layoutComments;
@@ -206,6 +208,12 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             // Aggiornamento del numero di likes
                             case UPDATE_CODE_LIKES:
                                 ah.txtLike.setText(String.valueOf(answerList.get(position).likes.size()));
+                                break;
+
+                            // Aggiornamento del numero di commenti
+                            case UPDATE_CODE_COMMENTS:
+                                ah.cAdapter.refreshAnswerComments(newComment, newCommentKey);
+                                ah.txtComment.setText(String.valueOf(ah.commentList.size()));
                                 break;
 
                             default:
@@ -405,13 +413,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Metodo per recupereare tutti i commenti di una relativa risposta
     private void initCommentList(final answerHolder ah, Answer answer)
     {
-        List<Comment> commentList = new ArrayList<>();
+        ah.commentList = new ArrayList<>();
+        ah.commentKeyList = new ArrayList<>();
 
         if (answer.comments != null)
             for(String key : answer.comments.keySet())
-                commentList.add(answer.comments.get(key));
+            {
+                ah.commentList.add(answer.comments.get(key));
+                ah.commentKeyList.add(key);
+            }
 
-        ah.cAdapter = new CommentAdapter(commentList);
+        ah.cAdapter = new CommentAdapter(ah.commentList, ah.commentKeyList);
         ah.recyclerViewComment.setAdapter(ah.cAdapter);
     }
 
@@ -466,17 +478,21 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void initActionComments(final answerHolder ah, final Answer answer)
     {
         // Inizializzazione del numero di "Comment" della risposta corrente
-        if(answer.comments != null)
-            ah.txtComment.setText(String.valueOf(answer.comments.size()));
-        else
-            ah.txtComment.setText("0");
+        ah.txtComment.setText(String.valueOf(ah.commentList.size()));
 
         // Click Listener relativo alla Action "Comments"
         ah.layoutComments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                ah.expandableLayout.toggle();
+                if (ah.expandableLayout.isExpanded())
+                    ah.expandableLayout.collapse();
+                else
+                {
+                    ah.expandableLayout.expand();
+                    ah.cAdapter = new CommentAdapter(ah.commentList, ah.commentKeyList);
+                    ah.recyclerViewComment.setAdapter(ah.cAdapter);
+                }
             }
         });
     }
@@ -674,7 +690,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void refreshRating(Question question)
     {
         this.question = question;
-        notifyItemChanged(0, Integer.valueOf(UPDATE_CODE_RATING));
+        notifyItemChanged(0, UPDATE_CODE_RATING);
     }
 
     // Metodo per aggiornare in tempo reale l'aggiunta di una domanda nuova
@@ -683,7 +699,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         answerList.add(answer);
         answerKeyList.add(answerKey);
         notifyItemInserted(answerList.size() - 1);
-        notifyItemChanged(0, Integer.valueOf(UPDATE_CODE_ANSWER));
+        notifyItemChanged(0, UPDATE_CODE_ANSWER);
     }
 
     // Metodo per aggiornare in tempo reale l'aggiunta di un like ad una risposta
@@ -719,6 +735,21 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             answerList.set(position, answer);
             notifyItemChanged(position, Integer.valueOf(UPDATE_CODE_LIKES));
         }
+    }
+
+    // Metodo per aggiornare in tempo reale l'aggiunta di un like ad una risposta
+    public void refreshAnswerComments(String answerKey, Comment comment, String commentKey)
+    {
+        int position;
+
+        // Recupero della posizione della risposta modificata
+        for(position = 0; position < answerKeyList.size(); position++)
+            if (answerKey.equals(answerKeyList.get(position)))
+                break;
+
+        newComment = comment;
+        newCommentKey = commentKey;
+        notifyItemChanged(position, UPDATE_CODE_COMMENTS);
     }
 
     // Metodo utilizzato per sapere se la risposta passata come parametro è già presente nella lista
