@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,13 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import net.cachapa.expandablelayout.ExpandableLayout;
+
+import org.apache.commons.lang3.builder.CompareToBuilder;
+
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
@@ -34,6 +41,7 @@ import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
 
+import static android.R.attr.key;
 import static it.unibo.studio.unigo.utils.Util.getCurrentUser;
 
 
@@ -126,14 +134,27 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         answerList = new ArrayList<>();
         answerKeyList = new ArrayList<>();
 
-        answerList.add(null);
-        answerKeyList.add(null);
         if (question.answers != null)
+        {
+            // Vengono recuperate le chiavi delle varie risposte
             for (String key : question.answers.keySet())
-            {
-                answerList.add(question.answers.get(key));
                 answerKeyList.add(key);
-            }
+            // Viene ordinata la lista delle risposte in base alla chiave
+            // (la chiave include un ordinamento temporale)
+            Collections.sort(answerKeyList, new Comparator<String>() {
+                @Override
+                public int compare(String s1, String s2)
+                {
+                    return new CompareToBuilder().append(s1, s2).toComparison();
+                }
+            });
+            // Viene inizializzata la lista di Answer
+            for (String key : answerKeyList)
+                answerList.add(question.answers.get(key));
+        }
+        // Viene aggiunto un elemento in testa per definire lo spazio relativo alla domanda
+        answerList.add(0, null);
+        answerKeyList.add(0, null);
     }
 
     @Override
@@ -364,10 +385,13 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         // Inizializzazione del comportamento del tasto "Rispondi":
         // Se la variaible booleana viene impostata a false, significa che l'utente ha già risposto alla domanda e non può più
         // effettuarne altre
-        if (question.answers != null)
-            for(String key : question.answers.keySet())
-                if (question.answers.get(key).user_key.equals(Util.encodeEmail(getCurrentUser().getEmail())))
+        if (answerList.size() != 1)
+            for(int i = 1; i < answerList.size(); i++)
+                if (Util.encodeEmail(getCurrentUser().getEmail()).equals(answerList.get(i).user_key))
+                {
                     answerAllowed = false;
+                    break;
+                }
 
         qh.answer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -517,9 +541,6 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
 
-        List<String> photoUrl = getCurrentUser().getPhotoUrl().getPathSegments();
-        String[] photoUrlName = photoUrl.get(photoUrl.size() - 1).split("/");
-
         if (!Util.isNetworkAvailable(activity.getApplicationContext()) || getCurrentUser().getPhotoUrl().getPath().contains(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
         {
             ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(getCurrentUser().getDisplayName());
@@ -554,6 +575,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                 {
                                     writeAnswer(((EditText) dialogLayout.findViewById(R.id.reply_desc)).getText().toString());
                                     answerNotSent = null;
+                                    answerAllowed = false;
                                 }
                             }
                         })
@@ -625,9 +647,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         String answer_key = Util.getDatabase().getReference("Question").child(questionKey).child("answers").push().getKey();
 
-        Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answer_key).setValue(
-                new Answer(Util.encodeEmail(getCurrentUser().getEmail()), desc));
+        Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answer_key).setValue(new Answer(Util.encodeEmail(getCurrentUser().getEmail()), desc));
         Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail())).child("answers").child(answer_key).setValue(true);
+
         updateExpForAnswer();
     }
 
