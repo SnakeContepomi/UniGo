@@ -28,6 +28,7 @@ import net.cachapa.expandablelayout.ExpandableLayout;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
