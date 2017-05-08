@@ -8,6 +8,7 @@
     android:layout_marginEnd="16dp"
     android:layout_marginTop="8dp"
     card_view:cardCornerRadius="2dp">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,10 +17,11 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="16dp"
-            android:paddingStart="16dp"
+            android:orientation="horizontal"
             android:paddingEnd="16dp"
-            android:orientation="horizontal">
+            android:paddingStart="16dp"
+            android:paddingTop="16dp">
+
             <com.github.akashandroid90.imageletter.MaterialLetterIcon
                 android:id="@+id/itemq_user"
                 android:layout_width="40dp"
@@ -37,6 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/itemq_name"
                         android:layout_width="match_parent"
@@ -47,6 +50,7 @@
                         android:lines="1"
                         android:textColor="@color/ms_black"
                         android:textSize="14sp" />
+
                     <TextView
                         android:id="@+id/itemq_date"
                         android:layout_width="wrap_content"
@@ -62,22 +66,24 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
+                        android:text="@string/detail_cardq_course"
                         android:textColor="@color/md_grey_500"
-                        android:textSize="12sp"
-                        android:text="@string/detail_cardq_course"/>
+                        android:textSize="12sp" />
+
                     <TextView
                         android:id="@+id/itemq_course"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
                         android:ellipsize="end"
+                        android:fontFamily="sans-serif"
                         android:lines="1"
                         android:textColor="@color/colorAccent"
-                        android:textSize="12sp"/>
+                        android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -85,36 +91,38 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:paddingEnd="16dp"
             android:paddingStart="16dp"
-            android:paddingTop="16dp"
-            android:orientation="vertical">
+            android:paddingTop="16dp">
+
             <TextView
                 android:id="@+id/itemq_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/ms_black"
-                android:textSize="20sp"/>
+                android:textSize="20sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+            android:gravity="end"
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:id="@+id/itemq_rating"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:minWidth="48dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="12dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:minWidth="48dp"
+                android:orientation="horizontal"
+                android:paddingBottom="12dp"
+                android:paddingEnd="12dp"
+                android:paddingStart="16dp"
+                android:paddingTop="12dp">
+
                 <ImageView
                     android:id="@+id/itemq_imgrating"
                     android:layout_width="wrap_content"
@@ -123,13 +131,14 @@
                     android:contentDescription="@string/rvq_favorite"
                     android:src="@drawable/ic_favorite_black_24dp"
                     android:tint="@color/colorIconGray" />
+
                 <TextView
                     android:id="@+id/itemq_nrating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"
                     android:textColor="@color/colorIconGray"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <ImageView
@@ -144,15 +153,16 @@
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:minWidth="48dp"
-                android:padding="12dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:minWidth="48dp"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -160,14 +170,15 @@
                     android:contentDescription="@string/rvq_favorite"
                     android:src="@drawable/ic_mode_comment_black_24dp"
                     android:tint="@color/colorIconGray" />
+
                 <TextView
                     android:id="@+id/itemq_nanswer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"
+                    android:text="0"
                     android:textColor="@color/colorIconGray"
-                    android:textSize="14sp"
-                    android:text="0"/>
+                    android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
 

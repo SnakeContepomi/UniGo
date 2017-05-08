@@ -8,7 +8,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,11 +25,8 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import net.cachapa.expandablelayout.ExpandableLayout;
-
 import org.apache.commons.lang3.builder.CompareToBuilder;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -40,8 +36,6 @@ import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
-
-import static android.R.attr.key;
 import static it.unibo.studio.unigo.utils.Util.getCurrentUser;
 
 

@@ -1,11 +1,11 @@
 package it.unibo.studio.unigo.main.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +21,18 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.DetailActivity;
+import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 
 public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder>
 {
+    private final int UPDATE_CODE_QUESTION = 1;
+    private final int UPDATE_CODE_FAVORITE = 2;
+
     private List<QuestionAdapterItem> questionList;
+    private boolean isFavorite;
+    private Activity activity;
 
     static class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -55,9 +61,10 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         }
     }
 
-    public QuestionAdapter(List<QuestionAdapterItem> questionList)
+    public QuestionAdapter(List<QuestionAdapterItem> questionList, Activity activity)
     {
         this.questionList = questionList;
+        this.activity = activity;
     }
 
     @Override
@@ -88,9 +95,55 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             {
                 Intent intent = new Intent(holder.context, DetailActivity.class);
                 intent.putExtra("question_key", qItem.getQuestionKey());
-                holder.context.startActivity(intent);
+                //holder.context.startActivity(intent);
+                activity.startActivityForResult(intent, MainActivity.REQUEST_CODE_DETAIL);
             }
         });
+    }
+
+    // Aggiornamento parziale di uno o più elementi della recyclerview in realtime (rating, commenti, favourite)
+    @Override
+    public void onBindViewHolder(final ViewHolder holder, int position, List<Object> payloads)
+    {
+        // Aggiornamento totale
+        if (payloads.isEmpty())
+            onBindViewHolder(holder, position);
+            // Aggiornamento parziale
+        else
+        if (payloads.get(0) instanceof Integer)
+            switch ((Integer) payloads.get(0))
+            {
+                // Aggiornamento dei valori delle action della card answer
+                case UPDATE_CODE_QUESTION:
+                    // Action Rating
+                    //initActionRating(holder, questionList.get(position));
+                    if (questionList.get(position).getQuestion().ratings != null)
+                    {
+                        holder.txtRating.setText(String.valueOf(questionList.get(position).getQuestion().ratings.size()));
+                        if (questionList.get(position).getQuestion().ratings.keySet().contains(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                        {
+                            holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                            holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                            holder.rating.setClickable(false);
+                        }
+                    }
+
+                    // Numero risposte
+                    if (questionList.get(position).getQuestion().answers != null)
+                        holder.txtAnswer.setText(String.valueOf(questionList.get(position).getQuestion().answers.size()));
+                    else
+                        holder.txtAnswer.setText("0");
+                    break;
+
+                case UPDATE_CODE_FAVORITE:
+                    if (isFavorite)
+                        holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
+                    else
+                        holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
+
+                default:
+                    break;
+            }
     }
 
     @Override
@@ -214,8 +267,30 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         });
     }
 
-    public void refreshQuestionIntoPosition()
+    // Metodo utilizzato per aggiornare i campi "rating" e "comments" della domanda corrente, ad ogni eventuale cambiamento
+    public void refreshQuestion(int position, QuestionAdapterItem newQItem)
     {
+        questionList.set(position, newQItem);
+        notifyItemChanged(position, UPDATE_CODE_QUESTION);
+    }
 
+    // Metodo utilizzato per aggiornare il campo "favorite" della domanda corrente, ogni volta che viene chiusa l'activity Detail
+    public void refreshFavorite(final int position)
+    {
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(questionList.get(position).getQuestionKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (dataSnapshot.getValue() != null)
+                    isFavorite = true;
+                else
+                    isFavorite = false;
+
+                notifyItemChanged(position, UPDATE_CODE_FAVORITE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 }

@@ -1,5 +1,7 @@
 package it.unibo.studio.unigo.main;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,6 +33,17 @@ public class DetailActivity extends AppCompatActivity
         setContentView(R.layout.activity_question_detail);
 
         initialize();
+    }
+
+    // Alla chiusura dell'activity, viene restituito l'id della domanda per aggiornare il campo "favorite"
+    @Override
+    public void onBackPressed()
+    {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("question_key", getIntent().getStringExtra("question_key"));
+        setResult(Activity.RESULT_OK, resultIntent);
+        finish();
+        super.onBackPressed();
     }
 
     // Metodo per inizializzare l'oggetto che memorizza tutti i dati relativi alla domanda attuale

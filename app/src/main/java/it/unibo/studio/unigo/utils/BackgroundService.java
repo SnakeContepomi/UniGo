@@ -12,8 +12,6 @@ import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
-
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,7 +22,6 @@ import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.PostActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.firebase.Question;
-import it.unibo.studio.unigo.utils.firebase.User;
 
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
 // i cambiamenti da Firebase
@@ -214,6 +211,23 @@ public class BackgroundService extends Service
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+        // Listener sui cambiamenti generici, per aggiornare in real time la lista dele domande
+        Util.getDatabase().getReference("Question").child(question_key).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                // Se HomeFragment è visibile, l'aggiornamento viene effettuato in tempo reale
+                if (Util.isHomeFragmentVisible())
+                    Util.getHomeFragment().refreshQuestion(dataSnapshot.getKey(), dataSnapshot.getValue(Question.class));
+                // Altrimenti gli aggiornamenti vengono messi in coda finche non viene riesumato il fragment
+                else
+                    Util.getHomeFragment().addToUpdate(dataSnapshot.getKey(), dataSnapshot.getValue(Question.class));
+            }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }

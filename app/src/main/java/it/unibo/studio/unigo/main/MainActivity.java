@@ -1,6 +1,5 @@
 package it.unibo.studio.unigo.main;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -45,7 +44,8 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SheetLayout.OnFabAnimationEndListener
 {
-    private final int REQUEST_CODE_POST = 1;
+    public static final int REQUEST_CODE_POST = 1;
+    public static final int REQUEST_CODE_DETAIL = 2;
     private final String FRAGMENT_HOME = "home";
     private final String FRAGMENT_QUESTION = "question";
     private final String FRAGMENT_FAVORITE = "favorite";
@@ -153,11 +153,20 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_CODE_POST)
+        switch (requestCode)
         {
-            sheetLayout.contractFab();
-            if (resultCode == RESULT_OK && Util.isHomeFragmentVisible())
-                Util.getHomeFragment().updateElement(0);
+            // Alla chiusura dell'activity Post, viene aggiunta la nuova domanda
+            case REQUEST_CODE_POST:
+                sheetLayout.contractFab();
+                if (resultCode == RESULT_OK)
+                    Util.getHomeFragment().updateElement(0);
+                break;
+
+            // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata"
+            case REQUEST_CODE_DETAIL:
+                if (resultCode == RESULT_OK)
+                    Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
+                break;
         }
     }
 

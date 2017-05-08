@@ -10,15 +10,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 
 public class Util
 {
-    public static final String MY_PREFERENCES = "my_pref";
-    public static final String LAST_QUESTION_READ = "last_key";
+    static final String MY_PREFERENCES = "my_pref";
+    static final String LAST_QUESTION_READ = "last_key";
     public static String CURRENT_COURSE_KEY;
     public static final int EXP_START = 0;
     public static final int EXP_ANSWER = 10;
@@ -70,6 +69,7 @@ public class Util
         return questionList;
     }
 
+    // Metodo che controlla se la domanda passata è presente nella lista
     public static boolean questionExists(String key)
     {
         for(QuestionAdapterItem item : questionList)
@@ -78,11 +78,18 @@ public class Util
         return false;
     }
 
+    // Data una chiave di una domanda, viene restituita la posizione della stessa all'interno della lista
+    public static int getQuestionPosition(String questionKey)
+    {
+        for (int i = 0; i < questionList.size(); i++)
+            if (questionKey.equals(questionList.get(i).getQuestionKey()))
+                return i;
+        return -1;
+    }
+
     public static boolean isHomeFragmentVisible()
     {
-        if (isHomeFragmentVisible)
-            return true;
-        return false;
+        return (isHomeFragmentVisible) ? true : false;
     }
 
     public static void setHomeFragmentVisibility(boolean visibiliy)

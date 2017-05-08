@@ -7,14 +7,19 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import java.util.ArrayList;
+import java.util.List;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapters.QuestionAdapter;
 import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.Question;
 
 public class HomeFragment extends Fragment
 {
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private QuestionAdapter mAdapter;
+    private List<QuestionAdapterItem> questiosnToUpdate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -36,10 +41,15 @@ public class HomeFragment extends Fragment
     {
         super.onResume();
         Util.setHomeFragmentVisibility(true);
+        for(QuestionAdapterItem qitem : questiosnToUpdate)
+            refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
+        questiosnToUpdate.clear();
     }
 
     private void initComponents(View v)
     {
+        questiosnToUpdate = new ArrayList<>();
+
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewQuestion);
         setRecyclerViewVisibility(false);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
@@ -47,7 +57,7 @@ public class HomeFragment extends Fragment
         mRecyclerView.setLayoutManager(new LinearLayoutManager(v.getContext()));
 
         // Inizializzazione adapter della lista delle domande
-        mAdapter = new QuestionAdapter(Util.getQuestionList());
+        mAdapter = new QuestionAdapter(Util.getQuestionList(), getActivity());
         mRecyclerView.setAdapter(mAdapter);
         loadQuestionFromList();
     }
@@ -80,5 +90,25 @@ public class HomeFragment extends Fragment
         }
         else
             mRecyclerView.setVisibility(View.GONE);
+    }
+
+    // Metodo per aggiornare la GUI della domanda passata come parametro
+    public void refreshQuestion(String questionKey, Question question)
+    {
+        if (Util.getQuestionPosition(questionKey) != -1)
+            mAdapter.refreshQuestion(Util.getQuestionPosition(questionKey), new QuestionAdapterItem(question, questionKey));
+    }
+
+    // Metodo per aggiornare la GUI di favorite della domanda passata come parametro
+    public void refreshFavorite(String questionKey)
+    {
+        if (Util.getQuestionPosition(questionKey) != -1)
+            mAdapter.refreshFavorite(Util.getQuestionPosition(questionKey));
+    }
+
+    // Metodo per mettere in coda gli aggiornamenti grafici da effettuare, una volta riesumata l'app
+    public void addToUpdate(String questionKey, Question question)
+    {
+        questiosnToUpdate.add(new QuestionAdapterItem(question, questionKey));
     }
 }
