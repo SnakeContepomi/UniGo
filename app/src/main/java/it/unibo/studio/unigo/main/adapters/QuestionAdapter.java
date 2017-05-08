@@ -32,9 +32,9 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         Context context;
         CardView layout;
         MaterialLetterIcon imgProfile;
-        TextView txtName, txtCourse, txtTitle, txtDate, txtRating, txtComment;
+        TextView txtName, txtCourse, txtTitle, txtDate, txtRating, txtAnswer;
         LinearLayout rating;
-        ImageView imgRating, imgFavorite, imgComment;
+        ImageView imgRating, imgFavorite;
 
         ViewHolder(CardView v)
         {
@@ -50,8 +50,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             imgRating = (ImageView) v.findViewById(R.id.itemq_imgrating);
             txtRating = (TextView) v.findViewById(R.id.itemq_nrating);
             imgFavorite = (ImageView) v.findViewById(R.id.itemq_imgfavorite);
-            imgComment = (ImageView) v.findViewById(R.id.itemq_imgcomment);
-            txtComment = (TextView) v.findViewById(R.id.itemq_ncomment);
+            txtAnswer = (TextView) v.findViewById(R.id.itemq_nanswer);
         }
     }
 
@@ -74,6 +73,12 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         initQuestion(holder, qItem);
         initActionRating(holder, qItem);
         initActionFavorite(holder, qItem.getQuestionKey());
+
+        // Viene inizializzato il numero di risposte relative alla domanda in questione
+        if (qItem.getQuestion().answers != null)
+            holder.txtAnswer.setText(String.valueOf(qItem.getQuestion().answers.size()));
+        else
+            holder.txtAnswer.setText("0");
 
         // Al click della card viene aperta l'activity che ne mostra i dettagli
         holder.layout.setOnClickListener(new View.OnClickListener() {
