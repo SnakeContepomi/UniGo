@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,8 +114,8 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 holder.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                 if (!Util.isNetworkAvailable(holder.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(holder.context.getResources().getString(R.string.empty_profile_pic_url)))
                 {
-                    holder.imgProfile.setLetter(dataSnapshot.getValue(String.class));
-                    holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.getValue(String.class)));
+                    holder.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
+                    holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.child("name").getValue(String.class)));
                 }
                 else
                     Picasso.with(holder.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).fit().into(holder.imgProfile);
@@ -211,5 +212,10 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 });
             }
         });
+    }
+
+    public void refreshQuestionIntoPosition()
+    {
+
     }
 }

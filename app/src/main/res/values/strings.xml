@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">UniGo</string>
-    <string name="empty_profile_pic_url">default_profile_pic</string>
+    <string name="empty_profile_pic_url">empty_profile_pic</string>
 
     <string-array name="regions">
         <item>Abruzzo</item>

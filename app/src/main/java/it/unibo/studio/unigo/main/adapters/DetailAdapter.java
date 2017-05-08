@@ -28,13 +28,14 @@ import net.cachapa.expandablelayout.ExpandableLayout;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
-import static it.unibo.studio.unigo.utils.Util.getDatabase;
+
+import static it.unibo.studio.unigo.utils.Util.getCurrentUser;
+
 
 public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -241,7 +242,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void getQuestionInfo(final questionHolder qh)
     {
         // Query per l'utente
-        getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        Util.getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -278,7 +279,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             @Override
             public void onClick(View view)
             {
-                Util.getDatabase().getReference("Question").child(questionKey).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
+                Util.getDatabase().getReference("Question").child(questionKey).child("ratings").child(Util.encodeEmail(getCurrentUser().getEmail())).setValue(true);
                 qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                 qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                 qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
@@ -295,7 +296,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             qh.txtRating.setText(String.valueOf(question.ratings.size()));
 
             for (String key : question.ratings.keySet())
-                if (key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                if (key.equals(Util.encodeEmail(getCurrentUser().getEmail())))
                 {
                     qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                     qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
@@ -312,7 +313,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void initActionFavorite(final questionHolder qh)
     {
         // Inizializzazione della Action "Favorite"
-        getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(questionKey).addListenerForSingleValueEvent(new ValueEventListener() {
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail())).child("favorites").child(questionKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -327,7 +328,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Click Listener relativo alla Action "Favorite" (stella)
-        final DatabaseReference favoriteReference = getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(questionKey);
+        final DatabaseReference favoriteReference = Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail())).child("favorites").child(questionKey);
         qh.favorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
@@ -365,7 +366,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         // effettuarne altre
         if (question.answers != null)
             for(String key : question.answers.keySet())
-                if (question.answers.get(key).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                if (question.answers.get(key).user_key.equals(Util.encodeEmail(getCurrentUser().getEmail())))
                     answerAllowed = false;
 
         qh.answer.setOnClickListener(new View.OnClickListener() {
@@ -384,7 +385,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void getAnswerInfo(final answerHolder ah, final Answer answer)
     {
         // Query per recuperare le informazioni dell'autore della risposta
-        getDatabase().getReference("User").child(answer.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+        Util.getDatabase().getReference("User").child(answer.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -437,13 +438,13 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             @Override
             public void onClick(View view)
             {
-                if (Util.encodeEmail(Util.getCurrentUser().getEmail()).equals(answer.user_key))
+                if (Util.encodeEmail(getCurrentUser().getEmail()).equals(answer.user_key))
                     Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_autolike, Snackbar.LENGTH_SHORT).show();
                 else if (!Util.isNetworkAvailable(activity.getApplicationContext()))
                     Snackbar.make(activity.findViewById(R.id.l_detailContainer), R.string.detail_error_like_without_connection, Snackbar.LENGTH_LONG).show();
                 else
                 {
-                    Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("likes").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
+                    Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("likes").child(Util.encodeEmail(getCurrentUser().getEmail())).setValue(true);
                     ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
                     ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
                     ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
@@ -462,7 +463,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ah.txtLike.setText(String.valueOf(answer.likes.size()));
 
             for (String key : answer.likes.keySet())
-                if (key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                if (key.equals(Util.encodeEmail(getCurrentUser().getEmail())))
                 {
                     ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
                     ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue))));
@@ -516,18 +517,21 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
 
-        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || Util.getCurrentUser().getPhotoUrl().equals(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
+        List<String> photoUrl = getCurrentUser().getPhotoUrl().getPathSegments();
+        String[] photoUrlName = photoUrl.get(photoUrl.size() - 1).split("/");
+
+        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || getCurrentUser().getPhotoUrl().getPath().contains(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
         {
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(Util.getCurrentUser().getDisplayName());
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), Util.getCurrentUser().getDisplayName()));
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(getCurrentUser().getDisplayName());
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), getCurrentUser().getDisplayName()));
         }
         else
             Picasso.with(activity.getApplicationContext())
-                    .load(Util.getCurrentUser().getPhotoUrl())
+                    .load(getCurrentUser().getPhotoUrl())
                     .fit()
                     .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
 
-        ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(Util.getCurrentUser().getDisplayName());
+        ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(getCurrentUser().getDisplayName());
         if (answerNotSent != null)
             ((EditText) dialogLayout.findViewById(R.id.reply_desc)).setText(answerNotSent);
         else
@@ -571,18 +575,18 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
 
-        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || Util.getCurrentUser().getPhotoUrl().equals(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
+        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || getCurrentUser().getPhotoUrl().equals(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
         {
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(Util.getCurrentUser().getDisplayName());
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), Util.getCurrentUser().getDisplayName()));
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(getCurrentUser().getDisplayName());
+            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), getCurrentUser().getDisplayName()));
         }
         else
             Picasso.with(activity.getApplicationContext())
-                    .load(Util.getCurrentUser().getPhotoUrl())
+                    .load(getCurrentUser().getPhotoUrl())
                     .fit()
                     .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
 
-        ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(Util.getCurrentUser().getDisplayName());
+        ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(getCurrentUser().getDisplayName());
         if (commentNotSent != null)
             ((EditText) dialogLayout.findViewById(R.id.reply_desc)).setText(commentNotSent);
         else
@@ -622,8 +626,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         String answer_key = Util.getDatabase().getReference("Question").child(questionKey).child("answers").push().getKey();
 
         Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answer_key).setValue(
-                new Answer(Util.encodeEmail(Util.getCurrentUser().getEmail()), desc));
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("answers").child(answer_key).setValue(true);
+                new Answer(Util.encodeEmail(getCurrentUser().getEmail()), desc));
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail())).child("answers").child(answer_key).setValue(true);
         updateExpForAnswer();
     }
 
@@ -633,14 +637,14 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         String comment_key = Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("comments").push().getKey();
 
         Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("comments").child(comment_key).setValue(
-                new Comment(Util.encodeEmail(Util.getCurrentUser().getEmail()), desc));
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("comments").child(comment_key).setValue(true);
+                new Comment(Util.encodeEmail(getCurrentUser().getEmail()), desc));
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail())).child("comments").child(comment_key).setValue(true);
     }
 
     // Metodo che viene utilizzato per aggiungere i crediti a fronte di una risposta data e di aumentare l'exp dell'utente
     private void updateExpForAnswer()
     {
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail()))
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail()))
             .runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData)
