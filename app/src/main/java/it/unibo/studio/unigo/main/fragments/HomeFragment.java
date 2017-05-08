@@ -7,8 +7,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import java.util.ArrayList;
-import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapters.QuestionAdapter;
@@ -19,7 +17,6 @@ public class HomeFragment extends Fragment
 {
     private RecyclerView mRecyclerView;
     private QuestionAdapter mAdapter;
-    private List<QuestionAdapterItem> questiosnToUpdate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -41,15 +38,13 @@ public class HomeFragment extends Fragment
     {
         super.onResume();
         Util.setHomeFragmentVisibility(true);
-        for(QuestionAdapterItem qitem : questiosnToUpdate)
+        for(QuestionAdapterItem qitem : Util.getQuestionsToUpdate())
             refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
-        questiosnToUpdate.clear();
+        Util.getQuestionsToUpdate().clear();
     }
 
     private void initComponents(View v)
     {
-        questiosnToUpdate = new ArrayList<>();
-
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewQuestion);
         setRecyclerViewVisibility(false);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
@@ -104,11 +99,5 @@ public class HomeFragment extends Fragment
     {
         if (Util.getQuestionPosition(questionKey) != -1)
             mAdapter.refreshFavorite(Util.getQuestionPosition(questionKey));
-    }
-
-    // Metodo per mettere in coda gli aggiornamenti grafici da effettuare, una volta riesumata l'app
-    public void addToUpdate(String questionKey, Question question)
-    {
-        questiosnToUpdate.add(new QuestionAdapterItem(question, questionKey));
     }
 }

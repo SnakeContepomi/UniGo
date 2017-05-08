@@ -13,6 +13,7 @@ import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
+import it.unibo.studio.unigo.utils.firebase.Question;
 
 public class Util
 {
@@ -33,6 +34,7 @@ public class Util
     private static HomeFragment homeFragment;
     private static boolean isHomeFragmentVisible;
     private static List<QuestionAdapterItem> questionList;
+    private static List<QuestionAdapterItem> questiosnToUpdate;
     private static DecimalFormat mFormat= new DecimalFormat("00");
 
     // Riferimento al database di Firebase
@@ -65,8 +67,22 @@ public class Util
     public static List<QuestionAdapterItem> getQuestionList()
     {
         if (questionList == null)
-            questionList = new ArrayList<QuestionAdapterItem>();
+            questionList = new ArrayList<>();
         return questionList;
+    }
+
+    // Metodo per recupererare l'elenco delle domande da aggiornare al riavvio dell'app
+    public static List<QuestionAdapterItem> getQuestionsToUpdate()
+    {
+        if (questiosnToUpdate == null)
+            questiosnToUpdate = new ArrayList<>();
+        return questiosnToUpdate;
+    }
+
+    // Metodo per mettere in coda gli aggiornamenti grafici da effettuare, una volta riesumata l'app
+    public static void addToUpdate(String questionKey, Question question)
+    {
+        getQuestionsToUpdate().add(new QuestionAdapterItem(question, questionKey));
     }
 
     // Metodo che controlla se la domanda passata è presente nella lista

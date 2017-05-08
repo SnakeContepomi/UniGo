@@ -226,7 +226,7 @@ public class BackgroundService extends Service
                     Util.getHomeFragment().refreshQuestion(dataSnapshot.getKey(), dataSnapshot.getValue(Question.class));
                 // Altrimenti gli aggiornamenti vengono messi in coda finche non viene riesumato il fragment
                 else
-                    Util.getHomeFragment().addToUpdate(dataSnapshot.getKey(), dataSnapshot.getValue(Question.class));
+                    Util.addToUpdate(dataSnapshot.getKey(), dataSnapshot.getValue(Question.class));
             }
 
             @Override
