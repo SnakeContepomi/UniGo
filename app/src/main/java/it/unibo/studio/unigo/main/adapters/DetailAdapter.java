@@ -642,7 +642,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         String answer_key = Util.getDatabase().getReference("Question").child(questionKey).child("answers").push().getKey();
 
         Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answer_key).setValue(new Answer(Util.encodeEmail(getCurrentUser().getEmail()), desc));
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail())).child("answers").child(answer_key).setValue(true);
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(getCurrentUser().getEmail())).child("answers").child(answer_key).setValue(questionKey);
 
         updateExpForAnswer();
     }

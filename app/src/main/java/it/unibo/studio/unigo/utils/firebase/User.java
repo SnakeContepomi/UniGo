@@ -1,7 +1,6 @@
 package it.unibo.studio.unigo.utils.firebase;
 
 import java.util.HashMap;
-
 import it.unibo.studio.unigo.utils.Util;
 
 public class User
@@ -10,7 +9,8 @@ public class User
     public int exp, credits;
     public HashMap<String, Boolean> questions;
     public HashMap<String, Boolean> favorites;
-    public HashMap<String, Boolean> answers;
+    // String 1 = answer key, String 2 = question key
+    public HashMap<String, String> answers;
     public HashMap<String, Boolean> comments;
 
     public User() { }
