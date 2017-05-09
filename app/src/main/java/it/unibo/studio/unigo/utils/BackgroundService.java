@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,6 +22,7 @@ import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.PostActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
+import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
@@ -171,19 +173,19 @@ public class BackgroundService extends Service
 
     // Metodo per aggiungere alla lista presente in Util la domanda passata, ed aggiungerla alla RecyclerView
     // se il fragment Home risulta visibile
-    private void addQuestionIntoList(final Question question, final String question_key, final boolean execStartQuestionListener)
+    private void addQuestionIntoList(final Question question, final String questionKey, final boolean execStartQuestionListener)
     {
         // Aggiunta della domanda alla lista in Util
-        Util.getQuestionList().add(0, new QuestionAdapterItem(question, question_key));
+        Util.getQuestionList().add(0, new QuestionAdapterItem(question, questionKey));
 
         // Aggiornamento della recyclerView di Home fragment se è visibile
         if (Util.isHomeFragmentVisible())
             Util.getHomeFragment().updateElement(0);
         // Viene memorizzata la chiave della domanda nella shared preferences per evitare che, al prossimo avvio dell'app,
         // quest'ultima non triggheri le notifiche
-        updateLastQuestionRead(question_key);
+        updateLastQuestionRead(questionKey);
         // Viene agganciata alla domanda un listener su eventuali modifiche
-        addOnChangeListenerToQuestion(question_key);
+        addListenerForNotification(question, questionKey);
         if (execStartQuestionListener)
         {
             startQuestionListener();
@@ -193,10 +195,10 @@ public class BackgroundService extends Service
     }
 
     // Metodo per agganciare ad una domanda il listener sui suoi cambiamenti
-    private void addOnChangeListenerToQuestion(String question_key)
+    private void addListenerForNotification(Question question, String questionKey)
     {
         // Listener sui cambiamenti del post appena inserito (commenti, like, ...)
-        Util.getDatabase().getReference("Question").child(question_key).addChildEventListener(new ChildEventListener() {
+        /*Util.getDatabase().getReference("Question").child(question_key).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) { }
 
@@ -214,10 +216,12 @@ public class BackgroundService extends Service
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
-        });
+        });*/
+        if (question.user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+            addNweAnswerListener(question, questionKey);
 
         // Listener sui cambiamenti generici, per aggiornare in real time la lista dele domande
-        Util.getDatabase().getReference("Question").child(question_key).addValueEventListener(new ValueEventListener() {
+        Util.getDatabase().getReference("Question").child(questionKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
@@ -293,5 +297,75 @@ public class BackgroundService extends Service
     {
         SharedPreferences prefs = getSharedPreferences(Util.MY_PREFERENCES, Context.MODE_PRIVATE);
         return prefs.getString(Util.LAST_QUESTION_READ, "");
+    }
+
+    // Listener per notificare le risposte alle domande dell'utente loggato
+    private void addNweAnswerListener(Question question, final String questionKey)
+    {
+        // Se la domanda contiene delle risposte, vengono notificati tutti i nuovi inserimenti ad esclusione
+        // di queli già presenti
+        if (question.answers != null)
+        {
+            // Recupero della risposta più recente: questa e quelle più vecchie non verranno notificate
+            String lastAnswerRead = null;
+            for(String key : question.answers.keySet())
+            {
+                if (lastAnswerRead == null)
+                    lastAnswerRead = key;
+                else if (key.compareTo(lastAnswerRead) > 0)
+                        lastAnswerRead = key;
+            }
+
+            final String toAvoid = lastAnswerRead;
+
+            Util.getDatabase().getReference("Question").child(questionKey).child("answers").orderByKey().startAt(lastAnswerRead).addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s)
+                {
+                    // Vengono evitate le risposte già presenti e quella scritta dall'utente stesso
+                    if (!dataSnapshot.getKey().equals(toAvoid) && !dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                    {
+                        Log.d("Prova", dataSnapshot.getKey() + " " + toAvoid);
+                        Log.d("Prova", dataSnapshot.getValue(Answer.class).user_key + " " + Util.encodeEmail(Util.getCurrentUser().getEmail()));
+                    }
+
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) { }
+            });
+        }
+        // Altrimenti se la domanda non ha nessuna risposta, vengono notificate direttamente tutti i nuovi inserimenti
+        else
+            Util.getDatabase().getReference("Question").child(questionKey).child("answers").addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s)
+                {
+                    // Viene evitata la risposta scritta dall'utente stesso
+                    if (!dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                        Log.d("Prova", "bbb");
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) { }
+            });
     }
 }
