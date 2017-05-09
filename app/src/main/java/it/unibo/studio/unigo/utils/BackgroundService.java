@@ -12,6 +12,8 @@ import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -216,8 +218,14 @@ public class BackgroundService extends Service
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });*/
+        // Avvio Listener per le notifiche relative alle domande effettuate dall'utente loggato
+        // - Listener sulle nuove risposte
         if (question.user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+        {
             addNweAnswerListener(question, questionKey);
+            addRatingListener(question, questionKey);
+        }
+
 
         // Listener sui cambiamenti generici, per aggiornare in real time la lista dele domande
         Util.getDatabase().getReference("Question").child(questionKey).addValueEventListener(new ValueEventListener() {
@@ -363,5 +371,37 @@ public class BackgroundService extends Service
                 @Override
                 public void onCancelled(DatabaseError databaseError) { }
             });
+    }
+
+    // Listener per notificare le risposte alle domande dell'utente loggato
+    private void addRatingListener(final Question question, String questionKey)
+    {
+        Util.getDatabase().getReference("Question").child(questionKey).child("ratings").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                // Non vengono notificate le votazioni effettuate dall'utente stesso sulla propria domanda
+                if (!dataSnapshot.getKey().equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                {
+                    if (question.ratings == null)
+                        sendNotification();
+                    // Vengono notificate tutti rating ad esclusione di quelli gia presenti al momento del caricamento
+                    else if (!question.ratings.keySet().contains(dataSnapshot.getKey()))
+                        sendNotification();
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 }
