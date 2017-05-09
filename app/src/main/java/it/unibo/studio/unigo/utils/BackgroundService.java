@@ -12,7 +12,6 @@ import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -324,10 +323,7 @@ public class BackgroundService extends Service
                 {
                     // Vengono evitate le risposte già presenti e quella scritta dall'utente stesso
                     if (!dataSnapshot.getKey().equals(toAvoid) && !dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                    {
-                        Log.d("Prova", dataSnapshot.getKey() + " " + toAvoid);
-                        Log.d("Prova", dataSnapshot.getValue(Answer.class).user_key + " " + Util.encodeEmail(Util.getCurrentUser().getEmail()));
-                    }
+                        sendNotification();
 
                 }
 
@@ -352,7 +348,7 @@ public class BackgroundService extends Service
                 {
                     // Viene evitata la risposta scritta dall'utente stesso
                     if (!dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                        Log.d("Prova", "bbb");
+                        sendNotification();
                 }
 
                 @Override
