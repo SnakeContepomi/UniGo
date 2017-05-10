@@ -332,10 +332,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                if (dataSnapshot.getValue() == null)
-                    qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
-                else
-                    qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
+                if (dataSnapshot.getValue() != null)
+                    qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
             }
 
             @Override
@@ -355,12 +353,12 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         if (dataSnapshot.getValue() == null)
                         {
                             favoriteReference.setValue(true);
-                            qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
+                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
                         }
                         else
                         {
                             favoriteReference.removeValue();
-                            qh.imgfavorite.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
                         }
                     }
 

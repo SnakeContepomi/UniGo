@@ -159,13 +159,15 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             case REQUEST_CODE_POST:
                 sheetLayout.contractFab();
                 if (resultCode == RESULT_OK)
-                    Util.getHomeFragment().updateElement(0);
+                    if (Util.isHomeFragmentVisible())
+                        Util.getHomeFragment().updateElement(0);
                 break;
 
             // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata"
             case REQUEST_CODE_DETAIL:
                 if (resultCode == RESULT_OK)
-                    Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
+                    if (Util.isHomeFragmentVisible())
+                        Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
                 break;
         }
     }
