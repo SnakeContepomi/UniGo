@@ -1,6 +1,7 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
@@ -8,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -579,6 +581,15 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                 dialog.dismiss();
                             }
                         })
+                .setOnKeyListener(new Dialog.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event)
+                    {
+                        if (keyCode == KeyEvent.KEYCODE_BACK)
+                            dialog.dismiss();
+                        return true;
+                    }
+                })
                 .setView(dialogLayout)
                 .setCancelable(false);
         builder.show();
@@ -629,6 +640,15 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                 dialog.dismiss();
                             }
                         })
+                .setOnKeyListener(new Dialog.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event)
+                    {
+                        if (keyCode == KeyEvent.KEYCODE_BACK)
+                            dialog.dismiss();
+                        return true;
+                    }
+                })
                 .setView(dialogLayout)
                 .setCancelable(false);
         builder.show();

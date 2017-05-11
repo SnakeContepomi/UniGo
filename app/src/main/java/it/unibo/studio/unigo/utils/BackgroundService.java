@@ -186,7 +186,9 @@ public class BackgroundService extends Service
         Util.getQuestionList().add(0, new QuestionAdapterItem(question, questionKey));
 
         // Aggiornamento della recyclerview di HomeFragment
-        Util.getHomeFragment().updateElement(0);
+        // if (Util.isHomeFragmentVisible)
+        if (Util.getHomeFragment() != null)
+            Util.getHomeFragment().updateElement(0);
         // Viene memorizzata la chiave della domanda nella shared preferences per evitare che, al prossimo avvio dell'app,
         // quest'ultima non triggheri le notifiche
         updateLastQuestionRead(questionKey);
