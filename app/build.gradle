@@ -61,6 +61,8 @@ dependencies {
     compile 'net.cachapa.expandablelayout:expandablelayout:2.8'
     // Apache library used to sort custom objects
     compile 'org.apache.commons:commons-lang3:3.5'
+    // Material SearchView
+    compile 'com.miguelcatalan:materialsearchview:1.4.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
