@@ -84,6 +84,7 @@
     <string name="spinner_school_hint">Scuola</string>
     <string name="spinner_course_hint">Corso</string>
 
+    <string name="toolbar_search_hint">Cerca...</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="drawer_principale">Principale</string>

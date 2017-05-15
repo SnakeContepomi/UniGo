@@ -18,6 +18,12 @@
         app:title="@string/app_name"
         app:titleTextAppearance="@style/ToolbarTextAppearance"
         android:elevation="2dp"/>
+    <com.miguelcatalan.materialsearchview.MaterialSearchView
+        android:id="@+id/search_view"
+        style="@style/MaterialSearchViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"/>
 
     <LinearLayout
         android:id="@+id/fragment_container"

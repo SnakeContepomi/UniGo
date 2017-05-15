@@ -69,4 +69,8 @@
     <style name="FlatButton" parent="Theme.AppCompat.Light">
         <item name="colorControlHighlight">@color/colorAccent</item>
     </style>
+
+    <style name="MaterialSearchViewStyle">
+        <item name="android:hint">@string/toolbar_search_hint</item>
+    </style>
 </resources>
