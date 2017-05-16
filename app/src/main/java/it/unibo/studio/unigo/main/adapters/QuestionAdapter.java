@@ -109,14 +109,15 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         if (payloads.isEmpty())
             onBindViewHolder(holder, position);
             // Aggiornamento parziale
-        else
-        if (payloads.get(0) instanceof Integer)
+        else if (payloads.get(0) instanceof Integer)
             switch ((Integer) payloads.get(0))
             {
                 // Aggiornamento dei valori delle action della card answer
                 case UPDATE_CODE_QUESTION:
                     // Action Rating
                     //initActionRating(holder, questionList.get(position));
+                    holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
+                    holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
                     if (questionList.get(position).getQuestion().ratings != null)
                     {
                         holder.txtRating.setText(String.valueOf(questionList.get(position).getQuestion().ratings.size()));
@@ -198,19 +199,19 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
 
         // Al caricamento di ogni domanda, viene controllato se l'utente ha già votato la domanda
         // (un utente può votare la domanda una sola volta)
+        holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
+        holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
         if (qItem.getQuestion().ratings != null)
         {
             // Inizializzazione del numero di rating della domanda corrente
             holder.txtRating.setText(String.valueOf(qItem.getQuestion().ratings.size()));
 
-            for (String key : qItem.getQuestion().ratings.keySet())
-                if (key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                {
-                    holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
-                    holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
-                    holder.rating.setClickable(false);
-                    break;
-                }
+            if (qItem.getQuestion().ratings.keySet().contains(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+            {
+                holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                holder.rating.setClickable(false);
+            }
         }
         else
             holder.txtRating.setText("0");
@@ -231,6 +232,8 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 // Se la domanda risulta tra i preferiti, viene evidenziata
                 if (dataSnapshot.getValue() != null)
                     holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
+                else
+                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
             }
 
             @Override
@@ -281,10 +284,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                if (dataSnapshot.getValue() != null)
-                    isFavorite = true;
-                else
-                    isFavorite = false;
+                isFavorite = dataSnapshot.getValue() != null;
 
                 notifyItemChanged(position, UPDATE_CODE_FAVORITE);
             }
