@@ -9,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,6 +20,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.DetailActivity;
@@ -25,13 +31,14 @@ import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 
-public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder>
+public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder> implements Filterable
 {
     private final int UPDATE_CODE_QUESTION = 1;
     private final int UPDATE_CODE_FAVORITE = 2;
 
+    private Filter mFilter = new ItemFilter();
     private List<QuestionAdapterItem> questionList;
-    private boolean isFavorite;
+    private boolean isFiltered;
     private Activity activity;
 
     static class ViewHolder extends RecyclerView.ViewHolder
@@ -61,10 +68,53 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         }
     }
 
+    // Classe per filtrare la lista dell'Adapter
+    private class ItemFilter extends Filter
+    {
+        // Il filtro restituisce gli elementi che contengono la chiave di ricerca
+        // nei campi Titolo, Descrizione e Materia
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint)
+        {
+            String filterString = constraint.toString().toLowerCase();
+            questionList = Util.getQuestionList();
+            List<QuestionAdapterItem> filteredList = new ArrayList<>();
+            FilterResults results = new FilterResults();
+
+            for(int i = 0; i < questionList.size(); i++)
+                if (questionList.get(i).getQuestion().title.toLowerCase().contains(filterString)
+                        || questionList.get(i).getQuestion().course.toLowerCase().contains(filterString)
+                        || questionList.get(i).getQuestion().desc.toLowerCase().contains(filterString))
+                    filteredList.add(0, questionList.get(i));
+
+            results.values = filteredList;
+            results.count = filteredList.size();
+
+            return results;
+        }
+
+        // Metodo per aggiornare graficamente la lista
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results)
+        {
+            questionList = (ArrayList<QuestionAdapterItem>) results.values;
+            Collections.sort(questionList, new Comparator<QuestionAdapterItem>() {
+                @Override
+                public int compare(QuestionAdapterItem qItem1, QuestionAdapterItem qItem2)
+                {
+                    return new CompareToBuilder().append(qItem2.getQuestionKey(), qItem1.getQuestionKey()).toComparison();
+                }
+            });
+            notifyDataSetChanged();
+        }
+    }
+
     public QuestionAdapter(List<QuestionAdapterItem> questionList, Activity activity)
     {
         this.questionList = questionList;
         this.activity = activity;
+        isFiltered = false;
     }
 
     @Override
@@ -95,7 +145,6 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             {
                 Intent intent = new Intent(holder.context, DetailActivity.class);
                 intent.putExtra("question_key", qItem.getQuestionKey());
-                //holder.context.startActivity(intent);
                 activity.startActivityForResult(intent, MainActivity.REQUEST_CODE_DETAIL);
             }
         });
@@ -108,14 +157,13 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         // Aggiornamento totale
         if (payloads.isEmpty())
             onBindViewHolder(holder, position);
-            // Aggiornamento parziale
+        // Aggiornamento parziale
         else if (payloads.get(0) instanceof Integer)
             switch ((Integer) payloads.get(0))
             {
-                // Aggiornamento dei valori delle action della card answer
+                // Aggiornamento di tutte le Action della cardQuestion (Rating, Favorite e Answers)
                 case UPDATE_CODE_QUESTION:
                     // Action Rating
-                    //initActionRating(holder, questionList.get(position));
                     holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
                     holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
                     if (questionList.get(position).getQuestion().ratings != null)
@@ -129,6 +177,9 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                         }
                     }
 
+                    // Favorite
+                    updateFavorite(holder, position);
+
                     // Numero risposte
                     if (questionList.get(position).getQuestion().answers != null)
                         holder.txtAnswer.setText(String.valueOf(questionList.get(position).getQuestion().answers.size()));
@@ -136,11 +187,10 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                         holder.txtAnswer.setText("0");
                     break;
 
+                // Aggiornamento parziale del solo stato (favorite) della domanda corrente
                 case UPDATE_CODE_FAVORITE:
-                    if (isFavorite)
-                        holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
-                    else
-                        holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
+                    updateFavorite(holder, position);
+                    break;
 
                 default:
                     break;
@@ -151,6 +201,12 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
     public int getItemCount()
     {
         return questionList.size();
+    }
+
+    @Override
+    public Filter getFilter()
+    {
+        return mFilter;
     }
 
     // Metodo che recupera le informazioni relative a ciascuna domanda
@@ -270,27 +326,72 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         });
     }
 
-    // Metodo utilizzato per aggiornare i campi "rating" e "comments" della domanda corrente, ad ogni eventuale cambiamento
-    public void refreshQuestion(int position, QuestionAdapterItem newQItem)
+    // Metodo utilizzato per aggiornare l'inserimento dell'elemento in posizione "position" nella recyclerview
+    public void updateElement(int position)
     {
-        questionList.set(position, newQItem);
-        notifyItemChanged(position, UPDATE_CODE_QUESTION);
+        if (!isFiltered)
+            notifyItemInserted(position);
     }
 
-    // Metodo utilizzato per aggiornare il campo "favorite" della domanda corrente, ogni volta che viene chiusa l'activity Detail
-    public void refreshFavorite(final int position)
+    // Metodo utilizzato per aggiornare i campi "rating", "favorite" e "answers" della domanda corrente, ad ogni eventuale cambiamento
+    public void refreshQuestion(QuestionAdapterItem newQItem)
+    {
+        int position = getQuestionPosition(newQItem.getQuestionKey());
+
+        if (position != -1)
+        {
+            questionList.set(position, newQItem);
+            notifyItemChanged(position, UPDATE_CODE_QUESTION);
+        }
+    }
+
+    // Metodo utilizzato per aggiornare solo il campo "favorite" della domanda corrente, ogni volta che viene chiusa l'activity Detail
+    public void refreshFavorite(String questionKey)
+    {
+        int position = getQuestionPosition(questionKey);
+
+        if (position != -1)
+            notifyItemChanged(position, UPDATE_CODE_FAVORITE);
+    }
+
+    // Metodo per aggiornare graficamente il campo Favorite
+    private void updateFavorite(final ViewHolder holder, int position)
     {
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(questionList.get(position).getQuestionKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                isFavorite = dataSnapshot.getValue() != null;
-
-                notifyItemChanged(position, UPDATE_CODE_FAVORITE);
+                if (dataSnapshot.getValue() != null)
+                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
+                else
+                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+    }
+
+    // Metodo che reinizializza la lista delle domande presente nell'Adapter, con quella presente in Util
+    // (ogni volta che viene chiusa la SearchView)
+    public void resetFilter()
+    {
+        questionList = Util.getQuestionList();
+        notifyDataSetChanged();
+    }
+
+    // Metodo utilizzato per mantenere aggiornato lo stato della SearchView (Aperta/Chiusa)
+    public void setFilterState(boolean state)
+    {
+        isFiltered = state;
+    }
+
+    // Data una chiave di una domanda, viene restituita la posizione della stessa all'interno della lista
+    private int getQuestionPosition(String questionKey)
+    {
+        for (int i = 0; i < questionList.size(); i++)
+            if (questionKey.equals(questionList.get(i).getQuestionKey()))
+                return i;
+        return -1;
     }
 }

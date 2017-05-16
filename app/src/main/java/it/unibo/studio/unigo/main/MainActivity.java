@@ -33,6 +33,7 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.fragments.FavoriteFragment;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
 import it.unibo.studio.unigo.main.fragments.InfoFragment;
@@ -143,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     {
         if ((navDrawer != null) && (navDrawer.isDrawerOpen()))
             navDrawer.closeDrawer();
+        else if (searchView.isSearchOpen())
+            searchView.closeSearch();
         else
         {
             HomeFragment home = (HomeFragment) getFragmentManager().findFragmentByTag(FRAGMENT_HOME);
@@ -159,17 +162,18 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode)
         {
-            // Alla chiusura dell'activity Post, viene aggiunta la nuova domanda
+            // Alla chiusura dell'activity Post, viene aggiunta la nuova domanda e vengono aggiornate (parzialmente) tutte quelle
+            // domande che hanno subito dei cambiamenti (riguardanti Rating, Favorite o numero risposte)
             case REQUEST_CODE_POST:
                 sheetLayout.contractFab();
-                if (resultCode == RESULT_OK)
-                        Util.getHomeFragment().updateElement(0);
+                refreshAdapterList();
                 break;
 
-            // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata"
+            // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata" e tutte
+            // le eventuali domande che hanno subito dei cambiamenti mentre l'Activity era aperta
             case REQUEST_CODE_DETAIL:
-                if (resultCode == RESULT_OK)
-                        Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
+                refreshAdapterList();
+                Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
                 break;
         }
     }
@@ -198,16 +202,13 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         searchView = (MaterialSearchView) findViewById(R.id.search_view);
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query)
-            {
-                //Do some magic
-                return false;
-            }
+            public boolean onQueryTextSubmit(String query) { return false; }
 
             @Override
             public boolean onQueryTextChange(String newText)
             {
-                //Do some magic
+                if (!newText.equals(""))
+                    Util.getHomeFragment().filterResults(newText);
                 return false;
             }
         });
@@ -216,13 +217,16 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onSearchViewShown()
             {
-                //Do some magic
+                Util.getHomeFragment().setFilterState(true);
             }
 
+            // Alla chiusura della SearchView, viene resettata la lista delle domande, prendendole da quella presente in Util
+            // (mantenuta aggiornata)
             @Override
             public void onSearchViewClosed()
             {
-                //Do some magic
+                Util.getHomeFragment().setFilterState(false);
+                Util.getHomeFragment().resetFilter();
             }
         });
 
@@ -356,36 +360,42 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                             case 1:
                                 loadFragment(fragmentHome, FRAGMENT_HOME);
                                 getSupportActionBar().setTitle(R.string.drawer_tutte);
+                                //toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
                                 showFab();
                                 break;
                             case 2:
                                 loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
                                 getSupportActionBar().setTitle(R.string.drawer_preferiti);
+                                //toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
                                 showFab();
                                 break;
                             case 3:
                                 loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
                                 getSupportActionBar().setTitle(R.string.drawer_domande);
+                                //toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
                                 showFab();
                                 break;
                             case 4:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
                                 getSupportActionBar().setTitle(R.string.drawer_social);
+                                //toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
                             case 5:
                                 loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
                                 getSupportActionBar().setTitle(R.string.drawer_impostazioni);
+                                //toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
                             case 6:
                                 loadFragment(fragmentInfo, FRAGMENT_INFO);
                                 getSupportActionBar().setTitle(R.string.drawer_guida);
+                                //toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
@@ -418,5 +428,14 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     {
         if (fab.isShown())
             fab.hide();
+    }
+
+    // Metodo che aggiorna la lista di domande presenti in Util e quella utilizzata dall'Adapter, con tutte
+    // le domande che hanno subito dei cambiamenti durante il periodo in cui il fragment Home non era visibile
+    private void refreshAdapterList()
+    {
+        for(QuestionAdapterItem qitem : Util.getQuestionsToUpdate())
+            Util.getHomeFragment().refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
+        Util.getQuestionsToUpdate().clear();
     }
 }

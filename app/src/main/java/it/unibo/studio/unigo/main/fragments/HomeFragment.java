@@ -37,10 +37,12 @@ public class HomeFragment extends Fragment
     public void onResume()
     {
         super.onResume();
-        Util.setHomeFragmentVisibility(true);
+        // Se ci sono aggiornamenti effettuati in background, vengono applicati alla lista Utils
+        // e a quella utilizzata dall'Adapater
         for(QuestionAdapterItem qitem : Util.getQuestionsToUpdate())
-            refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
+            Util.getHomeFragment().refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
         Util.getQuestionsToUpdate().clear();
+        Util.setHomeFragmentVisibility(true);
     }
 
     private void initComponents(View v)
@@ -68,11 +70,11 @@ public class HomeFragment extends Fragment
         }
     }
 
-    // Metodo utilizzato per aggiornare l'elemento in posizione "position" nella recyclerview
+    // Metodo utilizzato per aggiornare l'aggiunta dell'elemento in posizione "position" nella recyclerview
     public void updateElement(int position)
     {
-        mAdapter.notifyItemInserted(position);
-        mRecyclerView.scrollToPosition(0);
+        mAdapter.updateElement(position);
+        mRecyclerView.scrollToPosition(position);
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview
@@ -87,17 +89,36 @@ public class HomeFragment extends Fragment
             mRecyclerView.setVisibility(View.GONE);
     }
 
-    // Metodo per aggiornare la GUI della domanda passata come parametro
+    // Metodo per aggiornare la GUI della domanda passata come parametro (i tre campi Rating, Favorite e Answer)
+    // e aggiornare i valori della lista di domande in Util
     public void refreshQuestion(String questionKey, Question question)
     {
         if (Util.getQuestionPosition(questionKey) != -1)
-            mAdapter.refreshQuestion(Util.getQuestionPosition(questionKey), new QuestionAdapterItem(question, questionKey));
+            Util.updateElementAt(Util.getQuestionPosition(questionKey), new QuestionAdapterItem(question, questionKey));
+        mAdapter.refreshQuestion(new QuestionAdapterItem(question, questionKey));
     }
 
     // Metodo per aggiornare la GUI di favorite della domanda passata come parametro
     public void refreshFavorite(String questionKey)
     {
-        if (Util.getQuestionPosition(questionKey) != -1)
-            mAdapter.refreshFavorite(Util.getQuestionPosition(questionKey));
+        mAdapter.refreshFavorite(questionKey);
+    }
+
+    // Metodo per filtrare la ricerca di domande, in base al titolo, descrizione o materia
+    public void filterResults(String filterConstraint)
+    {
+        mAdapter.getFilter().filter(filterConstraint);
+    }
+
+    // Metodo per riempire la lista con tutte le domande presenti nella lista in Util
+    public void resetFilter()
+    {
+        mAdapter.resetFilter();
+    }
+
+    // Metodo utilizzato per modificare lo stato della ricerca (attiva o non attiva)
+    public void setFilterState(boolean state)
+    {
+        mAdapter.setFilterState(state);
     }
 }

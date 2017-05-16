@@ -12,6 +12,8 @@ import android.graphics.Color;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -186,7 +188,6 @@ public class BackgroundService extends Service
         Util.getQuestionList().add(0, new QuestionAdapterItem(question, questionKey));
 
         // Aggiornamento della recyclerview di HomeFragment
-        // if (Util.isHomeFragmentVisible)
         if (Util.getHomeFragment() != null)
             Util.getHomeFragment().updateElement(0);
         // Viene memorizzata la chiave della domanda nella shared preferences per evitare che, al prossimo avvio dell'app,

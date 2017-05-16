@@ -71,6 +71,11 @@ public class Util
         return questionList;
     }
 
+    public static void updateElementAt(int position, QuestionAdapterItem qItem)
+    {
+        questionList.set(position, qItem);
+    }
+
     // Metodo per recupererare l'elenco delle domande da aggiornare al riavvio dell'app
     public static List<QuestionAdapterItem> getQuestionsToUpdate()
     {
@@ -105,7 +110,7 @@ public class Util
 
     public static boolean isHomeFragmentVisible()
     {
-        return (isHomeFragmentVisible) ? true : false;
+        return (isHomeFragmentVisible);
     }
 
     public static void setHomeFragmentVisibility(boolean visibiliy)
