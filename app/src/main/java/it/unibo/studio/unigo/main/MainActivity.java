@@ -11,8 +11,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import com.github.fabtransitionactivity.SheetLayout;
@@ -178,17 +176,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        getMenuInflater().inflate(R.menu.menu_item_search, menu);
-
-        MenuItem item = menu.findItem(R.id.action_search);
-        searchView.setMenuItem(item);
-
-        return true;
-    }
-
     // Creazione della nuova activity con animazione
     @Override
     public void onFabAnimationEnd()
@@ -283,7 +270,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private void initNavDrawer()
     {
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
-        setSupportActionBar(toolbar);
+        toolbar.inflateMenu(R.menu.menu_item_search);
+        searchView.setMenuItem(toolbar.getMenu().getItem(0));
 
         fragmentHome = new HomeFragment();
         fragmentFavorite = new FavoriteFragment();
@@ -359,43 +347,43 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                         {
                             case 1:
                                 loadFragment(fragmentHome, FRAGMENT_HOME);
-                                getSupportActionBar().setTitle(R.string.drawer_tutte);
-                                //toolbar.getMenu().getItem(0).setVisible(true);
+                                toolbar.setTitle(R.string.drawer_tutte);
+                                toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
                                 showFab();
                                 break;
                             case 2:
                                 loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
-                                getSupportActionBar().setTitle(R.string.drawer_preferiti);
-                                //toolbar.getMenu().getItem(0).setVisible(true);
+                                toolbar.setTitle(R.string.drawer_preferiti);
+                                toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
                                 showFab();
                                 break;
                             case 3:
                                 loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
-                                getSupportActionBar().setTitle(R.string.drawer_domande);
-                                //toolbar.getMenu().getItem(0).setVisible(true);
+                                toolbar.setTitle(R.string.drawer_domande);
+                                toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
                                 showFab();
                                 break;
                             case 4:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
-                                getSupportActionBar().setTitle(R.string.drawer_social);
-                                //toolbar.getMenu().getItem(0).setVisible(false);
+                                toolbar.setTitle(R.string.drawer_social);
+                                toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
                             case 5:
                                 loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
-                                getSupportActionBar().setTitle(R.string.drawer_impostazioni);
-                                //toolbar.getMenu().getItem(0).setVisible(false);
+                                toolbar.setTitle(R.string.drawer_impostazioni);
+                                toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
                             case 6:
                                 loadFragment(fragmentInfo, FRAGMENT_INFO);
-                                getSupportActionBar().setTitle(R.string.drawer_guida);
-                                //toolbar.getMenu().getItem(0).setVisible(false);
+                                toolbar.setTitle(R.string.drawer_guida);
+                                toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
