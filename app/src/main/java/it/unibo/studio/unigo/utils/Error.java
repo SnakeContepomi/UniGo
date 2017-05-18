@@ -4,7 +4,7 @@ import android.support.design.widget.TextInputLayout;
 
 public class Error
 {
-    public static enum Type
+    public enum Type
     {
         NETWORK_UNAVAILABLE,
 
@@ -24,7 +24,7 @@ public class Error
         COURSE_IS_EMPTY,
         DESC_IS_EMPTY,
         NOT_ENOUGH_CREDITS
-    };
+    }
 
     public static void resetError(TextInputLayout layout)
     {

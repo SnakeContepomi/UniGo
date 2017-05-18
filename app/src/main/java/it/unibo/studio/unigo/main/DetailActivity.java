@@ -15,6 +15,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapters.DetailAdapter;
+import it.unibo.studio.unigo.utils.BackgroundService;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
@@ -61,6 +62,8 @@ public class DetailActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+
+        BackgroundService.resetNotification();
     }
 
     private void initComponents()

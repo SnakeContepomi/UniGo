@@ -9,18 +9,19 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
-
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.PostActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.firebase.Answer;
@@ -31,9 +32,19 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 // i cambiamenti da Firebase
 public class BackgroundService extends Service
 {
-    // ID che permette di aggiornare un particolare tipo di notifica
-    private int notifyID = 1;
     public static boolean isRunning = false;
+    private static List<String> questionList = new ArrayList<>();
+    private static int questionCount = 0;
+    /*
+        Tipi di Notifiche in base al valore della variabile notifyID:
+        1 - QUESTION: nuova domanda inserita
+        2 - ANSWER: nuova risposta alla domanda dell'utente
+        3 - COMMENT_QUESTION: nuovo commento generico ad una domanda dell'utente
+        4 - COMMENT_ANSWER: nuovo commento riguardante una risposta effettuata dall'utente
+        5 - RATING: aumento di importanza di una domanda dell'utente
+        6 - LIKE: like ricevuto ad una risposta del'utente
+     */
+    private enum NotificationType {QUESTION, ANSWER, COMMENT_QUESTION, COMMENT_ANSWER, RATING, LIKE}
 
     // Avvio del servizio in background
     @Override
@@ -139,7 +150,7 @@ public class BackgroundService extends Service
     private void startQuestionListener()
     {
         // Il listener viene agganciato al campo questions, ma solamente agli elementi con chiave "maggiore" a quella presente nelle
-        // shared preferences, in modo da gestire solo gli eventi riguardanti le nuove domande inserite, ed evitando queidi
+        // shared preferences, in modo da gestire solo gli eventi riguardanti le nuove domande inserite, ed evitando quindi
         // quelli relativi alle domande già presenti
         Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByKey().startAt(getLastQuestionRead()).addChildEventListener(new ChildEventListener() {
             @Override
@@ -157,7 +168,21 @@ public class BackgroundService extends Service
                             // La notifica viene attivata solo se la nuova domanda è stata scritta da un utente diverso
                             // da quelo loggato
                             if (!dataSnapshot.getValue(Question.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                                sendNotification();
+                            {
+                                Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Question.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot)
+                                    {
+                                        if (!questionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                            questionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                        questionCount++;
+                                        new getBitmapFromUrl(NotificationType.QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) { }
+                                });
+                            }
                         }
                     }
 
@@ -212,7 +237,7 @@ public class BackgroundService extends Service
         // - Listener sui commenti riguardanti qualsiasi risposta relativa alla domanda dell'utente (escluse le risposte personali)
         if (question.user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
         {
-            addNweAnswerListener(question, questionKey);
+            addNewAnswerListener(question, questionKey);
             addRatingListener(question, questionKey);
             addGenericCommentListener(question, questionKey);
         }
@@ -235,50 +260,6 @@ public class BackgroundService extends Service
         });
     }
 
-    // Metodo per creare la notifica
-    private NotificationCompat.Builder createNotification(String contentText)
-    {
-        Bitmap profilePic = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(getApplicationContext())
-                        .setColor(Color.CYAN)
-                        .setSmallIcon(R.drawable.ic_home_black_24dp)
-                        .setContentInfo("5") // Android 6 or below
-                        .setPriority(NotificationCompat.PRIORITY_MAX)
-                        .setVibrate(new long[]{0, 300, 200, 300}) //{Initial Delay, Vibration Time 1, Delay, ...}
-                        .setLargeIcon(profilePic)
-                        .setLights(Color.MAGENTA, 200, 800)
-                        .setContentTitle("My notification")
-                        .setContentText(contentText);
-
-        // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(BackgroundService.this, PostActivity.class);
-
-        // The stack builder object will contain an artificial back stack for the
-        // started Activity.
-        // This ensures that navigating backward from the Activity leads out of
-        // your application to the Home screen.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-        // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MainActivity.class);
-        // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-        return mBuilder;
-    }
-
-    // Mtedoto utilizzato per inviare una notifica
-    private void sendNotification()
-    {
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(notifyID, createNotification("Hello World!").build());
-    }
-
     // Metodo per memorizzare nelle shared preferences la chiave dell'ultima domanda caricata
     private void updateLastQuestionRead(String key)
     {
@@ -296,7 +277,7 @@ public class BackgroundService extends Service
     }
 
     // Listener per notificare le risposte alle domande dell'utente loggato
-    private void addNweAnswerListener(Question question, final String questionKey)
+    private void addNewAnswerListener(Question question, final String questionKey)
     {
         // Se la domanda contiene delle risposte, vengono notificati tutti i nuovi inserimenti ad esclusione
         // di queli già presenti
@@ -316,28 +297,24 @@ public class BackgroundService extends Service
 
             Util.getDatabase().getReference("Question").child(questionKey).child("answers").orderByKey().startAt(lastAnswerRead).addChildEventListener(new ChildEventListener() {
                 @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                public void onChildAdded(DataSnapshot dataSnapshot, String s)
+                {
                     // Vengono evitate le risposte già presenti e quella scritta dall'utente stesso
                     if (!dataSnapshot.getKey().equals(toAvoid) && !dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                        sendNotification();
-
+                        sendNotification(NotificationType.ANSWER, null);
                 }
 
                 @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                }
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
                 @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                }
+                public void onChildRemoved(DataSnapshot dataSnapshot) { }
 
                 @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                }
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-                }
+                public void onCancelled(DatabaseError databaseError) { }
             });
         }
         // Altrimenti se la domanda non ha nessuna risposta, vengono notificate direttamente tutti i nuovi inserimenti
@@ -348,7 +325,7 @@ public class BackgroundService extends Service
                 {
                     // Viene evitata la risposta scritta dall'utente stesso
                     if (!dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                        sendNotification();
+                        sendNotification(NotificationType.ANSWER, null);
                 }
 
                 @Override
@@ -365,7 +342,7 @@ public class BackgroundService extends Service
             });
     }
 
-    // Listener per notificare le risposte alle domande dell'utente loggato
+    // Listener per notificare il rating alle domande dell'utente loggato
     private void addRatingListener(final Question question, String questionKey)
     {
         Util.getDatabase().getReference("Question").child(questionKey).child("ratings").addChildEventListener(new ChildEventListener() {
@@ -376,10 +353,10 @@ public class BackgroundService extends Service
                 if (!dataSnapshot.getKey().equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
                 {
                     if (question.ratings == null)
-                        sendNotification();
+                        sendNotification(NotificationType.RATING, null);
                     // Vengono notificate tutti rating ad esclusione di quelli gia presenti al momento del caricamento
                     else if (!question.ratings.keySet().contains(dataSnapshot.getKey()))
-                        sendNotification();
+                        sendNotification(NotificationType.RATING, null);
                 }
             }
 
@@ -421,9 +398,9 @@ public class BackgroundService extends Service
                             public void onChildAdded(DataSnapshot dataSnapshot, String s)
                             {
                                 if (answer.likes == null)
-                                    sendNotification();
+                                    sendNotification(NotificationType.LIKE, null);
                                 else if (!answer.likes.keySet().contains(dataSnapshot.getKey()))
-                                    sendNotification();
+                                    sendNotification(NotificationType.LIKE, null);
                             }
 
                             @Override
@@ -448,9 +425,9 @@ public class BackgroundService extends Service
                                 if (!dataSnapshot.getValue(Comment.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
                                 {
                                     if (answer.comments == null)
-                                        sendNotification();
+                                        sendNotification(NotificationType.COMMENT_ANSWER, null);
                                     else if (!answer.comments.keySet().contains(dataSnapshot.getKey()))
-                                        sendNotification();
+                                        sendNotification(NotificationType.COMMENT_ANSWER, null);
                                 }
                             }
 
@@ -510,13 +487,13 @@ public class BackgroundService extends Service
                             {
                                 // Notifica dal primo commento di tutta la domanda
                                 if (question.answers == null)
-                                    sendNotification();
+                                    sendNotification(NotificationType.COMMENT_QUESTION, null);
                                 // Notifica dal primo commento di tutta la risposta
                                 else if (question.answers.get(answerKey).comments == null)
-                                    sendNotification();
+                                    sendNotification(NotificationType.COMMENT_QUESTION, null);
                                 // Notifica del commento che non è già presente sul database
                                 else if (question.answers.get(answerKey).comments != null && !question.answers.get(answerKey).comments.keySet().contains(dataSnapshot.getKey()))
-                                    sendNotification();
+                                    sendNotification(NotificationType.COMMENT_QUESTION, null);
                             }
                         }
 
@@ -546,5 +523,152 @@ public class BackgroundService extends Service
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+    }
+
+    private class getBitmapFromUrl extends AsyncTask<String, Void, Bitmap>
+    {
+        private NotificationType type;
+
+        getBitmapFromUrl(NotificationType type)
+        {
+            this.type = type;
+        }
+
+        protected Bitmap doInBackground(String... urls)
+        {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try
+            {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result)
+        {
+            sendNotification(type, result);
+        }
+    }
+
+    // Metodo per creare la notifica in base al tipo passato
+    private void sendNotification(NotificationType type, Bitmap profilePic)
+    {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
+                .setColor(Color.RED)
+                .setSmallIcon(R.drawable.ic_school_black_24dp)
+                //.setSubText("5")
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
+                .setVibrate(new long[]{0, 300, 200, 300})
+                .setLights(Color.RED, 800, 4000);
+
+        switch (type)
+        {
+            case QUESTION:
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                {
+                    // Numero nuove domande
+                    if (questionCount == 1)
+                        mBuilder.setContentTitle("1 nuova domanda");
+                    else
+                        mBuilder.setContentTitle(questionCount + " nuove domande");
+
+                    // Gestione degli autori delle domande
+                    if ((questionList.size() == 1) && (questionCount == 1))
+                    {
+                        mBuilder.setContentText("Postata da " + questionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((questionList.size() == 1) && (questionCount > 1))
+                    {
+                        mBuilder.setContentText("Postate da " + questionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (questionList.size() == 2)
+                    {
+                        mBuilder.setContentText("Postate da " + questionList.get(0) + " e " + questionList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText("Postate da " + questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                // Versione precedente a Nougat
+                else
+                {
+                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                    // Gestione degli autori delle domande
+                    if ((questionList.size() == 1) && (questionCount == 1))
+                    {
+                        mBuilder.setContentText(questionCount + " nuova domanda postata da " + questionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((questionList.size() == 1) && (questionCount > 1))
+                    {
+                        mBuilder.setContentText(questionCount + " nuove domande postate da " + questionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (questionList.size() == 2)
+                    {
+                        mBuilder.setContentText( questionCount + " nuove domande postate da " + questionList.get(0) + " e " + questionList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText(questionCount + " nuove domande postate da " + questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        Intent resultIntent = new Intent(BackgroundService.this, PostActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+        stackBuilder.addParentStack(PostActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+        //ToDo: custom notification based on question, answer, etc...
+    }
+
+    // Metodo per restituire l'identificativo della notifica, dato il tipo
+    private int getNotificationID(NotificationType type)
+    {
+        switch (type)
+        {
+            case QUESTION:
+                return 1;
+            case ANSWER:
+                return 2;
+            case COMMENT_QUESTION:
+                return 3;
+            case COMMENT_ANSWER:
+                return 4;
+            case RATING:
+                return 5;
+            case LIKE:
+                return 6;
+            default:
+                return 0;
+        }
+    }
+
+    public static void resetNotification()
+    {
+        questionList.clear();
+        questionCount = 0;
     }
 }
