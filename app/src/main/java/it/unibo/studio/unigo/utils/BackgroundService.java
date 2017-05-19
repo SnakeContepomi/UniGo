@@ -8,7 +8,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -33,8 +38,16 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 public class BackgroundService extends Service
 {
     public static boolean isRunning = false;
+    // Liste dei nomi degli utenti che hanno generato una notifica di ciascun tipo
     private static List<String> questionList = new ArrayList<>();
+    private static List<String> answerList = new ArrayList<>();
+    private static List<String> commentQuestionList = new ArrayList<>();
+    private static List<String> commentAnswerList = new ArrayList<>();
+    // Numero di notifiche di ciascun tipo
     private static int questionCount = 0;
+    private static int answerCount = 0;
+    private static int commentQuestionCount = 0;
+    private static int commentAnswerCount = 0;
     /*
         Tipi di Notifiche in base al valore della variabile notifyID:
         1 - QUESTION: nuova domanda inserita
@@ -301,7 +314,19 @@ public class BackgroundService extends Service
                 {
                     // Vengono evitate le risposte già presenti e quella scritta dall'utente stesso
                     if (!dataSnapshot.getKey().equals(toAvoid) && !dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                        sendNotification(NotificationType.ANSWER, null);
+                        Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Answer.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot)
+                            {
+                                if (!answerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                    answerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                answerCount++;
+                                new getBitmapFromUrl(NotificationType.ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) { }
+                        });
                 }
 
                 @Override
@@ -325,7 +350,19 @@ public class BackgroundService extends Service
                 {
                     // Viene evitata la risposta scritta dall'utente stesso
                     if (!dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                        sendNotification(NotificationType.ANSWER, null);
+                        Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Answer.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot)
+                            {
+                                if (!answerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                    answerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                answerCount++;
+                                new getBitmapFromUrl(NotificationType.ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) { }
+                        });
                 }
 
                 @Override
@@ -425,9 +462,33 @@ public class BackgroundService extends Service
                                 if (!dataSnapshot.getValue(Comment.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
                                 {
                                     if (answer.comments == null)
-                                        sendNotification(NotificationType.COMMENT_ANSWER, null);
+                                        Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Comment.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot)
+                                            {
+                                                if (!commentAnswerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                                    commentAnswerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                                commentAnswerCount++;
+                                                new getBitmapFromUrl(NotificationType.COMMENT_ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) { }
+                                        });
                                     else if (!answer.comments.keySet().contains(dataSnapshot.getKey()))
-                                        sendNotification(NotificationType.COMMENT_ANSWER, null);
+                                        Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Comment.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot)
+                                            {
+                                                if (!commentAnswerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                                    commentAnswerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                                commentAnswerCount++;
+                                                new getBitmapFromUrl(NotificationType.COMMENT_ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) { }
+                                        });
                                 }
                             }
 
@@ -477,7 +538,7 @@ public class BackgroundService extends Service
                 // Se la risposta non è stata scritta dall'utente stesso, viene agganciato un listener
                 // su tutti i suoi commenti
                 if (!dataSnapshot.getValue(Answer.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                    Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(dataSnapshot.getKey()).child("comments").addChildEventListener(new ChildEventListener() {
+                    Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("comments").addChildEventListener(new ChildEventListener() {
                         @Override
                         public void onChildAdded(DataSnapshot dataSnapshot, String s)
                         {
@@ -487,13 +548,49 @@ public class BackgroundService extends Service
                             {
                                 // Notifica dal primo commento di tutta la domanda
                                 if (question.answers == null)
-                                    sendNotification(NotificationType.COMMENT_QUESTION, null);
+                                    Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Comment.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot)
+                                        {
+                                            if (!commentQuestionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                                commentQuestionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                            commentQuestionCount++;
+                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) { }
+                                    });
                                 // Notifica dal primo commento di tutta la risposta
                                 else if (question.answers.get(answerKey).comments == null)
-                                    sendNotification(NotificationType.COMMENT_QUESTION, null);
+                                    Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Comment.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot)
+                                        {
+                                            if (!commentQuestionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                                commentQuestionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                            commentQuestionCount++;
+                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) { }
+                                    });
                                 // Notifica del commento che non è già presente sul database
                                 else if (question.answers.get(answerKey).comments != null && !question.answers.get(answerKey).comments.keySet().contains(dataSnapshot.getKey()))
-                                    sendNotification(NotificationType.COMMENT_QUESTION, null);
+                                    Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Comment.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot)
+                                        {
+                                            if (!commentQuestionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                                commentQuestionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                            commentQuestionCount++;
+                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) { }
+                                    });
                             }
                         }
 
@@ -525,6 +622,8 @@ public class BackgroundService extends Service
         });
     }
 
+    // Metodo per scaricare in background l'immagine profilo di un utente e inviare successivamente una notifica
+    // del tipo desiderato
     private class getBitmapFromUrl extends AsyncTask<String, Void, Bitmap>
     {
         private NotificationType type;
@@ -537,6 +636,10 @@ public class BackgroundService extends Service
         protected Bitmap doInBackground(String... urls)
         {
             String urldisplay = urls[0];
+
+            if (urldisplay.equals(getResources().getString(R.string.empty_profile_pic_url)))
+                return BitmapFactory.decodeResource(getResources(), R.drawable.empty_profile_pic);
+
             Bitmap mIcon11 = null;
             try
             {
@@ -547,7 +650,7 @@ public class BackgroundService extends Service
             {
                 e.printStackTrace();
             }
-            return mIcon11;
+            return getCircleBitmap(mIcon11);
         }
 
         protected void onPostExecute(Bitmap result)
@@ -566,10 +669,12 @@ public class BackgroundService extends Service
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
                 .setVibrate(new long[]{0, 300, 200, 300})
-                .setLights(Color.RED, 800, 4000);
+                .setLights(Color.RED, 800, 4000)
+                .setAutoCancel(true);
 
         switch (type)
         {
+            // Notifica di una nuova domanda inserita
             case QUESTION:
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
                 {
@@ -605,6 +710,7 @@ public class BackgroundService extends Service
                 else
                 {
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+
                     // Gestione degli autori delle domande
                     if ((questionList.size() == 1) && (questionCount == 1))
                     {
@@ -618,7 +724,7 @@ public class BackgroundService extends Service
                     }
                     else if (questionList.size() == 2)
                     {
-                        mBuilder.setContentText( questionCount + " nuove domande postate da " + questionList.get(0) + " e " + questionList.get(1));
+                        mBuilder.setContentText(questionCount + " nuove domande postate da " + questionList.get(0) + " e " + questionList.get(1));
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
@@ -628,6 +734,190 @@ public class BackgroundService extends Service
                     }
                 }
                 break;
+
+            // Notifica di una nuova risposta inserita
+            case ANSWER:
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                {
+                    // Numero nuove risposte
+                    if (answerCount == 1)
+                        mBuilder.setContentTitle("1 nuova risposta ad una tua domanda");
+                    else
+                        mBuilder.setContentTitle(answerCount + " nuove risposte ad una tua domanda");
+
+                    // Gestione degli autori delle risposte
+                    if ((answerList.size() == 1) && (answerCount == 1))
+                    {
+                        mBuilder.setContentText("Scritta da " + answerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((answerList.size() == 1) && (answerCount > 1))
+                    {
+                        mBuilder.setContentText("Scritte da " + answerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (answerList.size() == 2)
+                    {
+                        mBuilder.setContentText("Scritte da " + answerList.get(0) + " e " + answerList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText("Scritte da " + answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                // Versione precedente a Nougat
+                else
+                {
+                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+
+                    // Gestione degli autori delle risposte
+                    if ((answerList.size() == 1) && (answerCount == 1))
+                    {
+                        mBuilder.setContentText(answerCount + " nuova risposta ad una tua domanda scritta da " + answerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((answerList.size() == 1) && (answerCount > 1))
+                    {
+                        mBuilder.setContentText(answerCount + " nuove risposte ad una tua domanda scritte da " + answerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (answerList.size() == 2)
+                    {
+                        mBuilder.setContentText(answerCount + " nuove risposte ad una tua domanda scritte da " + answerList.get(0) + " e " + answerList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText(answerCount + " nuove risposte ad una tua domanda scritte da " + answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                break;
+
+            // Notifica di un nuovo commento ad una domanda scritta dall'utente
+            case COMMENT_QUESTION:
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                {
+                    // Numero nuovi commenti
+                    if (commentQuestionCount == 1)
+                        mBuilder.setContentTitle("1 nuovo commento ad una tua domanda");
+                    else
+                        mBuilder.setContentTitle(commentQuestionCount + " nuovi commenti ad una tua domanda");
+
+                    // Gestione degli autori dei commenti
+                    if ((commentQuestionList.size() == 1) && (commentQuestionCount == 1))
+                    {
+                        mBuilder.setContentText("Scritto da " + commentQuestionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((commentQuestionList.size() == 1) && (commentQuestionCount > 1))
+                    {
+                        mBuilder.setContentText("Scritti da " + commentQuestionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (commentQuestionList.size() == 2)
+                    {
+                        mBuilder.setContentText("Scritti da " + commentQuestionList.get(0) + " e " + commentQuestionList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText("Scritti da " + commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                // Versione precedente a Nougat
+                else
+                {
+                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+
+                    // Gestione degli autori dei commenti
+                    if ((commentQuestionList.size() == 1) && (commentQuestionCount == 1))
+                    {
+                        mBuilder.setContentText(commentQuestionCount + " nuovo commento ad una tua domanda scritto da " + commentQuestionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((commentQuestionList.size() == 1) && (commentQuestionCount > 1))
+                    {
+                        mBuilder.setContentText(commentQuestionCount + " nuovi commenti ad una tua domanda scritti da " + commentQuestionList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (commentQuestionList.size() == 2)
+                    {
+                        mBuilder.setContentText(commentQuestionCount + " nuovi commenti ad una tua domanda scritti da " + commentQuestionList.get(0) + " e " + commentQuestionList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText(commentQuestionCount + " nuovi commenti ad una tua domanda scritti da " + commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                break;
+
+            // Notifica di un nuovo commento ad una risposta scritta dall'utente
+            case COMMENT_ANSWER:
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                {
+                    // Numero nuovi commenti
+                    if (commentAnswerCount == 1)
+                        mBuilder.setContentTitle("1 nuovo commento ad una tua risposta");
+                    else
+                        mBuilder.setContentTitle(commentAnswerCount + " nuovi commenti ad una tua risposta");
+
+                    // Gestione degli autori dei commenti
+                    if ((commentAnswerList.size() == 1) && (commentAnswerCount == 1))
+                    {
+                        mBuilder.setContentText("Scritto da " + commentAnswerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((commentAnswerList.size() == 1) && (commentAnswerCount > 1))
+                    {
+                        mBuilder.setContentText("Scritti da " + commentAnswerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (commentAnswerList.size() == 2)
+                    {
+                        mBuilder.setContentText("Scritti da " + commentAnswerList.get(0) + " e " + commentAnswerList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText("Scritti da " + commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                // Versione precedente a Nougat
+                else
+                {
+                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+
+                    // Gestione degli autori dei commenti
+                    if ((commentAnswerList.size() == 1) && (commentAnswerCount == 1))
+                    {
+                        mBuilder.setContentText(commentAnswerCount + " nuovo commento ad una tua risposta scritto da " + commentAnswerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if ((commentAnswerList.size() == 1) && (commentAnswerCount > 1))
+                    {
+                        mBuilder.setContentText(commentAnswerCount + " nuovi commenti ad una tua risposta scritti da " + commentAnswerList.get(0));
+                        mBuilder.setLargeIcon(profilePic);
+                    }
+                    else if (commentAnswerList.size() == 2)
+                    {
+                        mBuilder.setContentText(commentAnswerCount + " nuovi commenti ad una tua risposta scritti da " + commentAnswerList.get(0) + " e " + commentAnswerList.get(1));
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText(commentAnswerCount + " nuovi commenti ad una tua risposta scritti da " + commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone");
+                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    }
+                }
+                break;
+
             default:
                 break;
         }
@@ -641,7 +931,7 @@ public class BackgroundService extends Service
 
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(getNotificationID(type), mBuilder.build());
-        //ToDo: custom notification based on question, answer, etc...
+        //ToDo: custom notification like + rating
     }
 
     // Metodo per restituire l'identificativo della notifica, dato il tipo
@@ -666,9 +956,61 @@ public class BackgroundService extends Service
         }
     }
 
+    // Metodo per resettare i dettagli delle notifiche una volta lette
     public static void resetNotification()
     {
         questionList.clear();
+        answerList.clear();
+        commentQuestionList.clear();
+        commentAnswerList.clear();
+
         questionCount = 0;
+        answerCount = 0;
+        commentQuestionCount = 0;
+        commentAnswerCount = 0;
+    }
+
+    // Metodo per modificare la forma dell'immagine utente, rendendola circolare
+    private Bitmap getCircleBitmap(Bitmap bitmap)
+    {
+        Bitmap output;
+        Rect srcRect, dstRect;
+        float r;
+        final int width = bitmap.getWidth();
+        final int height = bitmap.getHeight();
+
+        if (width > height)
+        {
+            output = Bitmap.createBitmap(height, height, Bitmap.Config.ARGB_8888);
+            int left = (width - height) / 2;
+            int right = left + height;
+            srcRect = new Rect(left, 0, right, height);
+            dstRect = new Rect(0, 0, height, height);
+            r = height / 2;
+        }
+        else
+        {
+            output = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
+            int top = (height - width)/2;
+            int bottom = top + width;
+            srcRect = new Rect(0, top, width, bottom);
+            dstRect = new Rect(0, 0, width, width);
+            r = width / 2;
+        }
+
+        Canvas canvas = new Canvas(output);
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(r, r, r, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
+
+        bitmap.recycle();
+
+        return output;
     }
 }
