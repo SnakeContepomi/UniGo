@@ -671,7 +671,6 @@ public class BackgroundService extends Service
                 .setVibrate(new long[]{0, 300, 200, 300})
                 .setLights(Color.RED, 800, 4000)
                 .setAutoCancel(true);
-                // prova
 
         switch (type)
         {
