@@ -722,7 +722,6 @@ public class BackgroundService extends Service
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
                 .setColor(Color.RED)
                 .setSmallIcon(R.drawable.ic_school_black_24dp)
-                //.setSubText("5")
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
                 .setVibrate(new long[]{0, 300, 200, 300})
@@ -742,24 +741,19 @@ public class BackgroundService extends Service
                         mBuilder.setContentTitle(questionCount + " nuove domande");
 
                     // Gestione degli autori delle domande
-                    if ((questionList.size() == 1) && (questionCount == 1))
+                    if (questionList.size() == 1)
                     {
-                        mBuilder.setContentText("Postata da " + questionList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((questionList.size() == 1) && (questionCount > 1))
-                    {
-                        mBuilder.setContentText("Postate da " + questionList.get(0));
+                        mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (questionList.size() == 2)
                     {
-                        mBuilder.setContentText("Postate da " + questionList.get(0) + " e " + questionList.get(1));
+                        mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText("Postate da " + questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone");
+                        mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -768,25 +762,26 @@ public class BackgroundService extends Service
                 {
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
+                    // Numero nuove domande
+                    if (questionCount == 1)
+                        mBuilder.setSubText("1 nuova domanda");
+                    else
+                        mBuilder.setSubText(questionCount + " nuove domande");
+
                     // Gestione degli autori delle domande
-                    if ((questionList.size() == 1) && (questionCount == 1))
+                    if (questionList.size() == 1)
                     {
-                        mBuilder.setContentText(questionCount + " nuova domanda postata da " + questionList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((questionList.size() == 1) && (questionCount > 1))
-                    {
-                        mBuilder.setContentText(questionCount + " nuove domande postate da " + questionList.get(0));
+                        mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (questionList.size() == 2)
                     {
-                        mBuilder.setContentText(questionCount + " nuove domande postate da " + questionList.get(0) + " e " + questionList.get(1));
+                        mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText(questionCount + " nuove domande postate da " + questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone");
+                        mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -798,29 +793,24 @@ public class BackgroundService extends Service
                 {
                     // Numero nuove risposte
                     if (answerCount == 1)
-                        mBuilder.setContentTitle("1 nuova risposta ad una tua domanda");
+                        mBuilder.setContentTitle("1 nuova risposta");
                     else
-                        mBuilder.setContentTitle(answerCount + " nuove risposte ad una tua domanda");
+                        mBuilder.setContentTitle(answerCount + " nuove risposte");
 
                     // Gestione degli autori delle risposte
-                    if ((answerList.size() == 1) && (answerCount == 1))
+                    if (answerList.size() == 1)
                     {
-                        mBuilder.setContentText("Scritta da " + answerList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((answerList.size() == 1) && (answerCount > 1))
-                    {
-                        mBuilder.setContentText("Scritte da " + answerList.get(0));
+                        mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (answerList.size() == 2)
                     {
-                        mBuilder.setContentText("Scritte da " + answerList.get(0) + " e " + answerList.get(1));
+                        mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText("Scritte da " + answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone");
+                        mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -829,25 +819,26 @@ public class BackgroundService extends Service
                 {
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
+                    // Numero nuove risposte
+                    if (answerCount == 1)
+                        mBuilder.setSubText("1 nuova risposta");
+                    else
+                        mBuilder.setSubText(answerCount + " nuove risposte");
+
                     // Gestione degli autori delle risposte
-                    if ((answerList.size() == 1) && (answerCount == 1))
+                    if (answerList.size() == 1)
                     {
-                        mBuilder.setContentText(answerCount + " nuova risposta ad una tua domanda scritta da " + answerList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((answerList.size() == 1) && (answerCount > 1))
-                    {
-                        mBuilder.setContentText(answerCount + " nuove risposte ad una tua domanda scritte da " + answerList.get(0));
+                        mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (answerList.size() == 2)
                     {
-                        mBuilder.setContentText(answerCount + " nuove risposte ad una tua domanda scritte da " + answerList.get(0) + " e " + answerList.get(1));
+                        mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText(answerCount + " nuove risposte ad una tua domanda scritte da " + answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone");
+                        mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -859,29 +850,24 @@ public class BackgroundService extends Service
                 {
                     // Numero nuovi commenti
                     if (commentQuestionCount == 1)
-                        mBuilder.setContentTitle("1 nuovo commento ad una tua domanda");
+                        mBuilder.setContentTitle("1 nuovo commento");
                     else
-                        mBuilder.setContentTitle(commentQuestionCount + " nuovi commenti ad una tua domanda");
+                        mBuilder.setContentTitle(commentQuestionCount + " nuovi commenti");
 
                     // Gestione degli autori dei commenti
-                    if ((commentQuestionList.size() == 1) && (commentQuestionCount == 1))
+                    if (commentQuestionList.size() == 1)
                     {
-                        mBuilder.setContentText("Scritto da " + commentQuestionList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((commentQuestionList.size() == 1) && (commentQuestionCount > 1))
-                    {
-                        mBuilder.setContentText("Scritti da " + commentQuestionList.get(0));
+                        mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (commentQuestionList.size() == 2)
                     {
-                        mBuilder.setContentText("Scritti da " + commentQuestionList.get(0) + " e " + commentQuestionList.get(1));
+                        mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText("Scritti da " + commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone");
+                        mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -890,25 +876,26 @@ public class BackgroundService extends Service
                 {
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
+                    // Numero nuovi commenti
+                    if (commentQuestionCount == 1)
+                        mBuilder.setSubText("1 nuovo commento");
+                    else
+                        mBuilder.setSubText(commentQuestionCount + " nuovi commenti");
+
                     // Gestione degli autori dei commenti
-                    if ((commentQuestionList.size() == 1) && (commentQuestionCount == 1))
+                    if (commentQuestionList.size() == 1)
                     {
-                        mBuilder.setContentText(commentQuestionCount + " nuovo commento ad una tua domanda scritto da " + commentQuestionList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((commentQuestionList.size() == 1) && (commentQuestionCount > 1))
-                    {
-                        mBuilder.setContentText(commentQuestionCount + " nuovi commenti ad una tua domanda scritti da " + commentQuestionList.get(0));
+                        mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (commentQuestionList.size() == 2)
                     {
-                        mBuilder.setContentText(commentQuestionCount + " nuovi commenti ad una tua domanda scritti da " + commentQuestionList.get(0) + " e " + commentQuestionList.get(1));
+                        mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText(commentQuestionCount + " nuovi commenti ad una tua domanda scritti da " + commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone");
+                        mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -920,29 +907,24 @@ public class BackgroundService extends Service
                 {
                     // Numero nuovi commenti
                     if (commentAnswerCount == 1)
-                        mBuilder.setContentTitle("1 nuovo commento ad una tua risposta");
+                        mBuilder.setContentTitle("1 nuovo commento");
                     else
-                        mBuilder.setContentTitle(commentAnswerCount + " nuovi commenti ad una tua risposta");
+                        mBuilder.setContentTitle(commentAnswerCount + " nuovi commenti");
 
                     // Gestione degli autori dei commenti
-                    if ((commentAnswerList.size() == 1) && (commentAnswerCount == 1))
+                    if (commentAnswerList.size() == 1)
                     {
-                        mBuilder.setContentText("Scritto da " + commentAnswerList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((commentAnswerList.size() == 1) && (commentAnswerCount > 1))
-                    {
-                        mBuilder.setContentText("Scritti da " + commentAnswerList.get(0));
+                        mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (commentAnswerList.size() == 2)
                     {
-                        mBuilder.setContentText("Scritti da " + commentAnswerList.get(0) + " e " + commentAnswerList.get(1));
+                        mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText("Scritti da " + commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone");
+                        mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -951,25 +933,26 @@ public class BackgroundService extends Service
                 {
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
+                    // Numero nuovi commenti
+                    if (commentAnswerCount == 1)
+                        mBuilder.setSubText("1 nuovo commento");
+                    else
+                        mBuilder.setSubText(commentAnswerCount + " nuovi commenti");
+
                     // Gestione degli autori dei commenti
-                    if ((commentAnswerList.size() == 1) && (commentAnswerCount == 1))
+                    if (commentAnswerList.size() == 1)
                     {
-                        mBuilder.setContentText(commentAnswerCount + " nuovo commento ad una tua risposta scritto da " + commentAnswerList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((commentAnswerList.size() == 1) && (commentAnswerCount > 1))
-                    {
-                        mBuilder.setContentText(commentAnswerCount + " nuovi commenti ad una tua risposta scritti da " + commentAnswerList.get(0));
+                        mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (commentAnswerList.size() == 2)
                     {
-                        mBuilder.setContentText(commentAnswerCount + " nuovi commenti ad una tua risposta scritti da " + commentAnswerList.get(0) + " e " + commentAnswerList.get(1));
+                        mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText(commentAnswerCount + " nuovi commenti ad una tua risposta scritti da " + commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone");
+                        mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -981,29 +964,24 @@ public class BackgroundService extends Service
                 {
                     // Numero nuovi voti
                     if (ratingCount == 1)
-                        mBuilder.setContentTitle("1 nuovo voto alla tua domanda");
+                        mBuilder.setContentTitle("1 nuovo voto");
                     else
-                        mBuilder.setContentTitle(ratingCount + " nuovi voti alla tua domanda");
+                        mBuilder.setContentTitle(ratingCount + " nuovi voti");
 
                     // Gestione degli autori dei voti
-                    if ((ratingList.size() == 1) && (ratingCount == 1))
+                    if (ratingList.size() == 1)
                     {
-                        mBuilder.setContentText("Da " + ratingList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((ratingList.size() == 1) && (ratingCount > 1))
-                    {
-                        mBuilder.setContentText("Da " + ratingList.get(0));
+                        mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (ratingList.size() == 2)
                     {
-                        mBuilder.setContentText("Da " + ratingList.get(0) + " e " + ratingList.get(1));
+                        mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText("Da " + ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone");
+                        mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -1012,25 +990,26 @@ public class BackgroundService extends Service
                 {
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
+                    // Numero nuovi voti
+                    if (ratingCount == 1)
+                        mBuilder.setSubText("1 nuovo voto");
+                    else
+                        mBuilder.setSubText(ratingCount + " nuovi voti");
+
                     // Gestione degli autori dei voti
-                    if ((ratingList.size() == 1) && (ratingCount == 1))
+                    if (ratingList.size() == 1)
                     {
-                        mBuilder.setContentText(ratingCount + " nuovo voto alla tua domanda da " + ratingList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((ratingList.size() == 1) && (ratingCount > 1))
-                    {
-                        mBuilder.setContentText(ratingCount + " nuovi voti alla tua domanda da " + ratingList.get(0));
+                        mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (ratingList.size() == 2)
                     {
-                        mBuilder.setContentText(ratingCount + " nuovi voti alla tua domanda da " + ratingList.get(0) + " e " + ratingList.get(1));
+                        mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText(ratingCount + " nuovi voti alla tua domanda da " + ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone");
+                        mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -1042,29 +1021,24 @@ public class BackgroundService extends Service
                 {
                     // Numero nuovi like
                     if (likeCount == 1)
-                        mBuilder.setContentTitle("1 nuovo like alla tua risposta");
+                        mBuilder.setContentTitle("1 nuovo like");
                     else
-                        mBuilder.setContentTitle(likeCount + " nuovi like alla tua risposta");
+                        mBuilder.setContentTitle(likeCount + " nuovi like");
 
                     // Gestione degli autori dei like
-                    if ((likeList.size() == 1) && (likeCount == 1))
+                    if (likeList.size() == 1)
                     {
-                        mBuilder.setContentText("Da " + likeList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((likeList.size() == 1) && (likeCount > 1))
-                    {
-                        mBuilder.setContentText("Da " + likeList.get(0));
+                        mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (likeList.size() == 2)
                     {
-                        mBuilder.setContentText("Da " + likeList.get(0) + " e " + likeList.get(1));
+                        mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText("Da " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone");
+                        mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
@@ -1073,25 +1047,26 @@ public class BackgroundService extends Service
                 {
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
+                    // Numero nuovi like
+                    if (likeCount == 1)
+                        mBuilder.setSubText("1 nuovo like");
+                    else
+                        mBuilder.setSubText(likeCount + " nuovi like");
+
                     // Gestione degli autori dei like
-                    if ((likeList.size() == 1) && (likeCount == 1))
+                    if (likeList.size() == 1)
                     {
-                        mBuilder.setContentText(likeCount + " nuovo like alla tua risposta da " + likeList.get(0));
-                        mBuilder.setLargeIcon(profilePic);
-                    }
-                    else if ((likeList.size() == 1) && (likeCount > 1))
-                    {
-                        mBuilder.setContentText(likeCount + " nuovi like alla tua risposta da " + likeList.get(0));
+                        mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
                     }
                     else if (likeList.size() == 2)
                     {
-                        mBuilder.setContentText(likeCount + " nuovi like alla tua risposta da " + likeList.get(0) + " e " + likeList.get(1));
+                        mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                     else
                     {
-                        mBuilder.setContentText(likeCount + " nuovi like alla tua risposta da " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone");
+                        mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
                     }
                 }
