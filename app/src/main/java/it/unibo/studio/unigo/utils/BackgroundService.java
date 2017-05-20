@@ -1,5 +1,6 @@
 package it.unibo.studio.unigo.utils;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -719,10 +720,10 @@ public class BackgroundService extends Service
     // Metodo per creare la notifica in base al tipo passato
     private void sendNotification(NotificationType type, Bitmap profilePic, String questionKey)
     {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
+        Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
                 .setColor(Color.RED)
                 .setSmallIcon(R.drawable.ic_school_black_24dp)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setPriority(Notification.PRIORITY_MAX)
                 //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
                 .setVibrate(new long[]{0, 300, 200, 300})
                 .setLights(Color.RED, 800, 4000)
@@ -745,16 +746,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(questionList.get(0) + " ha aggiunto una nuova domanda"));
                     }
                     else if (questionList.size() == 2)
                     {
                         mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda"));
                     }
                 }
                 // Versione precedente a Nougat
@@ -773,16 +780,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(questionList.get(0) + " ha aggiunto una nuova domanda"));
                     }
                     else if (questionList.size() == 2)
                     {
                         mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda"));
                     }
                 }
                 break;
@@ -802,16 +815,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(answerList.get(0) + " ha risposto ad una tua domanda"));
                     }
                     else if (answerList.size() == 2)
                     {
                         mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda"));
                     }
                 }
                 // Versione precedente a Nougat
@@ -830,16 +849,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(answerList.get(0) + " ha risposto ad una tua domanda"));
                     }
                     else if (answerList.size() == 2)
                     {
                         mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda"));
                     }
                 }
                 break;
@@ -859,16 +884,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda"));
                     }
                     else if (commentQuestionList.size() == 2)
                     {
                         mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda"));
                     }
                 }
                 // Versione precedente a Nougat
@@ -887,16 +918,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda"));
                     }
                     else if (commentQuestionList.size() == 2)
                     {
                         mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda"));
                     }
                 }
                 break;
@@ -916,16 +953,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentAnswerList.get(0) + " ha commentato una tua risposta"));
                     }
                     else if (commentAnswerList.size() == 2)
                     {
                         mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta"));
                     }
                     else
                     {
                         mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta"));
                     }
                 }
                 // Versione precedente a Nougat
@@ -944,16 +987,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentAnswerList.get(0) + " ha commentato una tua risposta"));
                     }
                     else if (commentAnswerList.size() == 2)
                     {
                         mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta"));
                     }
                     else
                     {
                         mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta"));
                     }
                 }
                 break;
@@ -973,16 +1022,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(ratingList.get(0) + " trova interessante una tua domanda"));
                     }
                     else if (ratingList.size() == 2)
                     {
                         mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda"));
                     }
                 }
                 // Versione precedente a Nougat
@@ -1001,16 +1056,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(ratingList.get(0) + " trova interessante una tua domanda"));
                     }
                     else if (ratingList.size() == 2)
                     {
                         mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda"));
                     }
                     else
                     {
                         mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda"));
                     }
                 }
                 break;
@@ -1030,16 +1091,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText("A " + likeList.get(0) + " piace una tua risposta"));
                     }
                     else if (likeList.size() == 2)
                     {
                         mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta"));
                     }
                     else
                     {
                         mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta"));
                     }
                 }
                 // Versione precedente a Nougat
@@ -1058,16 +1125,22 @@ public class BackgroundService extends Service
                     {
                         mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
                         mBuilder.setLargeIcon(profilePic);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText("A " + likeList.get(0) + " piace una tua risposta"));
                     }
                     else if (likeList.size() == 2)
                     {
                         mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta"));
                     }
                     else
                     {
                         mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
                         mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta"));
                     }
                 }
                 break;
