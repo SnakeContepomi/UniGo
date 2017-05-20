@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.PostActivity;
+import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
@@ -181,7 +181,9 @@ public class BackgroundService extends Service
                         // l'utente con un notifica
                         if (!Util.questionExists(dataSnapshot.getKey()))
                         {
-                            addQuestionIntoList(dataSnapshot.getValue(Question.class), dataSnapshot.getKey(), false);
+                            final String questionKey = dataSnapshot.getKey();
+
+                            addQuestionIntoList(dataSnapshot.getValue(Question.class), questionKey, false);
                             // La notifica viene attivata solo se la nuova domanda è stata scritta da un utente diverso
                             // da quelo loggato
                             if (!dataSnapshot.getValue(Question.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
@@ -193,7 +195,7 @@ public class BackgroundService extends Service
                                         if (!questionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                             questionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                         questionCount++;
-                                        new getBitmapFromUrl(NotificationType.QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                        new getBitmapFromUrl(NotificationType.QUESTION, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                     }
 
                                     @Override
@@ -325,7 +327,7 @@ public class BackgroundService extends Service
                                 if (!answerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                     answerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                 answerCount++;
-                                new getBitmapFromUrl(NotificationType.ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                new getBitmapFromUrl(NotificationType.ANSWER, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                             }
 
                             @Override
@@ -361,7 +363,7 @@ public class BackgroundService extends Service
                                 if (!answerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                     answerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                 answerCount++;
-                                new getBitmapFromUrl(NotificationType.ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                new getBitmapFromUrl(NotificationType.ANSWER, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                             }
 
                             @Override
@@ -384,7 +386,7 @@ public class BackgroundService extends Service
     }
 
     // Listener per notificare il rating alle domande dell'utente loggato
-    private void addRatingListener(final Question question, String questionKey)
+    private void addRatingListener(final Question question, final String questionKey)
     {
         Util.getDatabase().getReference("Question").child(questionKey).child("ratings").addChildEventListener(new ChildEventListener() {
             @Override
@@ -401,7 +403,7 @@ public class BackgroundService extends Service
                                 if (!ratingList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                     ratingList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                 ratingCount++;
-                                new getBitmapFromUrl(NotificationType.RATING).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                new getBitmapFromUrl(NotificationType.RATING, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                             }
 
                             @Override
@@ -416,7 +418,7 @@ public class BackgroundService extends Service
                                 if (!ratingList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                     ratingList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                 ratingCount++;
-                                new getBitmapFromUrl(NotificationType.RATING).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                new getBitmapFromUrl(NotificationType.RATING, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                             }
 
                             @Override
@@ -470,7 +472,7 @@ public class BackgroundService extends Service
                                             if (!likeList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                                 likeList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                             likeCount++;
-                                            new getBitmapFromUrl(NotificationType.LIKE).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                            new getBitmapFromUrl(NotificationType.LIKE, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                         }
 
                                         @Override
@@ -484,7 +486,7 @@ public class BackgroundService extends Service
                                             if (!likeList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                                 likeList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                             likeCount++;
-                                            new getBitmapFromUrl(NotificationType.LIKE).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                            new getBitmapFromUrl(NotificationType.LIKE, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                         }
 
                                         @Override
@@ -521,7 +523,7 @@ public class BackgroundService extends Service
                                                 if (!commentAnswerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                                     commentAnswerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                                 commentAnswerCount++;
-                                                new getBitmapFromUrl(NotificationType.COMMENT_ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                                new getBitmapFromUrl(NotificationType.COMMENT_ANSWER, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                             }
 
                                             @Override
@@ -535,7 +537,7 @@ public class BackgroundService extends Service
                                                 if (!commentAnswerList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                                     commentAnswerList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                                 commentAnswerCount++;
-                                                new getBitmapFromUrl(NotificationType.COMMENT_ANSWER).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                                new getBitmapFromUrl(NotificationType.COMMENT_ANSWER, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                             }
 
                                             @Override
@@ -607,7 +609,7 @@ public class BackgroundService extends Service
                                             if (!commentQuestionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                                 commentQuestionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                             commentQuestionCount++;
-                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                         }
 
                                         @Override
@@ -622,7 +624,7 @@ public class BackgroundService extends Service
                                             if (!commentQuestionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                                 commentQuestionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                             commentQuestionCount++;
-                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                         }
 
                                         @Override
@@ -637,7 +639,7 @@ public class BackgroundService extends Service
                                             if (!commentQuestionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
                                                 commentQuestionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                                             commentQuestionCount++;
-                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                            new getBitmapFromUrl(NotificationType.COMMENT_QUESTION, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
                                         }
 
                                         @Override
@@ -679,10 +681,12 @@ public class BackgroundService extends Service
     private class getBitmapFromUrl extends AsyncTask<String, Void, Bitmap>
     {
         private NotificationType type;
+        private String questionKey;
 
-        getBitmapFromUrl(NotificationType type)
+        getBitmapFromUrl(NotificationType type, String questionKey)
         {
             this.type = type;
+            this.questionKey = questionKey;
         }
 
         protected Bitmap doInBackground(String... urls)
@@ -708,12 +712,12 @@ public class BackgroundService extends Service
 
         protected void onPostExecute(Bitmap result)
         {
-            sendNotification(type, result);
+            sendNotification(type, result, questionKey);
         }
     }
 
     // Metodo per creare la notifica in base al tipo passato
-    private void sendNotification(NotificationType type, Bitmap profilePic)
+    private void sendNotification(NotificationType type, Bitmap profilePic, String questionKey)
     {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
                 .setColor(Color.RED)
@@ -1097,9 +1101,10 @@ public class BackgroundService extends Service
                 break;
         }
 
-        Intent resultIntent = new Intent(BackgroundService.this, PostActivity.class);
+        Intent resultIntent = new Intent(BackgroundService.this, DetailActivity.class);
+        resultIntent.putExtra("question_key", questionKey);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-        stackBuilder.addParentStack(PostActivity.class);
+        stackBuilder.addParentStack(DetailActivity.class);
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);
