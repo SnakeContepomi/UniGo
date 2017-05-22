@@ -297,7 +297,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             public void onClick(View view)
             {
                 Util.getDatabase().getReference("Question").child(questionKey).child("ratings").child(Util.encodeEmail(getCurrentUser().getEmail())).setValue(true);
-                qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                qh.imgrating.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                 qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                 qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
                 qh.rating.setClickable(false);
@@ -305,8 +305,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Inizializzazione della Action "Rating"
-        qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
-        qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+        qh.imgrating.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
+        qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
         if (question.ratings != null)
         {
             // Inizializzazione del numero di rating della domanda corrente
@@ -315,7 +315,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             for (String key : question.ratings.keySet())
                 if (key.equals(Util.encodeEmail(getCurrentUser().getEmail())))
                 {
-                    qh.imgrating.setBackgroundTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                    qh.imgrating.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                     qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                     qh.rating.setClickable(false);
                     break;
@@ -336,6 +336,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             {
                 if (dataSnapshot.getValue() != null)
                     qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
+                else
+                    qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
             }
 
             @Override
@@ -360,7 +362,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         else
                         {
                             favoriteReference.removeValue();
-                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorDarkGray)));
+                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
                         }
                     }
 
@@ -473,8 +475,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Verifica se l'utente ha già inserito il "Like" per la risposta corrente
-        ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray)));
-        ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorDarkGray))));
+        ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorIconGray)));
+        ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorIconGray))));
         if (answer.likes != null)
         {
             // Inizializzazione del numero di "Like" della risposta corrente
