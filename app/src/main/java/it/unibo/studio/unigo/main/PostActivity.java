@@ -24,6 +24,8 @@ import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
 
+import static android.R.attr.name;
+
 public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
 {
     private EditText etTitle, etCourse, etDesc;
@@ -238,7 +240,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     private void addPost()
     {
         final String key = Util.getDatabase().getReference("Question").push().getKey();
-        final Question question = new Question(etTitle.getText().toString(), etCourse.getText().toString(), etDesc.getText().toString(),
+        final Question question = new Question(formatString(etTitle.getText().toString()), formatString(etCourse.getText().toString()), formatString(etDesc.getText().toString()),
                                   Util.encodeEmail(Util.getCurrentUser().getEmail()), Util.CURRENT_COURSE_KEY);
         Util.getDatabase().getReference("Question").child(key).setValue(question).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -263,5 +265,11 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     private void linkPostToCourse(String question_key, String date)
     {
         Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").child(question_key).setValue(date);
+    }
+
+    // Metodo che restituisce la stringa presa in ingresso, con il primo carattere in maiuscolo
+    private String formatString(String string)
+    {
+        return string.substring(0,1).toUpperCase() + string.substring(1);
     }
 }

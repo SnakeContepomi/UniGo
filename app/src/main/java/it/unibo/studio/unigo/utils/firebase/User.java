@@ -5,7 +5,7 @@ import it.unibo.studio.unigo.utils.Util;
 
 public class User
 {
-    public String photoUrl, name, lastName, phone, city, courseKey;
+    public String photoUrl, name, lastName, phone, city, subscribeDate, courseKey;
     public int exp, credits;
     public HashMap<String, Boolean> questions;
     public HashMap<String, Boolean> favorites;
@@ -22,6 +22,7 @@ public class User
         this.lastName = lastName;
         this.phone = phone;
         this.city = city;
+        this.subscribeDate = Util.getDate();
         this.courseKey = courseKey;
         this.exp = Util.EXP_START;
         this.credits = Util.CREDITS_START;
