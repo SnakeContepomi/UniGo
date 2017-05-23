@@ -203,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                     ((HomeFragment) getCurrentFragment()).filterResults(newText);
                 if (getCurrentFragment() instanceof FavoriteFragment)
                     ((FavoriteFragment) getCurrentFragment()).filterResults(newText);
+                if (getCurrentFragment() instanceof MyQuestionFragment)
+                    ((MyQuestionFragment) getCurrentFragment()).filterResults(newText);
 
                 return false;
             }
@@ -228,6 +230,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 }
                 if (getCurrentFragment() instanceof FavoriteFragment)
                     ((FavoriteFragment) getCurrentFragment()).resetFilter();
+                if (getCurrentFragment() instanceof MyQuestionFragment)
+                    ((MyQuestionFragment) getCurrentFragment()).resetFilter();
             }
         });
 

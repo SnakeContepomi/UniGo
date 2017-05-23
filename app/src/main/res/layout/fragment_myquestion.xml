@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:wheel="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerViewMyQuestion"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+        <com.pnikosis.materialishprogress.ProgressWheel
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            wheel:matProg_barColor="#5588FF"
+            wheel:matProg_progressIndeterminate="true"/>
+    </LinearLayout>
+</LinearLayout>
