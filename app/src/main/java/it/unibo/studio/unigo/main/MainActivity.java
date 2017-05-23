@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private InfoFragment fragmentInfo;
 
     private Toolbar toolbar;
-    private MaterialSearchView searchView;
+    private static MaterialSearchView searchView;
     private ProfileDrawerItem profile;
     private AccountHeader header;
     private Drawer navDrawer;
@@ -164,14 +165,20 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             // domande che hanno subito dei cambiamenti (riguardanti Rating, Favorite o numero risposte)
             case REQUEST_CODE_POST:
                 sheetLayout.contractFab();
-                refreshAdapterList();
+                if (getCurrentFragment() instanceof HomeFragment)
+                    refreshAdapterList();
+                //if (getCurrentFragment() instanceof FavoriteFragment)
+                    //((FavoriteFragment)getCurrentFragment()).resetFilter();
                 break;
 
             // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata" e tutte
             // le eventuali domande che hanno subito dei cambiamenti mentre l'Activity era aperta
             case REQUEST_CODE_DETAIL:
-                refreshAdapterList();
-                Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
+                if (getCurrentFragment() instanceof HomeFragment)
+                {
+                    refreshAdapterList();
+                    Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
+                }
                 break;
         }
     }
@@ -194,8 +201,13 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public boolean onQueryTextChange(String newText)
             {
-                if (!newText.equals(""))
-                    Util.getHomeFragment().filterResults(newText);
+                if (getCurrentFragment() instanceof HomeFragment)
+                    ((HomeFragment) getCurrentFragment()).filterResults(newText);
+                if (getCurrentFragment() instanceof FavoriteFragment)
+                    ((FavoriteFragment) getCurrentFragment()).filterResults(newText);
+                //if (getCurrentFragment() instanceof HomeFragment)
+                    //((HomeFragment) getCurrentFragment()).filterResults(newText);
+
                 return false;
             }
         });
@@ -204,7 +216,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onSearchViewShown()
             {
-                Util.getHomeFragment().setFilterState(true);
+                if (getCurrentFragment() instanceof HomeFragment)
+                    ((HomeFragment) getCurrentFragment()).setFilterState(true);
             }
 
             // Alla chiusura della SearchView, viene resettata la lista delle domande, prendendole da quella presente in Util
@@ -212,8 +225,13 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onSearchViewClosed()
             {
-                Util.getHomeFragment().setFilterState(false);
-                Util.getHomeFragment().resetFilter();
+                if (getCurrentFragment() instanceof HomeFragment)
+                {
+                    ((HomeFragment) getCurrentFragment()).setFilterState(false);
+                    ((HomeFragment) getCurrentFragment()).resetFilter();
+                }
+                if (getCurrentFragment() instanceof FavoriteFragment)
+                    ((FavoriteFragment) getCurrentFragment()).resetFilter();
             }
         });
 
@@ -406,6 +424,28 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             .commit();
     }
 
+    // Metodo che ritorna il Fragment attualmente caricato
+    @Nullable
+    public Fragment getCurrentFragment()
+    {
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.fragment_container);
+
+        if (fragment instanceof HomeFragment)
+            return fragmentHome;
+        if (fragment instanceof FavoriteFragment)
+            return fragmentFavorite;
+        if (fragment instanceof MyQuestionFragment)
+            return fragmentQuestion;
+        if (fragment instanceof SocialFragment)
+            return fragmentSocial;
+        if (fragment instanceof SettingsFragment)
+            return fragmentSettings;
+        if (fragment instanceof InfoFragment)
+            return fragmentInfo;
+
+        return null;
+    }
+
     private void showFab()
     {
         if (!fab.isShown())
@@ -425,5 +465,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         for(QuestionAdapterItem qitem : Util.getQuestionsToUpdate())
             Util.getHomeFragment().refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
         Util.getQuestionsToUpdate().clear();
+    }
+
+    public static boolean isSearchViewOpen()
+    {
+        return searchView.isSearchOpen();
     }
 }

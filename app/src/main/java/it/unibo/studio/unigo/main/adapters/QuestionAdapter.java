@@ -36,10 +36,10 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
     private final int UPDATE_CODE_QUESTION = 1;
     private final int UPDATE_CODE_FAVORITE = 2;
 
-    private Filter mFilter = new ItemFilter();
-    private List<QuestionAdapterItem> questionList;
+    protected Filter mFilter = new ItemFilter();
+    protected List<QuestionAdapterItem> questionList, backupList;
     private boolean isFiltered;
-    private Activity activity;
+    protected Activity activity;
 
     static class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -77,7 +77,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         protected FilterResults performFiltering(CharSequence constraint)
         {
             String filterString = constraint.toString().toLowerCase();
-            questionList = Util.getQuestionList();
+            questionList = backupList;
             List<QuestionAdapterItem> filteredList = new ArrayList<>();
             FilterResults results = new FilterResults();
 
@@ -113,6 +113,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
     public QuestionAdapter(List<QuestionAdapterItem> questionList, Activity activity)
     {
         this.questionList = questionList;
+        this.backupList = questionList;
         this.activity = activity;
         isFiltered = false;
     }
@@ -275,7 +276,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
 
     // Metodo che verifica se la domanda appartiene all'elenco dei preferiti dell'utente
     // e abilita il clickListener per poterla inserire
-    private void initActionFavorite(final ViewHolder holder, String questionKey)
+    private void initActionFavorite(final ViewHolder holder, final String questionKey)
     {
         final DatabaseReference favoriteReference = Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").child(questionKey);
 
@@ -374,9 +375,10 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
 
     // Metodo che reinizializza la lista delle domande presente nell'Adapter, con quella presente in Util
     // (ogni volta che viene chiusa la SearchView)
-    public void resetFilter()
+    public void resetFilter(List<QuestionAdapterItem> questionList)
     {
-        questionList = Util.getQuestionList();
+        this.questionList = questionList;
+        this.backupList = questionList;
         notifyDataSetChanged();
     }
 
@@ -387,7 +389,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
     }
 
     // Data una chiave di una domanda, viene restituita la posizione della stessa all'interno della lista
-    private int getQuestionPosition(String questionKey)
+    protected int getQuestionPosition(String questionKey)
     {
         for (int i = 0; i < questionList.size(); i++)
             if (questionKey.equals(questionList.get(i).getQuestionKey()))

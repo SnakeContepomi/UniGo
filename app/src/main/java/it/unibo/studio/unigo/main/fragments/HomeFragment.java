@@ -47,7 +47,7 @@ public class HomeFragment extends Fragment
 
     private void initComponents(View v)
     {
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewQuestion);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewHome);
         setRecyclerViewVisibility(false);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
         mRecyclerView.setHasFixedSize(true);
@@ -113,7 +113,7 @@ public class HomeFragment extends Fragment
     // Metodo per riempire la lista con tutte le domande presenti nella lista in Util
     public void resetFilter()
     {
-        mAdapter.resetFilter();
+        mAdapter.resetFilter(Util.getQuestionList());
     }
 
     // Metodo utilizzato per modificare lo stato della ricerca (attiva o non attiva)

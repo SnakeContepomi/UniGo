@@ -17,7 +17,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -112,13 +111,15 @@ public class BackgroundService extends Service
                             // Query per recuperare tutte le chiavi delle domande che fanno parte di quel corso, ordinate cronologicamente
                             Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                public void onDataChange(DataSnapshot dataSnapshot)
+                                {
                                     Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
                                     DataSnapshot child;
                                     // Per ogni chiave recuperata, viene eseguita una query sulla tabella "Question" al fine di ottenerne
                                     // i dettagli. Ogni domanda viene quindi inserita nella lista presente in Utils ed infine
                                     // viene inizializzato il listener per sull'inserimento delle nuove domande
-                                    while (iterator.hasNext()) {
+                                    while (iterator.hasNext())
+                                    {
                                         child = iterator.next();
                                         if (iterator.hasNext())
                                             getQuestionAndAddToList(child.getKey(), false);
@@ -262,7 +263,7 @@ public class BackgroundService extends Service
             addGenericCommentListener(question, questionKey);
         }
 
-        // Listener sui cambiamenti generici, per aggiornare in real time la lista dele domande
+        // Listener sui cambiamenti generici, per aggiornare in real time la lista delle domande
         Util.getDatabase().getReference("Question").child(questionKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
