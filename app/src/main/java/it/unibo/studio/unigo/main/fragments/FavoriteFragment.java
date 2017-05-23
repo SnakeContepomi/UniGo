@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapters.FavoriteAdapter;
 import it.unibo.studio.unigo.utils.Util;
@@ -37,6 +35,15 @@ public class FavoriteFragment extends Fragment
         return v;
     }
 
+    @Override
+    public void onDestroyView()
+    {
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").orderByKey().removeEventListener(favoriteListener);
+        for(QuestionAdapterItem item : favoriteList)
+            removeQuestionListener(item.getQuestionKey());
+        super.onDestroyView();
+    }
+
     private void initComponents(View v)
     {
         favoriteList = new ArrayList<>();
@@ -55,7 +62,6 @@ public class FavoriteFragment extends Fragment
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                Log.d("prova", "changeListener");
                 if (getQuestionPosition(dataSnapshot.getKey()) != -1)
                 {
                     QuestionAdapterItem newQItem = new QuestionAdapterItem(dataSnapshot.getValue(Question.class), dataSnapshot.getKey());
@@ -105,25 +111,8 @@ public class FavoriteFragment extends Fragment
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         };
-    }
 
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").orderByKey().removeEventListener(favoriteListener);
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        if (!((MainActivity)getActivity()).isSearchViewOpen())
-        {
-            favoriteList.clear();
-            mAdapter.notifyDataSetChanged();
-            Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").orderByKey().addChildEventListener(favoriteListener);
-        }
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").orderByKey().addChildEventListener(favoriteListener);
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview

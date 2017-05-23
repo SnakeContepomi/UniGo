@@ -167,8 +167,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 sheetLayout.contractFab();
                 if (getCurrentFragment() instanceof HomeFragment)
                     refreshAdapterList();
-                //if (getCurrentFragment() instanceof FavoriteFragment)
-                    //((FavoriteFragment)getCurrentFragment()).resetFilter();
                 break;
 
             // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata" e tutte
@@ -205,8 +203,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                     ((HomeFragment) getCurrentFragment()).filterResults(newText);
                 if (getCurrentFragment() instanceof FavoriteFragment)
                     ((FavoriteFragment) getCurrentFragment()).filterResults(newText);
-                //if (getCurrentFragment() instanceof HomeFragment)
-                    //((HomeFragment) getCurrentFragment()).filterResults(newText);
 
                 return false;
             }
@@ -465,10 +461,5 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         for(QuestionAdapterItem qitem : Util.getQuestionsToUpdate())
             Util.getHomeFragment().refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
         Util.getQuestionsToUpdate().clear();
-    }
-
-    public static boolean isSearchViewOpen()
-    {
-        return searchView.isSearchOpen();
     }
 }
