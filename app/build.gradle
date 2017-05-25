@@ -63,6 +63,13 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     // Material SearchView
     compile 'com.miguelcatalan:materialsearchview:1.4.0'
+    // Material Preferences
+    compile 'net.xpece.android:support-preference:1.2.7'
+    ext.supportLibsVersion = "25.3.0"
+    compile "com.android.support:appcompat-v7:$supportLibsVersion"
+    compile "com.android.support:preference-v7:$supportLibsVersion"
+    // Color Picker Preference
+    compile 'net.xpece.android:support-preference-color:1.2.7'
 }
 
 apply plugin: 'com.google.gms.google-services'
