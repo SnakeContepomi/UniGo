@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_notificationVibration_entries">
+        <item>Spenta</item>
+        <item>Predefinita</item>
+        <item>Breve</item>
+        <item>Lunga</item>
+    </string-array>
+    <string-array name="pref_notificationVibration_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="pref_notificationPriority_entries">
+        <item>Nessuna notifica a comparsa</item>
+        <item>Solo con schermo acceso</item>
+        <item>Solo con schermo spento</item>
+        <item>Mostra sempre una notifica a comparsa</item>
+    </string-array>
+    <string-array name="pref_notificationPriority_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="pref_notificationColor_entries">
+        <item>Nessuno</item>
+        <item>Bianca</item>
+        <item>Rossa</item>
+        <item>Gialla</item>
+        <item>Verde</item>
+        <item>Azzurra</item>
+        <item>Blu</item>
+        <item>Viola</item>
+    </string-array>
+    <string-array name="pref_notificationColor_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+</resources>

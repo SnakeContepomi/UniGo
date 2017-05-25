@@ -5,14 +5,14 @@
         android:key="pref_key_storage_settings">
         <SwitchPreference
             android:key="pref_notification"
-            android:title="Mostra notifiche"
-            android:summary="Attive"
+            android:title="Ricevi notifiche"
             android:defaultValue="true" />
         <RingtonePreference
             android:dependency="pref_notification"
+            android:key="pref_notificationRingtone"
             android:title="Tono notifiche"
+            android:dialogTitle="Tono notifiche"
             android:defaultValue="content://settings/system/notification_sound"
-            android:key="notifications_new_message_ringtone"
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"/>
@@ -20,17 +20,31 @@
             android:dependency="pref_notification"
             android:key="pref_notificationVibration"
             android:title="Vibrazione"
-            android:dialogTitle="bbb"
-            android:entries="@array/pref_syncConnectionTypes_entries"
-            android:entryValues="@array/pref_syncConnectionTypes_values"
-            android:defaultValue="@string/pref_syncConnectionTypes_default" />
+            android:dialogTitle="Vibrazione"
+            android:entries="@array/pref_notificationVibration_entries"
+            android:entryValues="@array/pref_notificationVibration_values"
+            android:defaultValue="1"
+            android:positiveButtonText="ok"
+            android:negativeButtonText="Annulla"/>
         <ListPreference
             android:dependency="pref_notification"
             android:key="pref_notificationPriority"
             android:title="Notifica a comparsa"
-            android:dialogTitle="ccc"
-            android:entries="@array/pref_syncConnectionTypes_entries"
-            android:entryValues="@array/pref_syncConnectionTypes_values"
-            android:defaultValue="@string/pref_syncConnectionTypes_default" />
+            android:dialogTitle="Notifica a comparsa"
+            android:entries="@array/pref_notificationPriority_entries"
+            android:entryValues="@array/pref_notificationPriority_values"
+            android:defaultValue="3"
+            android:positiveButtonText="ok"
+            android:negativeButtonText="Annulla"/>
+        <ListPreference
+            android:dependency="pref_notification"
+            android:key="pref_notificationColor"
+            android:title="Luce"
+            android:dialogTitle="Luce"
+            android:defaultValue="2"
+            android:entries="@array/pref_notificationColor_entries"
+            android:entryValues="@array/pref_notificationColor_values"
+            android:positiveButtonText="ok"
+            android:negativeButtonText="Annulla"/>
     </PreferenceCategory>
 </PreferenceScreen>
