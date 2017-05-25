@@ -18,6 +18,8 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.preference.PreferenceManager;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +31,7 @@ import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
+import it.unibo.studio.unigo.main.fragments.SettingsFragment;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
@@ -721,445 +724,378 @@ public class BackgroundService extends Service
     // Metodo per creare la notifica in base al tipo passato
     private void sendNotification(NotificationType type, Bitmap profilePic, String questionKey)
     {
-        Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
-                .setColor(Color.RED)
-                .setSmallIcon(R.drawable.ic_school_black_24dp)
-                .setPriority(Notification.PRIORITY_MAX)
-                //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
-                .setVibrate(new long[]{0, 300, 200, 300})
-                .setLights(Color.RED, 800, 4000)
-                .setAutoCancel(true);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-        switch (type)
+        // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment
+        if (sharedPref.getBoolean(SettingsFragment.KEY_PREF_NOTIF, true))
         {
-            // Notifica di una nuova domanda inserita
-            case QUESTION:
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-                {
-                    // Numero nuove domande
-                    if (questionCount == 1)
-                        mBuilder.setContentTitle("1 nuova domanda");
-                    else
-                        mBuilder.setContentTitle(questionCount + " nuove domande");
+            Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
+                    .setColor(Color.RED)
+                    .setSmallIcon(R.drawable.ic_school_black_24dp)
+                    .setPriority(Notification.PRIORITY_MAX)
+                    //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
+                    .setVibrate(new long[]{0, 300, 200, 300})
+                    .setLights(Color.RED, 800, 4000)
+                    .setAutoCancel(true);
 
-                    // Gestione degli autori delle domande
-                    if (questionList.size() == 1)
-                    {
-                        mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                            .bigText(questionList.get(0) + " ha aggiunto una nuova domanda"));
-                    }
-                    else if (questionList.size() == 2)
-                    {
-                        mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda"));
-                    }
-                }
-                // Versione precedente a Nougat
-                else
-                {
-                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+            switch (type) {
+                // Notifica di una nuova domanda inserita
+                case QUESTION:
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        // Numero nuove domande
+                        if (questionCount == 1)
+                            mBuilder.setContentTitle("1 nuova domanda");
+                        else
+                            mBuilder.setContentTitle(questionCount + " nuove domande");
 
-                    // Numero nuove domande
-                    if (questionCount == 1)
-                        mBuilder.setSubText("1 nuova domanda");
-                    else
-                        mBuilder.setSubText(questionCount + " nuove domande");
+                        // Gestione degli autori delle domande
+                        if (questionList.size() == 1) {
+                            mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(questionList.get(0) + " ha aggiunto una nuova domanda"));
+                        } else if (questionList.size() == 2) {
+                            mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda"));
+                        } else {
+                            mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda"));
+                        }
+                    }
+                    // Versione precedente a Nougat
+                    else {
+                        mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
-                    // Gestione degli autori delle domande
-                    if (questionList.size() == 1)
-                    {
-                        mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(questionList.get(0) + " ha aggiunto una nuova domanda"));
-                    }
-                    else if (questionList.size() == 2)
-                    {
-                        mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda"));
-                    }
-                }
-                break;
+                        // Numero nuove domande
+                        if (questionCount == 1)
+                            mBuilder.setSubText("1 nuova domanda");
+                        else
+                            mBuilder.setSubText(questionCount + " nuove domande");
 
-            // Notifica di una nuova risposta inserita
-            case ANSWER:
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-                {
-                    // Numero nuove risposte
-                    if (answerCount == 1)
-                        mBuilder.setContentTitle("1 nuova risposta");
-                    else
-                        mBuilder.setContentTitle(answerCount + " nuove risposte");
+                        // Gestione degli autori delle domande
+                        if (questionList.size() == 1) {
+                            mBuilder.setContentText(questionList.get(0) + " ha aggiunto una nuova domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(questionList.get(0) + " ha aggiunto una nuova domanda"));
+                        } else if (questionList.size() == 2) {
+                            mBuilder.setContentText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(questionList.get(0) + " e " + questionList.get(1) + " hanno aggiunto una nuova domanda"));
+                        } else {
+                            mBuilder.setContentText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(questionList.get(0) + " e altre " + (questionList.size() - 1) + " persone hanno aggiunto una nuova domanda"));
+                        }
+                    }
+                    break;
 
-                    // Gestione degli autori delle risposte
-                    if (answerList.size() == 1)
-                    {
-                        mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(answerList.get(0) + " ha risposto ad una tua domanda"));
-                    }
-                    else if (answerList.size() == 2)
-                    {
-                        mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda"));
-                    }
-                }
-                // Versione precedente a Nougat
-                else
-                {
-                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                // Notifica di una nuova risposta inserita
+                case ANSWER:
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        // Numero nuove risposte
+                        if (answerCount == 1)
+                            mBuilder.setContentTitle("1 nuova risposta");
+                        else
+                            mBuilder.setContentTitle(answerCount + " nuove risposte");
 
-                    // Numero nuove risposte
-                    if (answerCount == 1)
-                        mBuilder.setSubText("1 nuova risposta");
-                    else
-                        mBuilder.setSubText(answerCount + " nuove risposte");
+                        // Gestione degli autori delle risposte
+                        if (answerList.size() == 1) {
+                            mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(answerList.get(0) + " ha risposto ad una tua domanda"));
+                        } else if (answerList.size() == 2) {
+                            mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda"));
+                        } else {
+                            mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda"));
+                        }
+                    }
+                    // Versione precedente a Nougat
+                    else {
+                        mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
-                    // Gestione degli autori delle risposte
-                    if (answerList.size() == 1)
-                    {
-                        mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(answerList.get(0) + " ha risposto ad una tua domanda"));
-                    }
-                    else if (answerList.size() == 2)
-                    {
-                        mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda"));
-                    }
-                }
-                break;
+                        // Numero nuove risposte
+                        if (answerCount == 1)
+                            mBuilder.setSubText("1 nuova risposta");
+                        else
+                            mBuilder.setSubText(answerCount + " nuove risposte");
 
-            // Notifica di un nuovo commento ad una domanda scritta dall'utente
-            case COMMENT_QUESTION:
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-                {
-                    // Numero nuovi commenti
-                    if (commentQuestionCount == 1)
-                        mBuilder.setContentTitle("1 nuovo commento");
-                    else
-                        mBuilder.setContentTitle(commentQuestionCount + " nuovi commenti");
+                        // Gestione degli autori delle risposte
+                        if (answerList.size() == 1) {
+                            mBuilder.setContentText(answerList.get(0) + " ha risposto ad una tua domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(answerList.get(0) + " ha risposto ad una tua domanda"));
+                        } else if (answerList.size() == 2) {
+                            mBuilder.setContentText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(answerList.get(0) + " e " + answerList.get(1) + " hanno risposto ad una tua domanda"));
+                        } else {
+                            mBuilder.setContentText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(answerList.get(0) + " e altre " + (answerList.size() - 1) + " persone hanno risposto ad una tua domanda"));
+                        }
+                    }
+                    break;
 
-                    // Gestione degli autori dei commenti
-                    if (commentQuestionList.size() == 1)
-                    {
-                        mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda"));
-                    }
-                    else if (commentQuestionList.size() == 2)
-                    {
-                        mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda"));
-                    }
-                }
-                // Versione precedente a Nougat
-                else
-                {
-                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                // Notifica di un nuovo commento ad una domanda scritta dall'utente
+                case COMMENT_QUESTION:
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        // Numero nuovi commenti
+                        if (commentQuestionCount == 1)
+                            mBuilder.setContentTitle("1 nuovo commento");
+                        else
+                            mBuilder.setContentTitle(commentQuestionCount + " nuovi commenti");
 
-                    // Numero nuovi commenti
-                    if (commentQuestionCount == 1)
-                        mBuilder.setSubText("1 nuovo commento");
-                    else
-                        mBuilder.setSubText(commentQuestionCount + " nuovi commenti");
+                        // Gestione degli autori dei commenti
+                        if (commentQuestionList.size() == 1) {
+                            mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda"));
+                        } else if (commentQuestionList.size() == 2) {
+                            mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda"));
+                        } else {
+                            mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda"));
+                        }
+                    }
+                    // Versione precedente a Nougat
+                    else {
+                        mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
-                    // Gestione degli autori dei commenti
-                    if (commentQuestionList.size() == 1)
-                    {
-                        mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda"));
-                    }
-                    else if (commentQuestionList.size() == 2)
-                    {
-                        mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda"));
-                    }
-                }
-                break;
+                        // Numero nuovi commenti
+                        if (commentQuestionCount == 1)
+                            mBuilder.setSubText("1 nuovo commento");
+                        else
+                            mBuilder.setSubText(commentQuestionCount + " nuovi commenti");
 
-            // Notifica di un nuovo commento ad una risposta scritta dall'utente
-            case COMMENT_ANSWER:
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-                {
-                    // Numero nuovi commenti
-                    if (commentAnswerCount == 1)
-                        mBuilder.setContentTitle("1 nuovo commento");
-                    else
-                        mBuilder.setContentTitle(commentAnswerCount + " nuovi commenti");
+                        // Gestione degli autori dei commenti
+                        if (commentQuestionList.size() == 1) {
+                            mBuilder.setContentText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentQuestionList.get(0) + " ha aggiunto un commento relativo ad una tua domanda"));
+                        } else if (commentQuestionList.size() == 2) {
+                            mBuilder.setContentText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentQuestionList.get(0) + " e " + commentQuestionList.get(1) + " hanno aggiunto un commento relativo ad una tua domanda"));
+                        } else {
+                            mBuilder.setContentText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentQuestionList.get(0) + " e altre " + (commentQuestionList.size() - 1) + " persone hanno aggiunto un commento relativo ad una tua domanda"));
+                        }
+                    }
+                    break;
 
-                    // Gestione degli autori dei commenti
-                    if (commentAnswerList.size() == 1)
-                    {
-                        mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentAnswerList.get(0) + " ha commentato una tua risposta"));
-                    }
-                    else if (commentAnswerList.size() == 2)
-                    {
-                        mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta"));
-                    }
-                }
-                // Versione precedente a Nougat
-                else
-                {
-                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                // Notifica di un nuovo commento ad una risposta scritta dall'utente
+                case COMMENT_ANSWER:
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        // Numero nuovi commenti
+                        if (commentAnswerCount == 1)
+                            mBuilder.setContentTitle("1 nuovo commento");
+                        else
+                            mBuilder.setContentTitle(commentAnswerCount + " nuovi commenti");
 
-                    // Numero nuovi commenti
-                    if (commentAnswerCount == 1)
-                        mBuilder.setSubText("1 nuovo commento");
-                    else
-                        mBuilder.setSubText(commentAnswerCount + " nuovi commenti");
+                        // Gestione degli autori dei commenti
+                        if (commentAnswerList.size() == 1) {
+                            mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentAnswerList.get(0) + " ha commentato una tua risposta"));
+                        } else if (commentAnswerList.size() == 2) {
+                            mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta"));
+                        } else {
+                            mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta"));
+                        }
+                    }
+                    // Versione precedente a Nougat
+                    else {
+                        mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
-                    // Gestione degli autori dei commenti
-                    if (commentAnswerList.size() == 1)
-                    {
-                        mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentAnswerList.get(0) + " ha commentato una tua risposta"));
-                    }
-                    else if (commentAnswerList.size() == 2)
-                    {
-                        mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta"));
-                    }
-                }
-                break;
+                        // Numero nuovi commenti
+                        if (commentAnswerCount == 1)
+                            mBuilder.setSubText("1 nuovo commento");
+                        else
+                            mBuilder.setSubText(commentAnswerCount + " nuovi commenti");
 
-            // Notifica di un nuovo voto ottenuto su una domanda dell'utente
-            case RATING:
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-                {
-                    // Numero nuovi voti
-                    if (ratingCount == 1)
-                        mBuilder.setContentTitle("1 nuovo voto");
-                    else
-                        mBuilder.setContentTitle(ratingCount + " nuovi voti");
+                        // Gestione degli autori dei commenti
+                        if (commentAnswerList.size() == 1) {
+                            mBuilder.setContentText(commentAnswerList.get(0) + " ha commentato una tua risposta");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentAnswerList.get(0) + " ha commentato una tua risposta"));
+                        } else if (commentAnswerList.size() == 2) {
+                            mBuilder.setContentText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentAnswerList.get(0) + " e " + commentAnswerList.get(1) + " hanno commentato una tua risposta"));
+                        } else {
+                            mBuilder.setContentText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(commentAnswerList.get(0) + " e altre " + (commentAnswerList.size() - 1) + " persone hanno commentato una tua risposta"));
+                        }
+                    }
+                    break;
 
-                    // Gestione degli autori dei voti
-                    if (ratingList.size() == 1)
-                    {
-                        mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(ratingList.get(0) + " trova interessante una tua domanda"));
-                    }
-                    else if (ratingList.size() == 2)
-                    {
-                        mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda"));
-                    }
-                }
-                // Versione precedente a Nougat
-                else
-                {
-                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                // Notifica di un nuovo voto ottenuto su una domanda dell'utente
+                case RATING:
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        // Numero nuovi voti
+                        if (ratingCount == 1)
+                            mBuilder.setContentTitle("1 nuovo voto");
+                        else
+                            mBuilder.setContentTitle(ratingCount + " nuovi voti");
 
-                    // Numero nuovi voti
-                    if (ratingCount == 1)
-                        mBuilder.setSubText("1 nuovo voto");
-                    else
-                        mBuilder.setSubText(ratingCount + " nuovi voti");
+                        // Gestione degli autori dei voti
+                        if (ratingList.size() == 1) {
+                            mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(ratingList.get(0) + " trova interessante una tua domanda"));
+                        } else if (ratingList.size() == 2) {
+                            mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda"));
+                        } else {
+                            mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda"));
+                        }
+                    }
+                    // Versione precedente a Nougat
+                    else {
+                        mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
-                    // Gestione degli autori dei voti
-                    if (ratingList.size() == 1)
-                    {
-                        mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(ratingList.get(0) + " trova interessante una tua domanda"));
-                    }
-                    else if (ratingList.size() == 2)
-                    {
-                        mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda"));
-                    }
-                }
-                break;
+                        // Numero nuovi voti
+                        if (ratingCount == 1)
+                            mBuilder.setSubText("1 nuovo voto");
+                        else
+                            mBuilder.setSubText(ratingCount + " nuovi voti");
 
-            // Notifica di un nuovo like ottenuto su una risposta dell'utente
-            case LIKE:
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-                {
-                    // Numero nuovi like
-                    if (likeCount == 1)
-                        mBuilder.setContentTitle("1 nuovo like");
-                    else
-                        mBuilder.setContentTitle(likeCount + " nuovi like");
+                        // Gestione degli autori dei voti
+                        if (ratingList.size() == 1) {
+                            mBuilder.setContentText(ratingList.get(0) + " trova interessante una tua domanda");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(ratingList.get(0) + " trova interessante una tua domanda"));
+                        } else if (ratingList.size() == 2) {
+                            mBuilder.setContentText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(ratingList.get(0) + " e " + ratingList.get(1) + " trovano interessante una tua domanda"));
+                        } else {
+                            mBuilder.setContentText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText(ratingList.get(0) + " e altre " + (ratingList.size() - 1) + " persone trovano interessante una tua domanda"));
+                        }
+                    }
+                    break;
 
-                    // Gestione degli autori dei like
-                    if (likeList.size() == 1)
-                    {
-                        mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText("A " + likeList.get(0) + " piace una tua risposta"));
-                    }
-                    else if (likeList.size() == 2)
-                    {
-                        mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta"));
-                    }
-                }
-                // Versione precedente a Nougat
-                else
-                {
-                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                // Notifica di un nuovo like ottenuto su una risposta dell'utente
+                case LIKE:
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        // Numero nuovi like
+                        if (likeCount == 1)
+                            mBuilder.setContentTitle("1 nuovo like");
+                        else
+                            mBuilder.setContentTitle(likeCount + " nuovi like");
 
-                    // Numero nuovi like
-                    if (likeCount == 1)
-                        mBuilder.setSubText("1 nuovo like");
-                    else
-                        mBuilder.setSubText(likeCount + " nuovi like");
+                        // Gestione degli autori dei like
+                        if (likeList.size() == 1) {
+                            mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText("A " + likeList.get(0) + " piace una tua risposta"));
+                        } else if (likeList.size() == 2) {
+                            mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta"));
+                        } else {
+                            mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta"));
+                        }
+                    }
+                    // Versione precedente a Nougat
+                    else {
+                        mBuilder.setContentTitle(getResources().getString(R.string.app_name));
 
-                    // Gestione degli autori dei like
-                    if (likeList.size() == 1)
-                    {
-                        mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
-                        mBuilder.setLargeIcon(profilePic);
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText("A " + likeList.get(0) + " piace una tua risposta"));
-                    }
-                    else if (likeList.size() == 2)
-                    {
-                        mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta"));
-                    }
-                    else
-                    {
-                        mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
-                        mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                        mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta"));
-                    }
-                }
-                break;
+                        // Numero nuovi like
+                        if (likeCount == 1)
+                            mBuilder.setSubText("1 nuovo like");
+                        else
+                            mBuilder.setSubText(likeCount + " nuovi like");
 
-            default:
-                break;
+                        // Gestione degli autori dei like
+                        if (likeList.size() == 1) {
+                            mBuilder.setContentText("A " + likeList.get(0) + " piace una tua risposta");
+                            mBuilder.setLargeIcon(profilePic);
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText("A " + likeList.get(0) + " piace una tua risposta"));
+                        } else if (likeList.size() == 2) {
+                            mBuilder.setContentText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText("A " + likeList.get(0) + " e " + likeList.get(1) + " piace una tua risposta"));
+                        } else {
+                            mBuilder.setContentText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta");
+                            mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            mBuilder.setStyle(new Notification.BigTextStyle()
+                                    .bigText("A " + likeList.get(0) + " e altre " + (likeList.size() - 1) + " persone piace una tua risposta"));
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            Intent resultIntent = new Intent(BackgroundService.this, DetailActivity.class);
+            resultIntent.putExtra("question_key", questionKey);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+            stackBuilder.addParentStack(DetailActivity.class);
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(resultPendingIntent);
+
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(getNotificationID(type), mBuilder.build());
         }
-
-        Intent resultIntent = new Intent(BackgroundService.this, DetailActivity.class);
-        resultIntent.putExtra("question_key", questionKey);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-        stackBuilder.addParentStack(DetailActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(getNotificationID(type), mBuilder.build());
     }
 
     // Metodo per restituire l'identificativo della notifica, dato il tipo

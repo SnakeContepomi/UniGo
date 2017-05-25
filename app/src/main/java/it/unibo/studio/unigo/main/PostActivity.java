@@ -270,6 +270,6 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // Metodo che restituisce la stringa presa in ingresso, con il primo carattere in maiuscolo
     private String formatString(String string)
     {
-        return string.substring(0,1).toUpperCase() + string.substring(1);
+        return (string.length() > 0) ? string.substring(0,1).toUpperCase() + string.substring(1) : "";
     }
 }
