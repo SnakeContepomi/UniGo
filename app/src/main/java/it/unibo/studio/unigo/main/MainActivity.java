@@ -1,6 +1,5 @@
 package it.unibo.studio.unigo.main;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -9,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             searchView.closeSearch();
         else
         {
-            HomeFragment home = (HomeFragment) getFragmentManager().findFragmentByTag(FRAGMENT_HOME);
+            HomeFragment home = (HomeFragment) getSupportFragmentManager().findFragmentByTag(FRAGMENT_HOME);
             if ((home == null) || (!home.isVisible()))
                 navDrawer.setSelection(navDrawer.getDrawerItem(1));
             else
@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     // Metodo per caricare un fragment nella Main Activity
     private void loadFragment(Fragment fragment, String tag)
     {
-        getFragmentManager()
+        getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.fragment_container, fragment, tag)
             .commit();
@@ -428,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     @Nullable
     public Fragment getCurrentFragment()
     {
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.fragment_container);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
         if (fragment instanceof HomeFragment)
             return fragmentHome;

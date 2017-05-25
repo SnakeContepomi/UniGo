@@ -1,6 +1,5 @@
 package it.unibo.studio.unigo.main.fragments;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,7 +18,7 @@ import it.unibo.studio.unigo.main.adapters.QuestionAdapter;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
-public class MyQuestionFragment extends Fragment
+public class MyQuestionFragment extends android.support.v4.app.Fragment
 {
     private RecyclerView mRecyclerView;
     private QuestionAdapter mAdapter;
