@@ -14,16 +14,14 @@
     </string-array>
 
     <string-array name="pref_notificationPriority_entries">
-        <item>Nessuna notifica a comparsa</item>
-        <item>Solo con schermo acceso</item>
-        <item>Solo con schermo spento</item>
-        <item>Mostra sempre una notifica a comparsa</item>
+        <item>Bassa: non disturba</item>
+        <item>Default: solo avviso</item>
+        <item>Alta: avviso con notifica a comparsa</item>
     </string-array>
     <string-array name="pref_notificationPriority_values">
         <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 
     <string-array name="pref_notificationColor_entries">

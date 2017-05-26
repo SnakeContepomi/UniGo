@@ -33,7 +33,7 @@
             android:dialogTitle="Notifica a comparsa"
             android:entries="@array/pref_notificationPriority_entries"
             android:entryValues="@array/pref_notificationPriority_values"
-            android:defaultValue="3"
+            android:defaultValue="2"
             android:positiveButtonText="ok"
             android:negativeButtonText="Annulla"/>
         <ListPreference

@@ -15,6 +15,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.TaskStackBuilder;
@@ -35,6 +36,8 @@ import it.unibo.studio.unigo.main.fragments.SettingsFragment;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
+
+import static java.lang.reflect.Array.getInt;
 
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
 // i cambiamenti da Firebase
@@ -727,15 +730,15 @@ public class BackgroundService extends Service
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment
-        if (sharedPref.getBoolean(SettingsFragment.KEY_PREF_NOTIF, true))
-        {
+        if (sharedPref.getBoolean(SettingsFragment.KEY_PREF_NOTIF, true)) {
             Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
                     .setColor(Color.RED)
                     .setSmallIcon(R.drawable.ic_school_black_24dp)
-                    .setPriority(Notification.PRIORITY_MAX)
+                    .setPriority(getNotificationPriority())
                     //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
-                    .setVibrate(new long[]{0, 300, 200, 300})
-                    .setLights(Color.RED, 800, 4000)
+                    .setVibrate(getNotificationVibration())
+                    .setLights(getNotificationColor(), 800, 4000)
+                    .setSound(getNotificationRingtone())
                     .setAutoCancel(true);
 
             switch (type) {
@@ -1180,5 +1183,71 @@ public class BackgroundService extends Service
         bitmap.recycle();
 
         return output;
+    }
+
+    // Metodo per recuperare il colore del led di notifica dalle sharedPreferences
+    private int getNotificationColor()
+    {
+        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_COLOR, "2"))
+        {
+            case "0":
+                return Color.TRANSPARENT;
+            case "1":
+                return Color.WHITE;
+            case "2":
+                return Color.RED;
+            case "3":
+                return Color.YELLOW;
+            case "4":
+                return Color.GREEN;
+            case "5":
+                return Color.CYAN;
+            case "6":
+                return Color.BLUE;
+            case "7":
+                return Color.MAGENTA;
+            default:
+                return Color.RED;
+        }
+    }
+
+    // Metodo per recuperare la priorità delle notifiche dalle sharedPreferences
+    private int getNotificationPriority()
+    {
+        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_PRIORITY, "2"))
+        {
+            case "0":
+                return Notification.PRIORITY_MIN;
+            case "1":
+                return Notification.PRIORITY_DEFAULT;
+            case "2":
+                return Notification.PRIORITY_MAX;
+            default:
+                return Notification.PRIORITY_MAX;
+        }
+    }
+
+    // Metodo per recuperare il tipo di vibrazione delle notifiche dalle sharedPreferences
+    private long[] getNotificationVibration()
+    {
+        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_VIBRATION, "1"))
+        {
+            case "0":
+                return new long[]{0};
+            case "1":
+                return new long[]{0, 300, 200, 300};
+            case "2":
+                return new long[]{0, 300, 200, 300};
+            case "3":
+                return new long[]{0, 700, 300, 700};
+            default:
+                return new long[]{0, 300, 200, 300};
+        }
+    }
+
+    // Metodo per recuperare il tono delle notifiche dalle sharedPreferences
+    private Uri getNotificationRingtone()
+    {
+        return Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_RINGTONE, "DEFAULT_SOUND"));
     }
 }
