@@ -34,10 +34,10 @@
             android:name=".main.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".signup.SignupActivity"
+            android:name=".main.ProfileActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".main.ProfileActivity"
+            android:name=".signup.SignupActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".main.PostActivity"
