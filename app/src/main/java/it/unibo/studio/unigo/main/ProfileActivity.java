@@ -9,7 +9,6 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -17,11 +16,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.utils.RoundedImageView;
 
 public class ProfileActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
@@ -39,7 +38,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
     private LinearLayout linearlayoutTitle;
     private Toolbar toolbar;
     private TextView textviewTitle;
-    private RoundedImageView avatar;
+    private CircleImageView avatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -87,7 +86,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         linearlayoutTitle = (LinearLayout)findViewById( R.id.linearlayout_title );
         toolbar = (Toolbar)findViewById( R.id.toolbar );
         textviewTitle = (TextView)findViewById( R.id.textview_title );
-        avatar = (RoundedImageView) findViewById(R.id.avatar);
+        avatar = (CircleImageView) findViewById(R.id.avatar);
 
         toolbar.inflateMenu(R.menu.menu_profile);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {

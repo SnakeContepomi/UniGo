@@ -70,8 +70,12 @@ dependencies {
     compile "com.android.support:preference-v7:$supportLibsVersion"
     // Color Picker Preference
     compile 'net.xpece.android:support-preference-color:1.2.7'
-    //fresco dependency
+    // Fresco dependency
     compile 'com.facebook.fresco:fresco:0.9.0'
+    // SeekArc
+    compile 'com.github.Triggertrap:SeekArc:v1.1'
+    // CircleImageView
+    compile 'de.hdodenhof:circleimageview:2.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -6,9 +6,10 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.View;
+import de.hdodenhof.circleimageview.CircleImageView;
 import it.unibo.studio.unigo.R;
 
-public class ImageBehavior extends CoordinatorLayout.Behavior<RoundedImageView> {
+public class ImageBehavior extends CoordinatorLayout.Behavior<CircleImageView> {
 
     private final static float MIN_AVATAR_PERCENTAGE_SIZE   = 0.3f;
     private final static int EXTRA_FINAL_AVATAR_PADDING     = 80;
@@ -44,12 +45,12 @@ public class ImageBehavior extends CoordinatorLayout.Behavior<RoundedImageView> 
     private int mStartHeight;
     private int mFinalXPosition;
     @Override
-    public boolean layoutDependsOn(CoordinatorLayout parent, RoundedImageView child, View dependency) {
+    public boolean layoutDependsOn(CoordinatorLayout parent, CircleImageView child, View dependency) {
         return dependency instanceof Toolbar;
     }
 
     @Override
-    public boolean onDependentViewChanged(CoordinatorLayout parent, RoundedImageView child, View dependency) {
+    public boolean onDependentViewChanged(CoordinatorLayout parent, CircleImageView child, View dependency) {
         maybeInitProperties(child, dependency);
 
         final int maxScrollDistance = (int) (mStartToolbarPosition - getStatusBarHeight());
@@ -76,7 +77,7 @@ public class ImageBehavior extends CoordinatorLayout.Behavior<RoundedImageView> 
     }
 
     @SuppressLint("PrivateResource")
-    private void maybeInitProperties(RoundedImageView child, View dependency) {
+    private void maybeInitProperties(CircleImageView child, View dependency) {
         if (mStartYPosition == 0)
             mStartYPosition = (int) (dependency.getY());
 

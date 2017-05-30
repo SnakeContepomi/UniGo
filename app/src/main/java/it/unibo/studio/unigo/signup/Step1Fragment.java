@@ -22,9 +22,10 @@ import com.stepstone.stepper.BlockingStep;
 import com.stepstone.stepper.StepperLayout;
 import com.stepstone.stepper.VerificationError;
 import java.io.InputStream;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Error;
-import it.unibo.studio.unigo.utils.RoundedImageView;
 import it.unibo.studio.unigo.utils.SignupData;
 import it.unibo.studio.unigo.utils.Util;
 import static it.unibo.studio.unigo.utils.Error.resetError;
@@ -39,7 +40,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
 
     private MaterialDialog dialog;
     private TextInputLayout inRegEmail, inRegPass, inRegPassConfirm;
-    private RoundedImageView roundedProfileImg;
+    private CircleImageView roundedProfileImg;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -141,7 +142,7 @@ public class Step1Fragment extends Fragment implements BlockingStep
     // Inizializzazione dei componenti
     private void initializeComponents(View v)
     {
-        roundedProfileImg = (RoundedImageView) v.findViewById(R.id.RoundedProfileImg);
+        roundedProfileImg = (CircleImageView) v.findViewById(R.id.RoundedProfileImg);
         inRegEmail = (TextInputLayout) v.findViewById(R.id.inRegEmail);
         inRegPass = (TextInputLayout) v.findViewById(R.id.inRegPass);
         inRegPassConfirm = (TextInputLayout) v.findViewById(R.id.inRegPassConfirm);

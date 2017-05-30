@@ -151,7 +151,7 @@
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
-        <it.unibo.studio.unigo.utils.RoundedImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/avatar"
             android:layout_width="@dimen/image_width"
             android:layout_height="@dimen/image_width"
