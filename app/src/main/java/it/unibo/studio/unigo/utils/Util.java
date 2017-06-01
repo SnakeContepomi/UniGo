@@ -28,6 +28,8 @@ public class Util
     public static final int CREDITS_LIKE = 1;
     // Crediti richiesti per effettuare una domanda
     public static final int CREDITS_QUESTION = 10;
+    // Moltiplicatore di exp utilizzato nella formula per calcolare l'exp necessaria per il livelo successivo
+    public static final int EXP_MULTIPLIER = 3;
 
     private static FirebaseDatabase database;
     private static FirebaseUser user;
@@ -156,7 +158,7 @@ public class Util
             return date.substring(8, 10) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4);
     }
 
-    private static String getMonthName(String month)
+    public static String getMonthName(String month)
     {
         switch (month)
         {
@@ -193,6 +195,12 @@ public class Util
     public static String encodeEmail(String email)
     {
         return email.replace(".", "%2E");
+    }
+
+    // Metodo che restituisce l'indirizzo email rimpiazzando i caratteri speciali con "."
+    public static String decodeEmail(String email)
+    {
+        return email.replace("%2E", ".");
     }
 
     // Metodo per ottenere il colore di sfondo per la lettera material, scelto in base alla prima lettera della stringa passata
@@ -257,5 +265,89 @@ public class Util
                 return colors[11];
         }
         return 0;
+    }
+
+    // Metodo utilizzato per recuperare il titolo dell'utente, relativo al suo livello
+    public static String getUserTitle(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return "Desktop Technician";
+            case 2:
+                return "Web Developer";
+            case 3:
+                return "Junior Programmer";
+            case 4:
+                return "Web Designer";
+            case 5:
+                return "Web Master";
+            case 6:
+                return "Advanced Programmer";
+            case 7:
+                return "Database Administrator";
+            case 8:
+                return "Network Administrator";
+            case 9:
+                return "System Administrator";
+            case 10:
+                return "Security Specialist";
+            case 11:
+                return "Hardware Engineer";
+            case 12:
+                return "Software Testing Engineer";
+            case 13:
+                return "Telecommunications Engeneer";
+            case 14:
+                return "Network Engineer";
+            case 15:
+                return "Application Engineer";
+            case 16:
+                return "Analyst";
+            case 17:
+                return "Hardware and Information System Manager";
+            case 18:
+                return "Information Technology Manager";
+            case 19:
+                return "Network Architect";
+            case 20:
+                return "Senior Database Administrator";
+            case 21:
+                return "Senior Engineer";
+            case 22:
+                return "Senior Manager - Programming";
+            case 23:
+                return "Telecommunications Manager";
+            case 24:
+                return "Project Manager";
+            case 25:
+                return "Project Leader";
+            case 26:
+                return "Chief Technical Officer";
+            case 27:
+                return "Chief Information Officer";
+            case 28:
+                return "Information Technology Director";
+            case 29:
+                return "MIS Director";
+            case 30:
+                return "Senior Manager - Project Planner";
+            default:
+                return "Senior Manager - Project Planner";
+        }
+    }
+
+    // Metodo utilizzato per ottenere il livelo dell'utente, dati i suoi punti exp
+    public static int getUserLevel(int exp)
+    {
+        int level;
+        int cumulativeExp = 0;
+        for (level = 1; level <= 30; level++)
+        {
+            cumulativeExp += (level -1) * EXP_MULTIPLIER * EXP_ANSWER;
+            if (exp < cumulativeExp)
+                return level;
+        }
+        return level;
     }
 }
