@@ -342,6 +342,7 @@ public class Util
     {
         int level;
         int cumulativeExp = 0;
+
         for (level = 1; level <= 30; level++)
         {
             cumulativeExp += (level -1) * EXP_MULTIPLIER * EXP_ANSWER;
@@ -349,5 +350,15 @@ public class Util
                 return level;
         }
         return level;
+    }
+
+    // Metodo che restituisce l'exp necessaria per salire al livelo successivo
+    public static int getExpForNextLevel(int level)
+    {
+        int cumulativeExp = 0;
+
+        for (int i = 1; i <= level + 1; i++)
+            cumulativeExp += (i -1) * EXP_MULTIPLIER * EXP_ANSWER;
+        return cumulativeExp;
     }
 }
