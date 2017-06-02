@@ -102,14 +102,16 @@
                         android:orientation="horizontal"
                         android:weightSum="1">
                         <LinearLayout
-                            android:layout_width="0dp"
+                            android:id="@+id/xpBarDone"
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_weight="0.30"
+                            android:orientation="vertical"
                             android:background="@android:color/holo_green_light"/>
                         <LinearLayout
-                            android:layout_width="0dp"
+                            android:id="@+id/xpBarLeft"
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_weight="0.70"
+                            android:orientation="vertical"
                             android:background="@android:color/darker_gray"/>
                     </LinearLayout>
                     <LinearLayout
@@ -120,19 +122,19 @@
                         android:paddingEnd="16dp"
                         android:weightSum="1">
                         <TextView
+                            android:id="@+id/txtBarLvl"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="0.50"
-                            android:text="Livello 30"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
                             android:textColor="@color/colorWhite"
                             android:textAlignment="textStart"/>
                         <TextView
+                            android:id="@+id/txtBarExp"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="0.50"
-                            android:text="20,500/50,500 XP"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
                             android:textColor="@color/colorWhite"
@@ -214,7 +216,7 @@
                         android:orientation="horizontal"
                         android:paddingBottom="10dp">
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -236,7 +238,7 @@
                         android:orientation="horizontal"
                         android:paddingBottom="10dp">
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -257,7 +259,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -302,7 +304,7 @@
                         android:orientation="horizontal"
                         android:paddingBottom="10dp">
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -324,7 +326,7 @@
                         android:orientation="horizontal"
                         android:paddingBottom="10dp">
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -346,7 +348,7 @@
                         android:orientation="horizontal"
                         android:paddingBottom="10dp">
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -368,7 +370,7 @@
                         android:orientation="horizontal"
                         android:paddingBottom="10dp">
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -437,7 +439,8 @@
                 android:id="@+id/txtProfileToolbarTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="0dp"
                 android:gravity="center_vertical"
                 android:textColor="@android:color/white"
                 android:textSize="20sp" />

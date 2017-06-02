@@ -14,25 +14,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
 
-import static android.R.attr.data;
-
-public class ProfileActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
-
+public class ProfileActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener
+{
     private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR  = 0.9f;
     private static final float PERCENTAGE_TO_HIDE_TITLE_DETAILS     = 0.3f;
     private static final int ALPHA_ANIMATIONS_DURATION              = 200;
@@ -43,9 +39,10 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
     private AppBarLayout appbar;
     private CollapsingToolbarLayout collapsing;
     private FrameLayout framelayoutTitle;
-    private LinearLayout linearlayoutTitle;
+    private LinearLayout linearlayoutTitle, xpBarDone, xpBarLeft;
     private Toolbar toolbar;
     private TextView txtToolbarTitle, txtName, txtLevel,
+                     txtBarLvl, txtBarExp,
                      txtEmail, txtCourse, txtCity, txtPhone, txtSubscribe,
                      txtnQuestions, txtNAnswers, txtNComments, txtNCredits, txtNextTitle;
     private CircleImageView avatar;
@@ -86,6 +83,10 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         linearlayoutTitle = (LinearLayout) findViewById( R.id.linearlayout_title );
         txtName = (TextView) findViewById(R.id.txtProfileName);
         txtLevel = (TextView) findViewById(R.id.txtProfileLevel);
+        xpBarDone = (LinearLayout) findViewById(R.id.xpBarDone);
+        xpBarLeft = (LinearLayout) findViewById(R.id.xpBarLeft);
+        txtBarLvl = (TextView) findViewById(R.id.txtBarLvl);
+        txtBarExp = (TextView) findViewById(R.id.txtBarExp);
         toolbar = (Toolbar) findViewById( R.id.toolbar );
         txtToolbarTitle = (TextView) findViewById( R.id.txtProfileToolbarTitle);
         avatar = (CircleImageView) findViewById(R.id.avatar);
@@ -180,6 +181,28 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 txtToolbarTitle.setText(user.name + " " + user.lastName);
                 // Caricamento titolo, in base ai punti exp dell'utente
                 txtLevel.setText(Util.getUserTitle(Util.getUserLevel(user.exp)));
+
+                // Caricamento livello attuale e punti necessari al prossimo livello
+                txtBarLvl.setText(String.valueOf(Util.getUserLevel(user.exp)));
+                txtBarExp.setText(user.exp + "/" + Util.getExpForNextLevel(Util.getUserLevel(user.exp)));
+
+                // Inizializzazione barra dell'Exp
+                if (Util.getUserLevel(user.exp) == 30)
+                {
+                    xpBarDone.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, 1f));
+                    xpBarLeft.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, 0f));
+                }
+                else
+                {
+                    float xpDone = user.exp / (float) Util.getExpForNextLevel(Util.getUserLevel(user.exp));
+                    //Log.d("prova", "exp for next level): " + (float) user.exp / Util.getExpForNextLevel(Util.getUserLevel(user.exp)));
+
+                    //Log.d("prova", "exp done(%): " + xpDone);
+                    //Log.d("prova", "exp remaining(%): " + (1 - xpDone));
+                    xpBarDone.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, xpDone));
+                    xpBarLeft.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, (1-xpDone)));
+                }
+
                 // Caricamento dell'email utente
                 txtEmail.setText(Util.decodeEmail(dataSnapshot.getKey()));
                 Util.getDatabase().getReference("Course").child(user.courseKey).addListenerForSingleValueEvent(new ValueEventListener() {
