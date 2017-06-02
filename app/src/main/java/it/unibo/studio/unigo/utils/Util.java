@@ -3,8 +3,6 @@ package it.unibo.studio.unigo.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -347,14 +345,13 @@ public class Util
         int level;
         int cumulativeExp = 0;
 
-        for (level = 1; level <= 30; level++)
+        for (level = 1; level <= MAX_LEVEL; level++)
         {
             cumulativeExp += (level -1) * EXP_MULTIPLIER * EXP_ANSWER;
-            Log.d("prova", "due apici: " + cumulativeExp);
             if (exp < cumulativeExp)
                 return level - 1;
         }
-        return level;
+        return MAX_LEVEL;
     }
 
     // Metodo che restituisce l'exp necessaria per salire al livelo successivo
