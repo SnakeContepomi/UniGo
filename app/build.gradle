@@ -71,7 +71,7 @@ dependencies {
     // Color Picker Preference
     compile 'net.xpece.android:support-preference-color:1.2.7'
     // Fresco dependency
-    compile 'com.facebook.fresco:fresco:0.9.0'
+    compile 'com.facebook.fresco:fresco:1.3.0'
     // SeekArc
     compile 'com.github.Triggertrap:SeekArc:v1.1'
     // CircleImageView
