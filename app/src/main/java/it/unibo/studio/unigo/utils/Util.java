@@ -11,6 +11,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
@@ -364,5 +365,42 @@ public class Util
         for (int i = 1; i <= level + 1; i++)
             cumulativeExp += (i -1) * EXP_MULTIPLIER * EXP_ANSWER;
         return cumulativeExp;
+    }
+
+    // Metodo utilizzato per convertire un intero (exp) in una stringa contenente una virgola dopo ogni multiplo di 1000
+    public static String formatExp(int exp)
+    {
+        String strExp = String.valueOf(exp);
+
+        // Se i punti exp son meno di 1000, l'exp viene restituita così com'è, sotto forma di stringa
+        if (exp < 1000)
+            return strExp;
+        // Altrimenti viene creata una stringa in cui, dopo ogni 3 cifre, viene aggiunta una virgola
+        else
+        {
+            ArrayList<String> newExp = new ArrayList<String>();
+            int counter = 0;
+
+            // Aggiunta di una virgola ogni 3 cifre
+            for (int i = strExp.length() - 1; i >= 0; i--)
+            {
+                counter++;
+                newExp.add(String.valueOf(strExp.charAt(i)));
+                if ((counter % 3 == 0) && i != 0)
+                {
+                    newExp.add(",");
+                    counter = 0;
+                }
+            }
+            // La nuova stringa viene invertita
+            Collections.reverse(newExp);
+
+            // Viene convertito l'ArrayList sotto forma di stringa
+            StringBuilder strBuilder = new StringBuilder();
+            for (String s : newExp)
+                strBuilder.append(s);
+
+            return strBuilder.toString();
+        }
     }
 }
