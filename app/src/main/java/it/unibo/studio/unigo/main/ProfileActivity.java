@@ -44,7 +44,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
     private TextView txtToolbarTitle, txtName, txtLevel,
                      txtBarLvl, txtBarExp,
                      txtEmail, txtCourse, txtCity, txtPhone, txtSubscribe,
-                     txtnQuestions, txtNAnswers, txtNComments, txtNCredits, txtNextTitle;
+                     txtXP, txtnQuestions, txtNAnswers, txtNComments, txtNCredits;
     private CircleImageView avatar;
 
     @Override
@@ -95,11 +95,11 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         txtCity = (TextView) findViewById(R.id.txtProfileCity);
         txtPhone = (TextView) findViewById(R.id.txtProfilePhone);
         txtSubscribe = (TextView) findViewById(R.id.txtProfileSubscribe);
+        txtXP = (TextView) findViewById(R.id.txtProfileXP);
         txtnQuestions = (TextView) findViewById(R.id.txtProfileNQuestion);
         txtNAnswers = (TextView) findViewById(R.id.txtProfileNAnswer);
         txtNComments = (TextView) findViewById(R.id.txtProfileNComments);
         txtNCredits = (TextView) findViewById(R.id.txtProfileNCredits);
-        txtNextTitle = (TextView) findViewById(R.id.txtProfileNextTitle);
 
 
         // Se il profilo dell'utente è quello dell'utilizzatore, sarà possibile modificare
@@ -186,26 +186,23 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 txtLevel.setText(Util.getUserTitle(userLvl));
 
                 // Caricamento livello attuale e punti necessari al prossimo livello
-                txtBarLvl.setText(String.valueOf(userLvl));
+                txtBarLvl.setText(getResources().getString(R.string.profile_lvl, userLvl));
                 expPreviousLvl = Util.getExpForNextLevel(userLvl - 1);
                 expNextLvl = Util.getExpForNextLevel(userLvl);
-                txtBarExp.setText((user.exp - expPreviousLvl) + "/" + (expNextLvl - expPreviousLvl));
 
-                // Inizializzazione barra dell'Exp
-                if (userLvl == 30)
+                // Inizializzazione Layout punti esperienza (barra dei progressi + testo)
+                if (userLvl == Util.MAX_LEVEL)
                 {
                     xpBarDone.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, 1f));
                     xpBarLeft.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, 0f));
+                    txtBarExp.setText(getResources().getString(R.string.profile_xp_max, Util.formatExp(user.exp)));
                 }
                 else
                 {
-                    float xpDone = user.exp / (float) Util.getExpForNextLevel(userLvl);
-                    //Log.d("prova", "exp for next level): " + (float) user.exp / Util.getExpForNextLevel(Util.getUserLevel(user.exp)));
-
-                    //Log.d("prova", "exp done(%): " + xpDone);
-                    //Log.d("prova", "exp remaining(%): " + (1 - xpDone));
+                    float xpDone = (user.exp - expPreviousLvl) / (float) (expNextLvl - expPreviousLvl);
                     xpBarDone.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, xpDone));
                     xpBarLeft.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, (1-xpDone)));
+                    txtBarExp.setText(getResources().getString(R.string.profile_xp, Util.formatExp(user.exp - expPreviousLvl), Util.formatExp(expNextLvl - expPreviousLvl)));
                 }
 
                 // Caricamento dell'email utente
@@ -220,9 +217,20 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                     @Override
                     public void onCancelled(DatabaseError databaseError) { }
                 });
-                txtCity.setText(user.city);
-                txtPhone.setText(user.phone);
+                // Caricamento della città dell'utente
+                if (user.city.equals(""))
+                    txtCity.setText("-");
+                else
+                    txtCity.setText(user.city);
+                // Caricamento del numero di telefono dell'utente
+                if (user.phone.equals(""))
+                    txtPhone.setText("-");
+                else
+                    txtPhone.setText(user.phone);
                 txtSubscribe.setText(setDate(user.subscribeDate));
+
+
+                txtXP.setText(Util.formatExp(user.exp));
 
                 if (user.questions != null)
                     txtnQuestions.setText(String.valueOf(user.questions.size()));
@@ -237,10 +245,6 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 else
                     txtNComments.setText("0");
                 txtNCredits.setText(String.valueOf(user.credits));
-                if (Util.getUserLevel(user.exp) < Util.MAX_LEVEL)
-                    txtNextTitle.setText(Util.getUserTitle(Util.getUserLevel(user.exp) + 1));
-                else
-                    txtNextTitle.setText("/");
             }
 
             @Override

@@ -119,13 +119,11 @@
                         android:layout_height="match_parent"
                         android:orientation="horizontal"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:weightSum="1">
+                        android:paddingEnd="16dp">
                         <TextView
                             android:id="@+id/txtBarLvl"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:layout_weight="0.50"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
                             android:textColor="@color/colorWhite"
@@ -134,7 +132,7 @@
                             android:id="@+id/txtBarExp"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
-                            android:layout_weight="0.50"
+                            android:layout_weight="1"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
                             android:textColor="@color/colorWhite"
@@ -153,7 +151,7 @@
                         android:paddingBottom="10dp"
                         android:textSize="20sp"
                         android:fontFamily="sans-serif-medium"
-                        android:text="Info Utente"
+                        android:text="@string/profile_info"
                         android:textColor="@color/colorBlack"/>
 
                     <LinearLayout
@@ -168,7 +166,7 @@
                             android:layout_weight="0.35"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Email"
+                            android:text="@string/profile_email"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
                             android:id="@+id/txtProfileEmail"
@@ -195,7 +193,7 @@
                             android:layout_weight="0.35"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Corso"
+                            android:text="@string/profile_course"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
                             android:id="@+id/txtProfileCourse"
@@ -220,7 +218,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Città"
+                            android:text="@string/profile_city"
                             android:layout_weight="0.2"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
@@ -242,7 +240,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Telefono"
+                            android:text="@string/profile_phone"
                             android:layout_weight="0.2"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
@@ -263,7 +261,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Data Iscrizione"
+                            android:text="@string/profile_subscribe"
                             android:layout_weight="0.2"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
@@ -284,7 +282,9 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="2dp"
-                app:contentPadding="16dp">
+                app:contentPaddingTop="16dp"
+                app:contentPaddingLeft="16dp"
+                app:contentPaddingRight="16dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -295,7 +295,7 @@
                         android:paddingBottom="10dp"
                         android:textSize="20sp"
                         android:fontFamily="sans-serif-medium"
-                        android:text="Statistiche"
+                        android:text="@string/profile_stats"
                         android:textColor="@color/colorBlack"/>
 
                     <LinearLayout
@@ -308,7 +308,29 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Domande"
+                            android:text="@string/profile_total_xp"
+                            android:layout_weight="0.2"
+                            android:textColor="@color/colorDarkGray"/>
+                        <TextView
+                            android:id="@+id/txtProfileXP"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:fontFamily="sans-serif"
+                            android:textColor="@color/colorDarkGray"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingBottom="10dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:fontFamily="sans-serif"
+                            android:text="@string/profile_questions"
                             android:layout_weight="0.2"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
@@ -330,7 +352,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Risposte"
+                            android:text="@string/profile_answers"
                             android:layout_weight="0.2"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
@@ -352,7 +374,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Commenti"
+                            android:text="@string/profile_comments"
                             android:layout_weight="0.2"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
@@ -374,7 +396,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:text="Crediti"
+                            android:text="@string/profile_credits"
                             android:layout_weight="0.2"
                             android:textColor="@color/colorDarkGray"/>
                         <TextView
@@ -383,32 +405,6 @@
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
-                            android:textColor="@color/colorDarkGray"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:weightSum="1">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="0.35"
-                            android:textSize="18sp"
-                            android:fontFamily="sans-serif"
-                            android:text="Prossimo Titolo"
-                            android:textColor="@color/colorDarkGray"/>
-                        <TextView
-                            android:id="@+id/txtProfileNextTitle"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="0.65"
-                            android:textSize="18sp"
-                            android:fontFamily="sans-serif"
-                            android:textAlignment="textEnd"
-                            android:ellipsize="end"
-                            android:lines="1"
                             android:textColor="@color/colorDarkGray"/>
                     </LinearLayout>
                 </LinearLayout>

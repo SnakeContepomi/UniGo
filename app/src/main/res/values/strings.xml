@@ -117,8 +117,20 @@
     <string name="detail_error_autolike">Non è consentito votare le proprie risposte</string>
     <string name="detail_error_like_without_connection">Assicurati di essere connesso per effettuare operazioni di rete</string>
 
-    <string name="lorem">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vehicula sem a malesuada rhoncus. Pellentesque ut dolor a dui porttitor porta lacinia non libero. Nunc volutpat arcu quis quam convallis molestie. Etiam ac tristique sem, id commodo justo. Phasellus congue tincidunt lectus, at dignissim ligula maximus eu. Quisque interdum nunc eget tellus bibendum suscipit. Phasellus feugiat ultricies posuere. Nullam porta accumsan velit, ut rutrum massa fermentum eu. Nunc ac bibendum nunc. Mauris eu ultricies ipsum. Ut id dolor dui. Pellentesque dictum dui vel tempus maximus. Vivamus non nisi quis libero scelerisque pretium. Ut eu tristique justo. Sed pellentesque placerat quam, ut ultricies turpis feugiat a. Aliquam a volutpat risus.
-        Praesent at lectus semper, suscipit elit in, facilisis massa. Phasellus sed vestibulum ante, a euismod sem. Interdum et malesuada fames ac ante ipsum primis in faucibus. Proin tincidunt orci augue, a porta odio lacinia eu. Nunc in congue risus. Maecenas commodo nibh ac enim fermentum, eu sagittis massa blandit. Vestibulum elementum massa nec dapibus mollis.
-    </string>
+
+    <string name="profile_lvl">Livello %1$d</string>
+    <string name="profile_xp">%1$s/%2$s XP</string>
+    <string name="profile_xp_max">%1$s XP</string>
+    <string name="profile_info">Info Utente</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_course">Corso</string>
+    <string name="profile_city">Città</string>
+    <string name="profile_phone">Telefono</string>
+    <string name="profile_subscribe">Iscritto il</string>
+    <string name="profile_stats">Statistiche</string>
+    <string name="profile_total_xp">XP Totali</string>
+    <string name="profile_questions">Domande</string>
+    <string name="profile_answers">Risposte</string>
+    <string name="profile_comments">Commenti</string>
+    <string name="profile_credits">Crediti</string>
 </resources>
