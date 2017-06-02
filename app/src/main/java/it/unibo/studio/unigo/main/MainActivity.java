@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current)
                     {
-                        startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+                        startActivity(new Intent(getApplicationContext(), ProfileActivity.class).putExtra("user_key", Util.getCurrentUser().getEmail()));
                         return false;
                     }
                 })

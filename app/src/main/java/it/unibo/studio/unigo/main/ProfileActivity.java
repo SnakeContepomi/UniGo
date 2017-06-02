@@ -9,6 +9,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -18,9 +19,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.User;
+
+import static android.R.attr.data;
 
 public class ProfileActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
 
@@ -33,11 +42,12 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
 
     private AppBarLayout appbar;
     private CollapsingToolbarLayout collapsing;
-    private ImageView coverImage;
     private FrameLayout framelayoutTitle;
     private LinearLayout linearlayoutTitle;
     private Toolbar toolbar;
-    private TextView textviewTitle;
+    private TextView txtToolbarTitle, txtName, txtLevel,
+                     txtEmail, txtCourse, txtCity, txtPhone, txtSubscribe,
+                     txtnQuestions, txtNAnswers, txtNComments, txtNCredits, txtNextTitle;
     private CircleImageView avatar;
 
     @Override
@@ -49,16 +59,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         Fresco.initialize(this);
         setContentView(R.layout.activity_profile);
         initComponents();
-
-        toolbar.setTitle("");
-        appbar.addOnOffsetChangedListener(this);
-
-        //setSupportActionBar(toolbar);
-        startAlphaAnimation(textviewTitle, 0, View.INVISIBLE);
-
-        //set avatar and cover
-        //avatar.setImageURI(imageUri);
-        coverImage.setImageResource(R.drawable.cover);
+        retrieveUserInfo();
     }
 
     @Override
@@ -79,15 +80,29 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
 
     private void initComponents()
     {
-        appbar = (AppBarLayout)findViewById( R.id.appbar );
-        collapsing = (CollapsingToolbarLayout)findViewById( R.id.collapsing );
-        coverImage = (ImageView)findViewById( R.id.imageview_placeholder );
-        framelayoutTitle = (FrameLayout)findViewById( R.id.framelayout_title );
-        linearlayoutTitle = (LinearLayout)findViewById( R.id.linearlayout_title );
-        toolbar = (Toolbar)findViewById( R.id.toolbar );
-        textviewTitle = (TextView)findViewById( R.id.textview_title );
+        appbar = (AppBarLayout) findViewById( R.id.appbar );
+        collapsing = (CollapsingToolbarLayout) findViewById( R.id.collapsing );
+        framelayoutTitle = (FrameLayout) findViewById( R.id.framelayout_title );
+        linearlayoutTitle = (LinearLayout) findViewById( R.id.linearlayout_title );
+        txtName = (TextView) findViewById(R.id.txtProfileName);
+        txtLevel = (TextView) findViewById(R.id.txtProfileLevel);
+        toolbar = (Toolbar) findViewById( R.id.toolbar );
+        txtToolbarTitle = (TextView) findViewById( R.id.txtProfileToolbarTitle);
         avatar = (CircleImageView) findViewById(R.id.avatar);
+        txtEmail = (TextView) findViewById(R.id.txtProfileEmail);
+        txtCourse = (TextView) findViewById(R.id.txtProfileCourse);
+        txtCity = (TextView) findViewById(R.id.txtProfileCity);
+        txtPhone = (TextView) findViewById(R.id.txtProfilePhone);
+        txtSubscribe = (TextView) findViewById(R.id.txtProfileSubscribe);
+        txtnQuestions = (TextView) findViewById(R.id.txtProfileNQuestion);
+        txtNAnswers = (TextView) findViewById(R.id.txtProfileNAnswer);
+        txtNComments = (TextView) findViewById(R.id.txtProfileNComments);
+        txtNCredits = (TextView) findViewById(R.id.txtProfileNCredits);
+        txtNextTitle = (TextView) findViewById(R.id.txtProfileNextTitle);
 
+
+        // Se il profilo dell'utente è quello dell'utilizzatore, sarà possibile modificare
+        // le proprie informazioni, altrimenti sarà possibile inviare una mail all'utente destinatario
         toolbar.inflateMenu(R.menu.menu_profile);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -97,20 +112,23 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 return false;
             }
         });
+
+        appbar.addOnOffsetChangedListener(this);
+        startAlphaAnimation(txtToolbarTitle, 0, View.INVISIBLE);
     }
 
     private void handleToolbarTitleVisibility(float percentage) {
         if (percentage >= PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR) {
 
             if(!mIsTheTitleVisible) {
-                startAlphaAnimation(textviewTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
+                startAlphaAnimation(txtToolbarTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
                 mIsTheTitleVisible = true;
             }
 
         } else {
 
             if (mIsTheTitleVisible) {
-                startAlphaAnimation(textviewTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
+                startAlphaAnimation(txtToolbarTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
                 mIsTheTitleVisible = false;
             }
         }
@@ -142,9 +160,69 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         v.startAnimation(alphaAnimation);
     }
 
+    // Vengono recuperate le informazioni personali dell'utente
+    private void retrieveUserInfo()
+    {
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(getIntent().getStringExtra("user_key"))).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                User user = dataSnapshot.getValue(User.class);
+
+                // Caricamento dell'immagine utente
+                if (!Util.isNetworkAvailable(getApplicationContext()) || user.photoUrl.equals(getResources().getString(R.string.empty_profile_pic_url)))
+                    avatar.setImageDrawable(getResources().getDrawable(R.drawable.empty_profile_pic, null));
+                else
+                    Picasso.with(avatar.getContext()).load(user.photoUrl).fit().into(avatar);
+
+                // Caricamento nome-cognome
+                txtName.setText(user.name + " " + user.lastName);
+                txtToolbarTitle.setText(user.name + " " + user.lastName);
+                // Caricamento titolo, in base ai punti exp dell'utente
+                txtLevel.setText(Util.getUserTitle(Util.getUserLevel(user.exp)));
+                // Caricamento dell'email utente
+                txtEmail.setText(Util.decodeEmail(dataSnapshot.getKey()));
+                Util.getDatabase().getReference("Course").child(user.courseKey).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        txtCourse.setText(dataSnapshot.child("name").getValue(String.class));
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
+                txtCity.setText(user.city);
+                txtPhone.setText(user.phone);
+                txtSubscribe.setText(setDate(user.subscribeDate));
+
+                if (user.questions != null)
+                    txtnQuestions.setText(String.valueOf(user.questions.size()));
+                else
+                    txtnQuestions.setText("0");
+                if (user.answers != null)
+                    txtNAnswers.setText(String.valueOf(user.answers.size()));
+                else
+                    txtNAnswers.setText("0");
+                if (user.comments != null)
+                    txtNComments.setText(String.valueOf(user.comments.size()));
+                else
+                    txtNComments.setText("0");
+                txtNCredits.setText(String.valueOf(user.credits));
+                if (Util.getUserLevel(user.exp) < Util.MAX_LEVEL)
+                    txtNextTitle.setText(Util.getUserTitle(Util.getUserLevel(user.exp) + 1));
+                else
+                    txtNextTitle.setText("/");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
     // Metodo che permette all'utente di scegliere con quale client inviare la mail
     // (tutto il testo già scritto verrà passato al client scelto)
-    protected void inviaEmail()
+    private void inviaEmail()
     {
         Intent email = new Intent(Intent.ACTION_SEND, Uri.parse("mailto:"));
         // Vengono visualizzati solamente i client email installati
@@ -174,6 +252,13 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
             AlertDialog alert = adBuilder.create();
             alert.show();
         }
+    }
+
+    private String setDate(String date)
+    {
+        String[] splittedDate = (date.substring(0, 10)).split("/");
+
+        return splittedDate[2] + " " + Util.getMonthName(splittedDate[1]) + " " + splittedDate[0];
     }
 }
 

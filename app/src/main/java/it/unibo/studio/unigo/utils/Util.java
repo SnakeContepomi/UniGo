@@ -33,6 +33,7 @@ public class Util
     public static final int CREDITS_QUESTION = 10;
     // Moltiplicatore di exp utilizzato nella formula per calcolare l'exp necessaria per il livelo successivo
     public static final int EXP_MULTIPLIER = 3;
+    public static final int MAX_LEVEL = 30;
 
     private static FirebaseDatabase database;
     private static FirebaseUser user;
@@ -349,8 +350,9 @@ public class Util
         for (level = 1; level <= 30; level++)
         {
             cumulativeExp += (level -1) * EXP_MULTIPLIER * EXP_ANSWER;
+            Log.d("prova", "due apici: " + cumulativeExp);
             if (exp < cumulativeExp)
-                return level;
+                return level - 1;
         }
         return level;
     }
