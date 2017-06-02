@@ -169,6 +169,9 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 User user = dataSnapshot.getValue(User.class);
+                int userLvl, expPreviousLvl, expNextLvl;
+
+                userLvl = Util.getUserLevel(user.exp);
 
                 // Caricamento dell'immagine utente
                 if (!Util.isNetworkAvailable(getApplicationContext()) || user.photoUrl.equals(getResources().getString(R.string.empty_profile_pic_url)))
@@ -180,21 +183,23 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 txtName.setText(user.name + " " + user.lastName);
                 txtToolbarTitle.setText(user.name + " " + user.lastName);
                 // Caricamento titolo, in base ai punti exp dell'utente
-                txtLevel.setText(Util.getUserTitle(Util.getUserLevel(user.exp)));
+                txtLevel.setText(Util.getUserTitle(userLvl));
 
                 // Caricamento livello attuale e punti necessari al prossimo livello
-                txtBarLvl.setText(String.valueOf(Util.getUserLevel(user.exp)));
-                txtBarExp.setText(user.exp + "/" + Util.getExpForNextLevel(Util.getUserLevel(user.exp)));
+                txtBarLvl.setText(String.valueOf(userLvl));
+                expPreviousLvl = Util.getExpForNextLevel(userLvl - 1);
+                expNextLvl = Util.getExpForNextLevel(userLvl);
+                txtBarExp.setText((user.exp - expPreviousLvl) + "/" + (expNextLvl - expPreviousLvl));
 
                 // Inizializzazione barra dell'Exp
-                if (Util.getUserLevel(user.exp) == 30)
+                if (userLvl == 30)
                 {
                     xpBarDone.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, 1f));
                     xpBarLeft.setLayoutParams(new LayoutParams(0, LayoutParams.MATCH_PARENT, 0f));
                 }
                 else
                 {
-                    float xpDone = user.exp / (float) Util.getExpForNextLevel(Util.getUserLevel(user.exp));
+                    float xpDone = user.exp / (float) Util.getExpForNextLevel(userLvl);
                     //Log.d("prova", "exp for next level): " + (float) user.exp / Util.getExpForNextLevel(Util.getUserLevel(user.exp)));
 
                     //Log.d("prova", "exp done(%): " + xpDone);

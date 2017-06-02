@@ -355,11 +355,11 @@ public class Util
     }
 
     // Metodo che restituisce l'exp necessaria per salire al livelo successivo
-    public static int getExpForNextLevel(int level)
+    public static int getExpForNextLevel(int startLvl)
     {
         int cumulativeExp = 0;
 
-        for (int i = 1; i <= level + 1; i++)
+        for (int i = 1; i <= startLvl + 1; i++)
             cumulativeExp += (i -1) * EXP_MULTIPLIER * EXP_ANSWER;
         return cumulativeExp;
     }
