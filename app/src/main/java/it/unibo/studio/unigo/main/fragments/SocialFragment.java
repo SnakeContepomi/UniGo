@@ -19,13 +19,14 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.adapteritems.UserAdapterItem;
 import it.unibo.studio.unigo.main.adapters.UserAdapter;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
 
 public class SocialFragment extends Fragment
 {
-    private List<User> userList;
+    private List<UserAdapterItem> userList;
 
     LinearLayout loadingLayout;
     private FastScrollRecyclerView mRecyclerView;
@@ -50,7 +51,7 @@ public class SocialFragment extends Fragment
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(v.getContext()));
         // Inizializzazione adapter della lista degli utenti
-        mAdapter = new UserAdapter(userList);
+        mAdapter = new UserAdapter(getActivity(), userList);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setFastScrollEnabled(true);
 
@@ -72,7 +73,7 @@ public class SocialFragment extends Fragment
                 while (iterator.hasNext())
                 {
                     DataSnapshot child = iterator.next();
-                    userList.add(child.getValue(User.class));
+                    userList.add(new UserAdapterItem(child.getValue(User.class), child.getKey()));
                     if (!iterator.hasNext())
                     {
                         sortUserList();
@@ -91,11 +92,11 @@ public class SocialFragment extends Fragment
     // Metodo per ordinare la lista degli utenti prima sul campo nome, poi sul cognome
     private void sortUserList()
     {
-        Collections.sort(userList, new Comparator<User>() {
+        Collections.sort(userList, new Comparator<UserAdapterItem>() {
             @Override
-            public int compare(User u1, User u2)
+            public int compare(UserAdapterItem u1, UserAdapterItem u2)
             {
-                return new CompareToBuilder().append(u1.name, u2.name).append(u1.lastName, u2.lastName).toComparison();
+                return new CompareToBuilder().append(u1.getUser().name, u2.getUser().name).append(u1.getUser().lastName, u2.getUser().lastName).toComparison();
             }
         });
     }

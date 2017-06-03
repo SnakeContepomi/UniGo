@@ -9,7 +9,6 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -170,7 +169,6 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
             {
                 User user = dataSnapshot.getValue(User.class);
                 int userLvl, expPreviousLvl, expNextLvl;
-
                 userLvl = Util.getUserLevel(user.exp);
 
                 // Caricamento dell'immagine utente
