@@ -229,7 +229,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                     holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.child("name").getValue(String.class)));
                 }
                 else
-                    Picasso.with(holder.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).fit().into(holder.imgProfile);
+                    Picasso.with(holder.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile);
             }
 
             @Override

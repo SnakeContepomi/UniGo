@@ -272,7 +272,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     qh.userPhoto.setShapeColor(Util.getLetterBackgroundColor(qh.context, dataSnapshot.child("name").getValue(String.class)));
                 }
                 else
-                    Picasso.with(qh.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).fit().into(qh.userPhoto);
+                    Picasso.with(qh.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(qh.userPhoto);
             }
 
             @Override
@@ -415,7 +415,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     ah.imgProfile.setShapeColor(Util.getLetterBackgroundColor(ah.context, dataSnapshot.child("name").getValue(String.class)));
                 }
                 else
-                    Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).fit().into(ah.imgProfile);
+                    Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(ah.imgProfile);
 
                 ah.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                 ah.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
@@ -545,6 +545,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         else
             Picasso.with(activity.getApplicationContext())
                     .load(getCurrentUser().getPhotoUrl())
+                    .placeholder(R.drawable.empty_profile_pic)
                     .fit()
                     .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
 
@@ -610,6 +611,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         else
             Picasso.with(activity.getApplicationContext())
                     .load(getCurrentUser().getPhotoUrl())
+                    .placeholder(R.drawable.empty_profile_pic)
                     .fit()
                     .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
 

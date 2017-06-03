@@ -16,7 +16,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -52,7 +51,6 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         //overridePendingTransition(entrante, uscente)
         overridePendingTransition(R.anim.target_activity_creation, R.anim.main_activity_dissolve);
         super.onCreate(savedInstanceState);
-        Fresco.initialize(this);
         setContentView(R.layout.activity_profile);
         initComponents();
         retrieveUserInfo();
@@ -175,7 +173,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 if (!Util.isNetworkAvailable(getApplicationContext()) || user.photoUrl.equals(getResources().getString(R.string.empty_profile_pic_url)))
                     avatar.setImageDrawable(getResources().getDrawable(R.drawable.empty_profile_pic, null));
                 else
-                    Picasso.with(avatar.getContext()).load(user.photoUrl).fit().into(avatar);
+                    Picasso.with(avatar.getContext()).load(user.photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(avatar);
 
                 // Caricamento nome-cognome
                 txtName.setText(user.name + " " + user.lastName);
