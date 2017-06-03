@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -95,7 +94,7 @@
                 app:cardCornerRadius="2dp">
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="28dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -118,12 +117,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="horizontal"
+                        android:gravity="center_vertical"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp">
                         <TextView
                             android:id="@+id/txtBarLvl"
                             android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
                             android:textColor="@color/colorWhite"
@@ -131,7 +131,7 @@
                         <TextView
                             android:id="@+id/txtBarExp"
                             android:layout_width="0dp"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textSize="18sp"
                             android:fontFamily="sans-serif"
@@ -452,7 +452,6 @@
         app:civ_border_overlay="true"
         app:civ_border_width="2dp"
         app:civ_border_color="@color/colorWhite"
-        app:layout_behavior="it.unibo.studio.unigo.utils.ImageBehavior"
-        fresco:roundAsCircle="true" />
+        app:layout_behavior="it.unibo.studio.unigo.utils.ImageBehavior" />
 
 </android.support.design.widget.CoordinatorLayout>
