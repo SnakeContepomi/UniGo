@@ -80,7 +80,7 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
                     holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.child("name").getValue(String.class)));
                 }
                 else
-                    Picasso.with(holder.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).fit().into(holder.imgProfile);
+                    Picasso.with(holder.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile);
             }
 
             @Override
