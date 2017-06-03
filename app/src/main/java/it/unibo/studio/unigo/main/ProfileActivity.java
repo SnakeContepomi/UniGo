@@ -2,6 +2,7 @@ package it.unibo.studio.unigo.main;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -9,6 +10,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -24,6 +26,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
+
+import static java.security.AccessController.getContext;
 
 public class ProfileActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener
 {
@@ -115,19 +119,26 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         startAlphaAnimation(txtToolbarTitle, 0, View.INVISIBLE);
     }
 
-    private void handleToolbarTitleVisibility(float percentage) {
-        if (percentage >= PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR) {
-
-            if(!mIsTheTitleVisible) {
+    private void handleToolbarTitleVisibility(float percentage)
+    {
+        if (percentage >= PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR)
+        {
+            if(!mIsTheTitleVisible)
+            {
                 startAlphaAnimation(txtToolbarTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
                 mIsTheTitleVisible = true;
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                avatar.setBorderWidth(0);
             }
-
-        } else {
-
-            if (mIsTheTitleVisible) {
+        }
+        else
+        {
+            if (mIsTheTitleVisible)
+            {
                 startAlphaAnimation(txtToolbarTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
                 mIsTheTitleVisible = false;
+                toolbar.setBackgroundColor(Color.TRANSPARENT);
+                avatar.setBorderWidth((int) (2 * getResources().getDisplayMetrics().density + 0.5f));
             }
         }
     }
