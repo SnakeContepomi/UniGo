@@ -14,7 +14,6 @@ import com.l4digital.fastscroll.FastScroller;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.ProfileActivity;
 import it.unibo.studio.unigo.main.adapteritems.UserAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
@@ -58,7 +57,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
     }
 
     @Override
-    public void onBindViewHolder(final UserHolder holder, final int position)
+    public void onBindViewHolder(final UserHolder holder, int position)
     {
         final User user = userList.get(position).getUser();
 
@@ -79,7 +78,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
             @Override
             public void onClick(View view)
             {
-                activity.startActivity(new Intent(holder.context, ProfileActivity.class).putExtra("user_key", userList.get(position).getUserKey()));
+                activity.startActivity(new Intent(holder.context, ProfileActivity.class).putExtra("user_key", userList.get(holder.getAdapterPosition()).getUserKey()));
             }
         });
     }
