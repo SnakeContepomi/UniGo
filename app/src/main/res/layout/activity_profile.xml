@@ -107,7 +107,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
-                            android:background="@android:color/holo_green_light"/>
+                            android:background="@color/colorPurple"/>
                         <LinearLayout
                             android:id="@+id/xpBarLeft"
                             android:layout_width="match_parent"
