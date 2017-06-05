@@ -3,14 +3,15 @@ package it.unibo.studio.unigo.main;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -26,8 +27,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
-
-import static java.security.AccessController.getContext;
 
 public class ProfileActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener
 {
@@ -102,6 +101,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         txtNComments = (TextView) findViewById(R.id.txtProfileNComments);
         txtNCredits = (TextView) findViewById(R.id.txtProfileNCredits);
 
+        this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorDarkPurple));
 
         // Se il profilo dell'utente è quello dell'utilizzatore, sarà possibile modificare
         // le proprie informazioni, altrimenti sarà possibile inviare una mail all'utente destinatario
@@ -129,6 +129,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 mIsTheTitleVisible = true;
                 toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                 avatar.setBorderWidth(0);
+                this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
             }
         }
         else
@@ -139,6 +140,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 mIsTheTitleVisible = false;
                 toolbar.setBackgroundColor(Color.TRANSPARENT);
                 avatar.setBorderWidth((int) (2 * getResources().getDisplayMetrics().density + 0.5f));
+                this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorDarkPurple));
             }
         }
     }
@@ -298,6 +300,15 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         String[] splittedDate = (date.substring(0, 10)).split("/");
 
         return splittedDate[2] + " " + Util.getMonthName(splittedDate[1]) + " " + splittedDate[0];
+    }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 }
 

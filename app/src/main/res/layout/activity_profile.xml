@@ -1,5 +1,6 @@
 <!--suppress XmlUnusedNamespaceDeclaration -->
 <android.support.design.widget.CoordinatorLayout
+    android:id="@+id/profile_container"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
