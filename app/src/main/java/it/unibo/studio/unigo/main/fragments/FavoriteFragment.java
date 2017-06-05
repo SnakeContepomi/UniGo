@@ -1,15 +1,20 @@
 package it.unibo.studio.unigo.main.fragments;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.pnikosis.materialishprogress.ProgressWheel;
+
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
@@ -21,6 +26,7 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 public class FavoriteFragment extends android.support.v4.app.Fragment
 {
     private RecyclerView mRecyclerView;
+    private LinearLayout wheel;
     private FavoriteAdapter mAdapter;
     private List<QuestionAdapterItem> favoriteList;
     private ValueEventListener changeListener;
@@ -52,6 +58,8 @@ public class FavoriteFragment extends android.support.v4.app.Fragment
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(v.getContext()));
+
+        wheel = (LinearLayout) v.findViewById(R.id.favoriteWheelLayout);
 
         // Inizializzazione adapter della lista delle domande
         mAdapter = new FavoriteAdapter(favoriteList, getActivity());
@@ -102,6 +110,11 @@ public class FavoriteFragment extends android.support.v4.app.Fragment
             {
                 removeQuestionListener(dataSnapshot.getKey());
                 mAdapter.removeQuestion(dataSnapshot.getKey());
+                if (favoriteList.size() == 0)
+                {
+                    wheel.setVisibility(View.GONE);
+                    setRecyclerViewVisibility(false);
+                }
             }
 
             @Override
@@ -112,6 +125,18 @@ public class FavoriteFragment extends android.support.v4.app.Fragment
         };
 
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("favorites").orderByKey().addChildEventListener(favoriteListener);
+
+        new CountDownTimer(3000, 3000)
+        {
+            public void onTick(long millisUntilFinished) { }
+
+            public void onFinish()
+            {
+                if (favoriteList.isEmpty())
+                    wheel.setVisibility(View.GONE);
+            }
+        }.start();
+
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview
