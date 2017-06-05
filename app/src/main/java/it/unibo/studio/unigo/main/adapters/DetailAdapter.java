@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -265,7 +266,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             {
                 // Impostazione dei campi relativi all'utente
                 qh.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
-                qh.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
+                qh.txtLvl.setText(Util.getUserTitle(Util.getUserLevel(dataSnapshot.child("exp").getValue(Integer.class))));
                 if (!Util.isNetworkAvailable(qh.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(qh.context.getResources().getString(R.string.empty_profile_pic_url)))
                 {
                     qh.userPhoto.setLetter(dataSnapshot.child("name").getValue(String.class));
@@ -418,7 +419,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(ah.imgProfile);
 
                 ah.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
-                ah.txtLvl.setText(String.valueOf(dataSnapshot.child("exp").getValue(Integer.class)));
+                ah.txtLvl.setText(Util.getUserTitle(Util.getUserLevel(dataSnapshot.child("exp").getValue(Integer.class))));
             }
 
             @Override

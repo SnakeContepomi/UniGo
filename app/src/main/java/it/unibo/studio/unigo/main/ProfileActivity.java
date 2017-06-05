@@ -3,19 +3,14 @@ package it.unibo.studio.unigo.main;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -37,9 +32,6 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
     private boolean mIsTheTitleVisible          = false;
     private boolean mIsTheTitleContainerVisible = true;
 
-    private AppBarLayout appbar;
-    private CollapsingToolbarLayout collapsing;
-    private FrameLayout framelayoutTitle;
     private LinearLayout linearlayoutTitle, xpBarDone, xpBarLeft;
     private Toolbar toolbar;
     private TextView txtToolbarTitle, txtName, txtLevel,
@@ -77,9 +69,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
 
     private void initComponents()
     {
-        appbar = (AppBarLayout) findViewById( R.id.appbar );
-        collapsing = (CollapsingToolbarLayout) findViewById( R.id.collapsing );
-        framelayoutTitle = (FrameLayout) findViewById( R.id.framelayout_title );
+        AppBarLayout appbar = (AppBarLayout) findViewById(R.id.appbar);
         linearlayoutTitle = (LinearLayout) findViewById( R.id.linearlayout_title );
         txtName = (TextView) findViewById(R.id.txtProfileName);
         txtLevel = (TextView) findViewById(R.id.txtProfileLevel);
@@ -110,7 +100,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
             @Override
             public boolean onMenuItemClick(MenuItem item)
             {
-                inviaEmail();
+                inviaEmail(Util.decodeEmail(getIntent().getStringExtra("user_key")));
                 return false;
             }
         });
@@ -263,26 +253,20 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
 
     // Metodo che permette all'utente di scegliere con quale client inviare la mail
     // (tutto il testo già scritto verrà passato al client scelto)
-    private void inviaEmail()
+    private void inviaEmail(String mail)
     {
-        Intent email = new Intent(Intent.ACTION_SEND, Uri.parse("mailto:"));
-        // Vengono visualizzati solamente i client email installati
-        email.setType("message/rfc822");
-        // Viene inserito il destinatario, l'ogetto e il corpo principale della mail dentro l'intent
-        email.putExtra(Intent.EXTRA_EMAIL, "concar92@gmail.com");
-
-        // Viene chiesto all'utente quale client email utilizzare
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{mail});
         try
         {
-            startActivity(Intent.createChooser(email, "Selezionare il client email"));
+            startActivity(Intent.createChooser(i, "Selezionare il client email"));
         }
-        // Se non vengono trovati client email, verrà visualizzato un alertDialog per informare l'utente
         catch (android.content.ActivityNotFoundException ex)
         {
             AlertDialog.Builder adBuilder = new AlertDialog.Builder(this);
             adBuilder.setTitle("Errore");
             adBuilder.setMessage("Nessun client email installato sul dispositivo.\nImpossibile inviare la mail.");
-            //adBuilder.setIcon(...);
             adBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener()
             {
                 public void onClick(DialogInterface dialog, int id)
@@ -300,15 +284,6 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         String[] splittedDate = (date.substring(0, 10)).split("/");
 
         return splittedDate[2] + " " + Util.getMonthName(splittedDate[1]) + " " + splittedDate[0];
-    }
-
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
     }
 }
 
