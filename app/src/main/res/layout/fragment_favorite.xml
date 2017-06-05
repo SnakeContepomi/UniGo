@@ -43,7 +43,7 @@
             android:textSize="20sp"
             android:fontFamily="sans-serif"
             android:textAlignment="center"
-            android:text="Nessuna domanda in questa sezione"/>
+            android:text="@string/empty_section"/>
     </LinearLayout>
 
 </LinearLayout>

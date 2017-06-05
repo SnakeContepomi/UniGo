@@ -1,11 +1,14 @@
 package it.unibo.studio.unigo.main.fragments;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,6 +24,7 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 public class MyQuestionFragment extends android.support.v4.app.Fragment
 {
     private RecyclerView mRecyclerView;
+    private LinearLayout wheel;
     private QuestionAdapter mAdapter;
     private List<QuestionAdapterItem> myQuestionList;
     private ValueEventListener changeListener;
@@ -47,6 +51,7 @@ public class MyQuestionFragment extends android.support.v4.app.Fragment
     {
         myQuestionList = new ArrayList<>();
 
+        wheel = (LinearLayout) v.findViewById(R.id.myQuestionWheelLayout);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewMyQuestion);
         setRecyclerViewVisibility(false);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
@@ -107,6 +112,17 @@ public class MyQuestionFragment extends android.support.v4.app.Fragment
         };
 
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("questions").orderByKey().addChildEventListener(myQuestionListener);
+
+        new CountDownTimer(3000, 3000)
+        {
+            public void onTick(long millisUntilFinished) { }
+
+            public void onFinish()
+            {
+                if (myQuestionList.isEmpty())
+                    wheel.setVisibility(View.GONE);
+            }
+        }.start();
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview

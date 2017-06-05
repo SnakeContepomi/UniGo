@@ -133,4 +133,6 @@
     <string name="profile_answers">Risposte</string>
     <string name="profile_comments">Commenti</string>
     <string name="profile_credits">Crediti</string>
+
+    <string name="empty_section">Nessuna domanda in questa sezione</string>
 </resources>
