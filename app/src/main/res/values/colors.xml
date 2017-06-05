@@ -15,7 +15,7 @@
     <color name="colorBlue">#2196f3</color>
     <color name="colorExpBarRemain">#757575</color>
     <color name="colorDarkPurple">#2b2234</color>
-    <color name="colorPurple">#ff8f00</color>
+    <color name="colorDarkAmber">#ff8f00</color>
 
     <!-- Material DEFAULT drawer colors -->
     <color name="material_drawer_primary_icon">#8A000000</color>
