@@ -104,6 +104,8 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 return false;
             }
         });
+        if (getIntent().getStringExtra("user_key").equals(Util.getCurrentUser().getEmail()))
+            toolbar.getMenu().getItem(0).setVisible(false);
 
         appbar.addOnOffsetChangedListener(this);
         startAlphaAnimation(txtToolbarTitle, 0, View.INVISIBLE);
