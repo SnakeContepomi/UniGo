@@ -300,6 +300,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 Util.getDatabase().getReference("Question").child(questionKey).child("ratings").child(Util.encodeEmail(getCurrentUser().getEmail())).setValue(true);
                 qh.imgrating.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
                 qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                Util.startBounceAnimation(activity, qh.rating);
                 qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
                 qh.rating.setClickable(false);
             }
@@ -359,11 +360,13 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         {
                             favoriteReference.setValue(true);
                             qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
+                            Util.startBounceAnimation(activity, qh.imgfavorite);
                         }
                         else
                         {
                             favoriteReference.removeValue();
                             qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
+                            Util.startBounceAnimation(activity, qh.imgfavorite);
                         }
                     }
 
@@ -468,6 +471,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("likes").child(Util.encodeEmail(getCurrentUser().getEmail())).setValue(true);
                     ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
                     ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                    Util.startBounceAnimation(activity, ah.like);
                     ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
                     ah.like.setClickable(false);
                     updateExpForLike(answer.user_key);
@@ -513,6 +517,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 else
                 {
                     ah.expandableLayout.expand();
+                    Util.startBounceAnimation(activity, ah.layoutComments);
                     ah.cAdapter = new CommentAdapter(ah.commentList, ah.commentKeyList);
                     ah.recyclerViewComment.setAdapter(ah.cAdapter);
                 }

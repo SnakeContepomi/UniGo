@@ -1,8 +1,13 @@
 package it.unibo.studio.unigo.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -399,5 +404,13 @@ public class Util
 
             return strBuilder.toString();
         }
+    }
+
+    public static void startBounceAnimation(Activity activity, View view)
+    {
+        final Animation myAnim = AnimationUtils.loadAnimation(activity, R.anim.bounce);
+        MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
+        myAnim.setInterpolator(interpolator);
+        view.startAnimation(myAnim);
     }
 }

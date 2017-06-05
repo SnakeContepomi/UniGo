@@ -249,6 +249,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 Util.getDatabase().getReference("Question").child(qItem.getQuestionKey()).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
                 holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
                 holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                Util.startBounceAnimation(activity, holder.rating);
                 holder.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(holder.txtRating.getText())) + 1));
                 holder.rating.setClickable(false);
             }
@@ -311,12 +312,14 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                         {
                             favoriteReference.setValue(true);
                             holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
+                            Util.startBounceAnimation(activity, holder.imgFavorite);
                         }
                         // Se la domanda è già nei preferiti, essa viene rimossa
                         else
                         {
                             favoriteReference.removeValue();
                             holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
+                            Util.startBounceAnimation(activity, holder.imgFavorite);
                         }
                     }
 
