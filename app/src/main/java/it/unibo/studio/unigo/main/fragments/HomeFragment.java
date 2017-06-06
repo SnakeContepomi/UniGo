@@ -1,12 +1,15 @@
 package it.unibo.studio.unigo.main.fragments;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapters.QuestionAdapter;
@@ -15,6 +18,7 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 
 public class HomeFragment extends Fragment
 {
+    private LinearLayout wheel;
     private RecyclerView mRecyclerView;
     private QuestionAdapter mAdapter;
 
@@ -47,6 +51,7 @@ public class HomeFragment extends Fragment
 
     private void initComponents(View v)
     {
+        wheel = (LinearLayout) v.findViewById(R.id.homeWheelLayout);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewHome);
         setRecyclerViewVisibility(false);
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
@@ -57,6 +62,17 @@ public class HomeFragment extends Fragment
         mAdapter = new QuestionAdapter(Util.getQuestionList(), getActivity());
         mRecyclerView.setAdapter(mAdapter);
         loadQuestionFromList();
+
+        new CountDownTimer(3000, 3000)
+        {
+            public void onTick(long millisUntilFinished) { }
+
+            public void onFinish()
+            {
+                if (Util.getQuestionList().isEmpty())
+                    wheel.setVisibility(View.GONE);
+            }
+        }.start();
     }
 
     // Metodo utilizzato per caricare le domande già recuperate dal database e presenti nella lista questionList
