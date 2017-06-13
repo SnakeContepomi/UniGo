@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="Notifiche"
+        android:title="@string/pref_category"
         android:key="pref_key_storage_settings">
         <SwitchPreference
             android:key="pref_notification"
-            android:title="Ricevi notifiche"
+            android:title="@string/pref_notification"
             android:defaultValue="true" />
+        <MultiSelectListPreference
+            android:dependency="pref_notification"
+            android:key="pref_notificationEvents"
+            android:title="@string/pref_notificationEvents"
+            android:dialogTitle="@string/pref_notificationEvents"
+            android:entries="@array/pref_notificationEvents_entries"
+            android:entryValues="@array/pref_notificationEvents_values"
+            android:defaultValue="@array/pref_notificationEvents_values"/>
         <RingtonePreference
             android:dependency="pref_notification"
             android:key="pref_notificationRingtone"
-            android:title="Tono notifiche"
-            android:dialogTitle="Tono notifiche"
+            android:title="@string/pref_notificationRingtone"
+            android:dialogTitle="@string/pref_notificationRingtone"
             android:defaultValue="content://settings/system/notification_sound"
             android:ringtoneType="notification"
             android:showDefault="true"
@@ -19,32 +27,32 @@
         <ListPreference
             android:dependency="pref_notification"
             android:key="pref_notificationVibration"
-            android:title="Vibrazione"
-            android:dialogTitle="Vibrazione"
+            android:title="@string/pref_notificationVibration"
+            android:dialogTitle="@string/pref_notificationVibration"
             android:entries="@array/pref_notificationVibration_entries"
             android:entryValues="@array/pref_notificationVibration_values"
             android:defaultValue="1"
-            android:positiveButtonText="ok"
-            android:negativeButtonText="Annulla"/>
+            android:positiveButtonText="@string/alert_dialog_confirm"
+            android:negativeButtonText="@string/alert_dialog_cancel"/>
         <ListPreference
             android:dependency="pref_notification"
             android:key="pref_notificationPriority"
-            android:title="Notifica a comparsa"
-            android:dialogTitle="Notifica a comparsa"
+            android:title="@string/pref_notificationPriority"
+            android:dialogTitle="@string/pref_notificationPriority"
             android:entries="@array/pref_notificationPriority_entries"
             android:entryValues="@array/pref_notificationPriority_values"
             android:defaultValue="2"
-            android:positiveButtonText="ok"
-            android:negativeButtonText="Annulla"/>
+            android:positiveButtonText="@string/alert_dialog_confirm"
+            android:negativeButtonText="@string/alert_dialog_cancel"/>
         <ListPreference
             android:dependency="pref_notification"
             android:key="pref_notificationColor"
-            android:title="Luce"
-            android:dialogTitle="Luce"
+            android:title="@string/pref_notificationColor"
+            android:dialogTitle="@string/pref_notificationColor"
             android:defaultValue="2"
             android:entries="@array/pref_notificationColor_entries"
             android:entryValues="@array/pref_notificationColor_values"
-            android:positiveButtonText="ok"
-            android:negativeButtonText="Annulla"/>
+            android:positiveButtonText="@string/alert_dialog_confirm"
+            android:negativeButtonText="@string/alert_dialog_cancel"/>
     </PreferenceCategory>
 </PreferenceScreen>

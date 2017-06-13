@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="pref_notificationEvents_entries">
+        <item>Nuove domande</item>
+        <item>Risposte alle tue domande</item>
+        <item>Commenti alle tue domande</item>
+        <item>Commenti alle tue risposte</item>
+        <item>Interesse per le tue domande</item>
+        <item>Like alle tue risposte</item>
+    </string-array>
+    <string-array name="pref_notificationEvents_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
     <string-array name="pref_notificationVibration_entries">
         <item>Spenta</item>
         <item>Predefinita</item>
@@ -14,9 +31,9 @@
     </string-array>
 
     <string-array name="pref_notificationPriority_entries">
-        <item>Bassa: non disturba</item>
-        <item>Default: solo avviso</item>
-        <item>Alta: avviso con notifica a comparsa</item>
+        <item>Non disturba</item>
+        <item>Solo avviso</item>
+        <item>Avviso con notifica a comparsa</item>
     </string-array>
     <string-array name="pref_notificationPriority_values">
         <item>0</item>

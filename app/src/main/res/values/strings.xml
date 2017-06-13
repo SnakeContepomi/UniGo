@@ -135,4 +135,16 @@
     <string name="profile_credits">Crediti</string>
 
     <string name="empty_section">Nessuna domanda in questa sezione</string>
+
+    <!-- notification strings -->
+    <string name="no_ringtone">Silenzioso</string>
+    <string name="alert_dialog_confirm">Ok</string>
+
+    <string name="pref_category">Notifiche</string>
+    <string name="pref_notification">Ricevi notifiche</string>
+    <string name="pref_notificationEvents">Eventi</string>
+    <string name="pref_notificationRingtone">Tono notifiche</string>
+    <string name="pref_notificationVibration">Vibrazione</string>
+    <string name="pref_notificationPriority">Priorità notifiche</string>
+    <string name="pref_notificationColor">Luce</string>
 </resources>

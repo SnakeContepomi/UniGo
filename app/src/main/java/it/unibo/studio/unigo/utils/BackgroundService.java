@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
@@ -729,8 +731,9 @@ public class BackgroundService extends Service
     {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-        // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment
-        if (sharedPref.getBoolean(SettingsFragment.KEY_PREF_NOTIF, true)) {
+        // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment (SwitchPreference)
+        // e l'utente desidera essere informato di quel particolare evento (MultiSelectListPreference)
+        if (sharedPref.getBoolean(SettingsFragment.KEY_PREF_NOTIF, true) && isNotificationEventSelected(type)) {
             Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
                     .setColor(Color.RED)
                     .setSmallIcon(R.drawable.ic_school_black_24dp)
@@ -1183,6 +1186,34 @@ public class BackgroundService extends Service
         bitmap.recycle();
 
         return output;
+    }
+
+    // Metodo che restituisce true se il tipo di evento è presente nelle shared preferences (MultiSelectListPreference):
+    // true --> l'evento deve essere notificato
+    // false --> l'evento viene scartato (non produce nessuna notifica)
+    private boolean isNotificationEventSelected(NotificationType type)
+    {
+        Set<String> value = PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getStringSet(SettingsFragment.KEY_PREF_NOTIF_EVENTS, null);
+
+        switch (type)
+        {
+            case QUESTION:
+                return (value.contains("0") ? true : false);
+            case ANSWER:
+                return (value.contains("1") ? true : false);
+            case COMMENT_QUESTION:
+                return (value.contains("2") ? true : false);
+            case COMMENT_ANSWER:
+                return (value.contains("3") ? true : false);
+            case RATING:
+                return (value.contains("4") ? true : false);
+            case LIKE:
+                return (value.contains("5") ? true : false);
+            default:
+                return false;
+        }
     }
 
     // Metodo per recuperare il colore del led di notifica dalle sharedPreferences
