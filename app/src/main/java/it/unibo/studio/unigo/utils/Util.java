@@ -7,7 +7,6 @@ import android.net.NetworkInfo;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -15,16 +14,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
-import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
-import it.unibo.studio.unigo.utils.firebase.Question;
 
 public class Util
 {
-    static final String MY_PREFERENCES = "my_pref";
-    static final String LAST_QUESTION_READ = "last_key";
     public static String CURRENT_COURSE_KEY;
     public static final int EXP_START = 0;
     public static final int EXP_ANSWER = 10;
@@ -41,9 +35,6 @@ public class Util
     private static FirebaseDatabase database;
     private static FirebaseUser user;
     private static HomeFragment homeFragment;
-    private static boolean isHomeFragmentVisible;
-    private static List<QuestionAdapterItem> questionList;
-    private static List<QuestionAdapterItem> questiosnToUpdate;
     private static DecimalFormat mFormat= new DecimalFormat("00");
 
     // Riferimento al database di Firebase
@@ -70,61 +61,6 @@ public class Util
     public static void setHomeFragment(HomeFragment fragment)
     {
         homeFragment = fragment;
-    }
-
-    // Metodo per recupererare l'elenco delle domande presenti nel corso corrente
-    public static List<QuestionAdapterItem> getQuestionList()
-    {
-        if (questionList == null)
-            questionList = new ArrayList<>();
-        return questionList;
-    }
-
-    public static void updateElementAt(int position, QuestionAdapterItem qItem)
-    {
-        questionList.set(position, qItem);
-    }
-
-    // Metodo per recupererare l'elenco delle domande da aggiornare al riavvio dell'app
-    public static List<QuestionAdapterItem> getQuestionsToUpdate()
-    {
-        if (questiosnToUpdate == null)
-            questiosnToUpdate = new ArrayList<>();
-        return questiosnToUpdate;
-    }
-
-    // Metodo per mettere in coda gli aggiornamenti grafici da effettuare, una volta riesumata l'app
-    public static void addToUpdate(String questionKey, Question question)
-    {
-        getQuestionsToUpdate().add(new QuestionAdapterItem(question, questionKey));
-    }
-
-    // Metodo che controlla se la domanda passata è presente nella lista
-    public static boolean questionExists(String key)
-    {
-        for(QuestionAdapterItem item : questionList)
-            if (item.getQuestionKey().equals(key))
-                return true;
-        return false;
-    }
-
-    // Data una chiave di una domanda, viene restituita la posizione della stessa all'interno della lista
-    public static int getQuestionPosition(String questionKey)
-    {
-        for (int i = 0; i < questionList.size(); i++)
-            if (questionKey.equals(questionList.get(i).getQuestionKey()))
-                return i;
-        return -1;
-    }
-
-    public static boolean isHomeFragmentVisible()
-    {
-        return (isHomeFragmentVisible);
-    }
-
-    public static void setHomeFragmentVisibility(boolean visibiliy)
-    {
-        isHomeFragmentVisible = visibiliy;
     }
 
     // Ritorna true il dispositivo è connesso ad internet, false altrimenti
@@ -406,6 +342,7 @@ public class Util
         }
     }
 
+    // Metodo per attivare l'animazione "bounce" della view passata
     public static void startBounceAnimation(Activity activity, View view)
     {
         final Animation myAnim = AnimationUtils.loadAnimation(activity, R.anim.bounce);

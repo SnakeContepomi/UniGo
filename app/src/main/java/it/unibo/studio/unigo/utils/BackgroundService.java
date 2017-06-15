@@ -20,31 +20,30 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.preference.PreferenceManager;
-
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.DetailActivity;
-import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.fragments.SettingsFragment;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
-import static java.lang.reflect.Array.getInt;
-
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
 // i cambiamenti da Firebase
 public class BackgroundService extends Service
 {
+    static final String CURRENT_COURSE_KEY = "course_key";
+    static final String LAST_QUESTION_READ = "last_key";
+
     public static boolean isRunning = false;
     // Liste dei nomi degli utenti che hanno generato una notifica di ciascun tipo
     private static List<String> questionList = new ArrayList<>();
@@ -60,6 +59,7 @@ public class BackgroundService extends Service
     private static int commentAnswerCount = 0;
     private static int ratingCount = 0;
     private static int likeCount = 0;
+    private SharedPreferences prefs;
     /*
         Tipi di Notifiche in base al valore della variabile notifyID:
         1 - QUESTION: nuova domanda inserita
@@ -95,6 +95,7 @@ public class BackgroundService extends Service
     // Memorizzazione utente corrente per poter effettuare operazioni anche in modalità offline
     private void initBackgroundService()
     {
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         // Se la chiave del corso non è ancora stata recuperata:
         // - Viene eseguita una query per recuperarla, conoscendo l'email dell'utente
         // - Viene eseguita una query per recuperare tutte le chiavi delle domande che fanno parte di quel corso,
@@ -105,7 +106,7 @@ public class BackgroundService extends Service
         // - Il listener sul campo questions della tabella "Course" permette di avvisare l'utente riguardo l'inserimento di nuove domande
         //   tramite delle notifiche
         // - Ad ogni domanda del corso, viene infine agganciato un listener che ne permette di gestire eventuali modifiche
-        if (Util.CURRENT_COURSE_KEY == null)
+        if (prefs.getString(CURRENT_COURSE_KEY, "").equals(""))
         {
             // Query per recuperare la chiave del corso
             Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("courseKey")
@@ -113,28 +114,38 @@ public class BackgroundService extends Service
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot)
                         {
+                            // Memorizzazione nelle SharedPreferences della chiave del corso
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString(CURRENT_COURSE_KEY, dataSnapshot.getValue(String.class));
+                            editor.apply();
                             Util.CURRENT_COURSE_KEY = dataSnapshot.getValue(String.class);
 
-                            Util.getQuestionList().clear();
-                            // Query per recuperare tutte le chiavi delle domande che fanno parte di quel corso, ordinate cronologicamente
-                            Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+                            // Recupero delle domande esistenti nel corso
+                            Util.getDatabase().getReference("Course").child(dataSnapshot.getValue(String.class)).child("questions").orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot)
                                 {
-                                    Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
-                                    DataSnapshot child;
-                                    // Per ogni chiave recuperata, viene eseguita una query sulla tabella "Question" al fine di ottenerne
-                                    // i dettagli. Ogni domanda viene quindi inserita nella lista presente in Utils ed infine
-                                    // viene inizializzato il listener per sull'inserimento delle nuove domande
-                                    while (iterator.hasNext())
+                                    // Se il corso ha almeno una domanda associata, le scorro tutte per recuperare l'ultima
+                                    // domanda inserita e memorizzarla nella SharedPreference LAST_QUESTION_READ
+                                    // (utilizzata per evitare di notificare l'utente per le domande già presenti)
+                                    if (dataSnapshot.getChildrenCount() > 0)
                                     {
-                                        child = iterator.next();
-                                        if (iterator.hasNext())
-                                            getQuestionAndAddToList(child.getKey(), false);
-                                            // Dopo l'ultima domanda letta viene avviato il listener sulle nuove domande
-                                        else
-                                            getQuestionAndAddToList(child.getKey(), true);
+                                        Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+                                        DataSnapshot child;
+                                        // Per ogni chiave recuperata, viene eseguita una query sulla tabella "Question" al fine di ottenerne
+                                        // i dettagli. Ogni domanda viene quindi inserita nella lista presente in Utils ed infine
+                                        // viene inizializzato il listener per sull'inserimento delle nuove domande
+                                        while (iterator.hasNext())
+                                        {
+                                            child = iterator.next();
+                                            updateLastQuestionRead(child.getKey());
+
+                                            if (!iterator.hasNext())
+                                                addNewQuestionListener();
+                                        }
                                     }
+                                    else
+                                        addNewQuestionListener();
                                 }
 
                                 @Override
@@ -149,37 +160,12 @@ public class BackgroundService extends Service
         // Se la chiave del corso è già presente, viene semplicemente fatto partire il listener sulle nuove domande, escludendo
         // tutte quelle con chiave precedente a quella presente nelle shared preferences
         else
-            startQuestionListener();
+        {
+            Util.CURRENT_COURSE_KEY = prefs.getString(CURRENT_COURSE_KEY, "");
+            addNewQuestionListener();
+        }
 
-        // Listener sui like ricevuti sulle risposte dell'utente
-        // + Listener sui commenti effettuati relativi alle risposte dell'utente
-        addLikeCommentListener();
-    }
-
-    // Metodo che, data una chiave di una domanda, ne recupera i relativi dettaglia dalla tabella "Question" e la aggiunge alla lista
-    // presente in Util. Inoltre se il parametro startListenerOnNewData è "true", viene avviato il listener sulle nuove domande
-    private void getQuestionAndAddToList(String question_key, final boolean startListenerOnNewData)
-    {
-        Util.getDatabase().getReference("Question").child(question_key).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                addQuestionIntoList(dataSnapshot.getValue(Question.class), dataSnapshot.getKey(), startListenerOnNewData);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-    }
-
-    // Metodo che inizializza un listener sul campo questions della tabella "Course", in modo da poter gestire con delle notifiche
-    // l'aggiunta di nuove domande
-    private void startQuestionListener()
-    {
-        // Il listener viene agganciato al campo questions, ma solamente agli elementi con chiave "maggiore" a quella presente nelle
-        // shared preferences, in modo da gestire solo gli eventi riguardanti le nuove domande inserite, ed evitando quindi
-        // quelli relativi alle domande già presenti
-        Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("questions").orderByKey().startAt(getLastQuestionRead()).addChildEventListener(new ChildEventListener() {
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("questions").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
@@ -187,32 +173,9 @@ public class BackgroundService extends Service
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
-                        // Se la domanda inserita non è presente nella lista in Utils, allora essa viene aggiunta e viene avvisato
-                        // l'utente con un notifica
-                        if (!Util.questionExists(dataSnapshot.getKey()))
-                        {
-                            final String questionKey = dataSnapshot.getKey();
-
-                            addQuestionIntoList(dataSnapshot.getValue(Question.class), questionKey, false);
-                            // La notifica viene attivata solo se la nuova domanda è stata scritta da un utente diverso
-                            // da quelo loggato
-                            if (!dataSnapshot.getValue(Question.class).user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                            {
-                                Util.getDatabase().getReference("User").child(dataSnapshot.getValue(Question.class).user_key).addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot)
-                                    {
-                                        if (!questionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
-                                            questionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
-                                        questionCount++;
-                                        new getBitmapFromUrl(NotificationType.QUESTION, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) { }
-                                });
-                            }
-                        }
+                        addRatingListener(dataSnapshot.getValue(Question.class), dataSnapshot.getKey());
+                        addNewAnswerListener(dataSnapshot.getValue(Question.class), dataSnapshot.getKey());
+                        addGenericCommentListener(dataSnapshot.getValue(Question.class), dataSnapshot.getKey());
                     }
 
                     @Override
@@ -232,77 +195,68 @@ public class BackgroundService extends Service
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+
+        // Listener sui like ricevuti sulle risposte dell'utente
+        // + Listener sui commenti effettuati relativi alle risposte dell'utente
+        addLikeCommentListener();
     }
 
-    // Metodo per aggiungere alla lista presente in Util la domanda passata, ed aggiungerla alla RecyclerView
-    // se il fragment Home risulta visibile
-    private void addQuestionIntoList(final Question question, final String questionKey, final boolean execStartQuestionListener)
+    // Listener per notificare tutte le nuove domande inserite nel corso dell'utente
+    // (evitando di notificare quelle già presenti)
+    private void addNewQuestionListener()
     {
-        // Aggiunta della domanda alla lista in Util
-        Util.getQuestionList().add(0, new QuestionAdapterItem(question, questionKey));
+        Util.getDatabase()
+            .getReference("Question")
+            .orderByChild("course_key")
+            .equalTo(PreferenceManager.getDefaultSharedPreferences(this).getString(CURRENT_COURSE_KEY, ""))
+            .addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s)
+                {
+                    final String questionKey = dataSnapshot.getKey();
+                    // Vengono evitati gli eventi relativi all'aggiunta di domande già presenti nel database e
+                    // l'aggiunta delle domande dell'utente loggato
+                    if (questionKey.compareTo(prefs.getString(LAST_QUESTION_READ, "")) > 0
+                        && !dataSnapshot.child("user_key").getValue(String.class).equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                    {
+                        updateLastQuestionRead(dataSnapshot.getKey());
+                        // Recupero delle informazioni dell'utente e invio di una notifica
+                        Util.getDatabase().getReference("User").child(dataSnapshot.child("user_key").getValue(String.class)).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot)
+                            {
+                                if (!questionList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                    questionList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                questionCount++;
+                                new getBitmapFromUrl(NotificationType.QUESTION, questionKey).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                            }
 
-        // Aggiornamento della recyclerview di HomeFragment
-        if (Util.getHomeFragment() != null)
-            Util.getHomeFragment().updateElement(0);
-        // Viene memorizzata la chiave della domanda nella shared preferences per evitare che, al prossimo avvio dell'app,
-        // quest'ultima non triggheri le notifiche
-        updateLastQuestionRead(questionKey);
-        // Viene agganciata alla domanda un listener su eventuali modifiche
-        addListenerForNotification(question, questionKey);
-        if (execStartQuestionListener)
-        {
-            startQuestionListener();
-            if (Util.isHomeFragmentVisible())
-                Util.getHomeFragment().loadQuestionFromList();
-        }
-    }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) { }
+                        });
+                    }
+                }
 
-    // Metodo per agganciare ad una domanda il listener sui suoi cambiamenti
-    private void addListenerForNotification(Question question, String questionKey)
-    {
-        // Avvio Listener per le notifiche relative alle domande effettuate dall'utente loggato
-        // - Listener sulle nuove risposte
-        // - Listener sul rating delle domande
-        // - Listener sui commenti riguardanti qualsiasi risposta relativa alla domanda dell'utente (escluse le risposte personali)
-        if (question.user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-        {
-            addNewAnswerListener(question, questionKey);
-            addRatingListener(question, questionKey);
-            addGenericCommentListener(question, questionKey);
-        }
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
-        // Listener sui cambiamenti generici, per aggiornare in real time la lista delle domande
-        Util.getDatabase().getReference("Question").child(questionKey).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                // Se HomeFragment è visibile, l'aggiornamento viene effettuato in tempo reale
-                if (Util.isHomeFragmentVisible())
-                    Util.getHomeFragment().refreshQuestion(dataSnapshot.getKey(), dataSnapshot.getValue(Question.class));
-                    // Altrimenti gli aggiornamenti vengono messi in coda finche non viene riesumato il fragment
-                else
-                    Util.addToUpdate(dataSnapshot.getKey(), dataSnapshot.getValue(Question.class));
-            }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) { }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) { }
+            });
     }
 
     // Metodo per memorizzare nelle shared preferences la chiave dell'ultima domanda caricata
     private void updateLastQuestionRead(String key)
     {
-        SharedPreferences prefs = getSharedPreferences(Util.MY_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(Util.LAST_QUESTION_READ, key);
+        editor.putString(LAST_QUESTION_READ, key);
         editor.apply();
-    }
-
-    // Metodo per recuperare la chiave dell'ultima domanda memorizzata
-    private String getLastQuestionRead()
-    {
-        SharedPreferences prefs = getSharedPreferences(Util.MY_PREFERENCES, Context.MODE_PRIVATE);
-        return prefs.getString(Util.LAST_QUESTION_READ, "");
     }
 
     // Listener per notificare le risposte alle domande dell'utente loggato
@@ -729,11 +683,9 @@ public class BackgroundService extends Service
     // Metodo per creare la notifica in base al tipo passato
     private void sendNotification(NotificationType type, Bitmap profilePic, String questionKey)
     {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-
         // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment (SwitchPreference)
         // e l'utente desidera essere informato di quel particolare evento (MultiSelectListPreference)
-        if (sharedPref.getBoolean(SettingsFragment.KEY_PREF_NOTIF, true) && isNotificationEventSelected(type)) {
+        if (prefs.getBoolean(SettingsFragment.KEY_PREF_NOTIF, getResources().getBoolean(R.bool.pref_notification_defVal)) && isNotificationEventSelected(type)) {
             Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
                     .setColor(Color.RED)
                     .setSmallIcon(R.drawable.ic_school_black_24dp)
@@ -1193,24 +1145,30 @@ public class BackgroundService extends Service
     // false --> l'evento viene scartato (non produce nessuna notifica)
     private boolean isNotificationEventSelected(NotificationType type)
     {
+
+        String[] array = getResources().getStringArray(R.array.pref_notificationEvents_values);
+        Set<String> set = new HashSet<>();
+        for(String s : array)
+            set.add(s);
+
         Set<String> value = PreferenceManager
                 .getDefaultSharedPreferences(this)
-                .getStringSet(SettingsFragment.KEY_PREF_NOTIF_EVENTS, null);
+                .getStringSet(SettingsFragment.KEY_PREF_NOTIF_EVENTS, set);
 
         switch (type)
         {
             case QUESTION:
-                return (value.contains("0") ? true : false);
+                return (value.contains("0"));
             case ANSWER:
-                return (value.contains("1") ? true : false);
+                return (value.contains("1"));
             case COMMENT_QUESTION:
-                return (value.contains("2") ? true : false);
+                return (value.contains("2"));
             case COMMENT_ANSWER:
-                return (value.contains("3") ? true : false);
+                return (value.contains("3"));
             case RATING:
-                return (value.contains("4") ? true : false);
+                return (value.contains("4"));
             case LIKE:
-                return (value.contains("5") ? true : false);
+                return (value.contains("5"));
             default:
                 return false;
         }
@@ -1219,7 +1177,7 @@ public class BackgroundService extends Service
     // Metodo per recuperare il colore del led di notifica dalle sharedPreferences
     private int getNotificationColor()
     {
-        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_COLOR, "2"))
+        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_COLOR, getResources().getString(R.string.pref_notificationColor_defVal)))
         {
             case "0":
                 return Color.TRANSPARENT;
@@ -1245,7 +1203,7 @@ public class BackgroundService extends Service
     // Metodo per recuperare la priorità delle notifiche dalle sharedPreferences
     private int getNotificationPriority()
     {
-        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_PRIORITY, "2"))
+        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_PRIORITY, getResources().getString(R.string.pref_notificationPriority_defVal)))
         {
             case "0":
                 return Notification.PRIORITY_MIN;
@@ -1261,7 +1219,7 @@ public class BackgroundService extends Service
     // Metodo per recuperare il tipo di vibrazione delle notifiche dalle sharedPreferences
     private long[] getNotificationVibration()
     {
-        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_VIBRATION, "1"))
+        switch (PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_VIBRATION, getResources().getString(R.string.pref_notificationVibration_defVal)))
         {
             case "0":
                 return new long[]{0};
@@ -1279,6 +1237,6 @@ public class BackgroundService extends Service
     // Metodo per recuperare il tono delle notifiche dalle sharedPreferences
     private Uri getNotificationRingtone()
     {
-        return Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_RINGTONE, "DEFAULT_SOUND"));
+        return Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsFragment.KEY_PREF_NOTIF_RINGTONE, getResources().getString(R.string.pref_notificationRingtone_defVal)));
     }
 }

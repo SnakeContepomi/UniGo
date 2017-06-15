@@ -2,25 +2,31 @@ package it.unibo.studio.unigo.main.fragments;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import java.util.ArrayList;
+import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapters.QuestionAdapter;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
-public class HomeFragment extends Fragment
+public class HomeFragment extends android.support.v4.app.Fragment
 {
-    private LinearLayout wheel;
     private RecyclerView mRecyclerView;
+    private LinearLayout wheel;
     private QuestionAdapter mAdapter;
+    private List<QuestionAdapterItem> questionList;
+    private ChildEventListener questionListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -31,26 +37,16 @@ public class HomeFragment extends Fragment
     }
 
     @Override
-    public void onPause()
+    public void onDestroyView()
     {
-        Util.setHomeFragmentVisibility(false);
-        super.onPause();
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        // Se ci sono aggiornamenti effettuati in background, vengono applicati alla lista Utils
-        // e a quella utilizzata dall'Adapater
-        for(QuestionAdapterItem qitem : Util.getQuestionsToUpdate())
-            Util.getHomeFragment().refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
-        Util.getQuestionsToUpdate().clear();
-        Util.setHomeFragmentVisibility(true);
+        Util.getDatabase().getReference("Question").orderByKey().removeEventListener(questionListener);
+        super.onDestroyView();
     }
 
     private void initComponents(View v)
     {
+        questionList = new ArrayList<>();
+
         wheel = (LinearLayout) v.findViewById(R.id.homeWheelLayout);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewHome);
         setRecyclerViewVisibility(false);
@@ -59,9 +55,43 @@ public class HomeFragment extends Fragment
         mRecyclerView.setLayoutManager(new LinearLayoutManager(v.getContext()));
 
         // Inizializzazione adapter della lista delle domande
-        mAdapter = new QuestionAdapter(Util.getQuestionList(), getActivity());
+        mAdapter = new QuestionAdapter(questionList, getActivity());
         mRecyclerView.setAdapter(mAdapter);
-        loadQuestionFromList();
+
+        questionListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                if (getQuestionPosition(dataSnapshot.getKey()) == -1)
+                {
+                    questionList.add(0, new QuestionAdapterItem(dataSnapshot.getValue(Question.class), dataSnapshot.getKey()));
+                    mAdapter.notifyItemInserted(0);
+                    setRecyclerViewVisibility(true);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s)
+            {
+                if (getQuestionPosition(dataSnapshot.getKey()) != -1)
+                {
+                    QuestionAdapterItem newQItem = new QuestionAdapterItem(dataSnapshot.getValue(Question.class), dataSnapshot.getKey());
+                    questionList.set(getQuestionPosition(dataSnapshot.getKey()), newQItem);
+                    mAdapter.refreshQuestion(newQItem);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        };
+
+        Util.getDatabase().getReference("Question").orderByKey().addChildEventListener(questionListener);
 
         new CountDownTimer(3000, 3000)
         {
@@ -69,28 +99,10 @@ public class HomeFragment extends Fragment
 
             public void onFinish()
             {
-                if (Util.getQuestionList().isEmpty())
+                if (questionList.isEmpty())
                     wheel.setVisibility(View.GONE);
             }
         }.start();
-    }
-
-    // Metodo utilizzato per caricare le domande già recuperate dal database e presenti nella lista questionList
-    public void loadQuestionFromList()
-    {
-        if (Util.getQuestionList().size() != 0)
-        {
-            for(int i = 0; i < Util.getQuestionList().size(); i++)
-                mAdapter.notifyItemInserted(i);
-            setRecyclerViewVisibility(true);
-        }
-    }
-
-    // Metodo utilizzato per aggiornare l'aggiunta dell'elemento in posizione "position" nella recyclerview
-    public void updateElement(int position)
-    {
-        mAdapter.updateElement(position);
-        mRecyclerView.scrollToPosition(position);
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview
@@ -105,16 +117,16 @@ public class HomeFragment extends Fragment
             mRecyclerView.setVisibility(View.GONE);
     }
 
-    // Metodo per aggiornare la GUI della domanda passata come parametro (i tre campi Rating, Favorite e Answer)
-    // e aggiornare i valori della lista di domande in Util
-    public void refreshQuestion(String questionKey, Question question)
+    // Metodo che restituisce la posizione della domanda nella lista, in base alla chiave fornita
+    private int getQuestionPosition(String questionKey)
     {
-        if (Util.getQuestionPosition(questionKey) != -1)
-            Util.updateElementAt(Util.getQuestionPosition(questionKey), new QuestionAdapterItem(question, questionKey));
-        mAdapter.refreshQuestion(new QuestionAdapterItem(question, questionKey));
+        for(int i = 0; i < questionList.size(); i++)
+            if (questionList.get(i).getQuestionKey().equals(questionKey))
+                return i;
+        return -1;
     }
 
-    // Metodo per aggiornare la GUI di favorite della domanda passata come parametro
+    // Metodo per aggiornare la GUI Favorite della domanda passata come parametro
     public void refreshFavorite(String questionKey)
     {
         mAdapter.refreshFavorite(questionKey);
@@ -129,12 +141,6 @@ public class HomeFragment extends Fragment
     // Metodo per riempire la lista con tutte le domande presenti nella lista in Util
     public void resetFilter()
     {
-        mAdapter.resetFilter(Util.getQuestionList());
-    }
-
-    // Metodo utilizzato per modificare lo stato della ricerca (attiva o non attiva)
-    public void setFilterState(boolean state)
-    {
-        mAdapter.setFilterState(state);
+        mAdapter.resetFilter(questionList);
     }
 }

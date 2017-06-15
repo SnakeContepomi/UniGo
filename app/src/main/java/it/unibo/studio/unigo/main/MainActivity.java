@@ -32,7 +32,6 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.fragments.FavoriteFragment;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
 import it.unibo.studio.unigo.main.fragments.InfoFragment;
@@ -68,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private InfoFragment fragmentInfo;
 
     private Toolbar toolbar;
-    private static MaterialSearchView searchView;
+    private MaterialSearchView searchView;
     private ProfileDrawerItem profile;
     private AccountHeader header;
     private Drawer navDrawer;
@@ -161,22 +160,14 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode)
         {
-            // Alla chiusura dell'activity Post, viene aggiunta la nuova domanda e vengono aggiornate (parzialmente) tutte quelle
-            // domande che hanno subito dei cambiamenti (riguardanti Rating, Favorite o numero risposte)
             case REQUEST_CODE_POST:
                 sheetLayout.contractFab();
-                if (getCurrentFragment() instanceof HomeFragment)
-                    refreshAdapterList();
                 break;
 
-            // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata" e tutte
-            // le eventuali domande che hanno subito dei cambiamenti mentre l'Activity era aperta
+            // Alla chiusura dell'activity Detail, viene aggiornato il campo "favorite della domanda interessata"
             case REQUEST_CODE_DETAIL:
                 if (getCurrentFragment() instanceof HomeFragment)
-                {
-                    refreshAdapterList();
                     Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
-                }
                 break;
         }
     }
@@ -212,11 +203,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
             @Override
-            public void onSearchViewShown()
-            {
-                if (getCurrentFragment() instanceof HomeFragment)
-                    ((HomeFragment) getCurrentFragment()).setFilterState(true);
-            }
+            public void onSearchViewShown() { }
 
             // Alla chiusura della SearchView, viene resettata la lista delle domande, prendendole da quella presente in Util
             // (mantenuta aggiornata)
@@ -224,10 +211,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             public void onSearchViewClosed()
             {
                 if (getCurrentFragment() instanceof HomeFragment)
-                {
-                    ((HomeFragment) getCurrentFragment()).setFilterState(false);
                     ((HomeFragment) getCurrentFragment()).resetFilter();
-                }
                 if (getCurrentFragment() instanceof FavoriteFragment)
                     ((FavoriteFragment) getCurrentFragment()).resetFilter();
                 if (getCurrentFragment() instanceof MyQuestionFragment)
@@ -456,14 +440,5 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     {
         if (fab.isShown())
             fab.hide();
-    }
-
-    // Metodo che aggiorna la lista di domande presenti in Util e quella utilizzata dall'Adapter, con tutte
-    // le domande che hanno subito dei cambiamenti durante il periodo in cui il fragment Home non era visibile
-    private void refreshAdapterList()
-    {
-        for(QuestionAdapterItem qitem : Util.getQuestionsToUpdate())
-            Util.getHomeFragment().refreshQuestion(qitem.getQuestionKey(), qitem.getQuestion());
-        Util.getQuestionsToUpdate().clear();
     }
 }
