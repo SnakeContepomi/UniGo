@@ -32,6 +32,7 @@ import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.fragments.ChatFragment;
 import it.unibo.studio.unigo.main.fragments.FavoriteFragment;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
 import it.unibo.studio.unigo.main.fragments.InfoFragment;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private final String FRAGMENT_HOME = "home";
     private final String FRAGMENT_QUESTION = "question";
     private final String FRAGMENT_FAVORITE = "favorite";
+    private final String FRAGMENT_CHAT = "chat";
     private final String FRAGMENT_SOCIAL = "social";
     private final String FRAGMENT_SETTINGS = "settings";
     private final String FRAGMENT_INFO = "info";
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private HomeFragment fragmentHome;
     private FavoriteFragment fragmentFavorite;
     private MyQuestionFragment fragmentQuestion;
+    private ChatFragment fragmentChat;
     private SocialFragment fragmentSocial;
     private SettingsFragment fragmentSettings;
     private InfoFragment fragmentInfo;
@@ -278,6 +281,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         fragmentHome = new HomeFragment();
         fragmentFavorite = new FavoriteFragment();
         fragmentQuestion = new MyQuestionFragment();
+        fragmentChat = new ChatFragment();
         fragmentSocial = new SocialFragment();
         fragmentSettings = new SettingsFragment();
         fragmentInfo = new InfoFragment();
@@ -313,9 +317,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_tutte).withLevel(2).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_preferiti).withLevel(2).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_domande).withLevel(2).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_chat = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_chat).withIcon(R.drawable.ic_chat_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(7).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
         ExpandableBadgeDrawerItem nav_expandable = new ExpandableBadgeDrawerItem()
                 .withName(R.string.drawer_principale)
                 .withIcon(R.drawable.ic_home_black_24dp)
@@ -337,6 +342,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 // withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)).withBadge("100").
                 .addDrawerItems(
                         nav_expandable,
+                        nav_chat,
                         nav_social,
                         new DividerDrawerItem(),
                         nav_settings,
@@ -369,20 +375,27 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 showFab();
                                 break;
                             case 4:
+                                loadFragment(fragmentChat, FRAGMENT_CHAT);
+                                toolbar.setTitle(R.string.drawer_chat);
+                                toolbar.getMenu().getItem(0).setVisible(false);
+                                navDrawer.closeDrawer();
+                                hideFab();
+                                break;
+                            case 5:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
                                 toolbar.setTitle(R.string.drawer_social);
                                 toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
-                            case 5:
+                            case 6:
                                 loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
                                 toolbar.setTitle(R.string.drawer_impostazioni);
                                 toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
-                            case 6:
+                            case 7:
                                 loadFragment(fragmentInfo, FRAGMENT_INFO);
                                 toolbar.setTitle(R.string.drawer_guida);
                                 toolbar.getMenu().getItem(0).setVisible(false);
@@ -420,6 +433,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             return fragmentFavorite;
         if (fragment instanceof MyQuestionFragment)
             return fragmentQuestion;
+        if (fragment instanceof  ChatFragment)
+            return fragmentChat;
         if (fragment instanceof SocialFragment)
             return fragmentSocial;
         if (fragment instanceof SettingsFragment)

@@ -91,6 +91,7 @@
     <string name="drawer_tutte">Tutte le domande</string>
     <string name="drawer_domande">Le mie domande</string>
     <string name="drawer_preferiti">Preferiti</string>
+    <string name="drawer_chat">Chat</string>
     <string name="drawer_social">Iscritti al corso</string>
     <string name="drawer_impostazioni">Impostazioni</string>
     <string name="drawer_guida">Guida &amp; info</string>
@@ -135,6 +136,7 @@
     <string name="profile_credits">Crediti</string>
 
     <string name="empty_section">Nessuna domanda in questa sezione</string>
+    <string name="empty_chat">Nessun messaggio da visualizzare</string>
 
     <!-- notification strings -->
     <string name="no_ringtone">Silenzioso</string>
