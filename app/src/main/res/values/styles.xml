@@ -28,12 +28,21 @@
     </style>
 
     <!-- Toolbar Text Style -->
-    <style name="ToolbarTextAppearance">
+    <style name="ToolbarTitleTextAppearanceMedium">
         <item name="android:textColor">@color/colorWhite</item>
         <item name="android:textSize">20sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
-
+    <style name="ToolbarTitleTextAppearanceNormal">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+    <style name="ToolbarSubtitleTextAppearance">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
     <!-- Hamburger Icon & Back Arrow Icon Style -->
     <style name="MaterialDrawer.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="color">@android:color/white</item>

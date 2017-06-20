@@ -31,8 +31,6 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
-
-import it.unibo.studio.unigo.LoginActivity;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.ChatFragment;
 import it.unibo.studio.unigo.main.fragments.FavoriteFragment;
@@ -51,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 {
     public static final int REQUEST_CODE_POST = 1;
     public static final int REQUEST_CODE_DETAIL = 2;
+    public static final int REQUEST_CODE_CHAT = 3;
     private final String FRAGMENT_HOME = "home";
     private final String FRAGMENT_QUESTION = "question";
     private final String FRAGMENT_FAVORITE = "favorite";
@@ -174,6 +173,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 if (getCurrentFragment() instanceof HomeFragment)
                     Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
                 break;
+
+            case REQUEST_CODE_CHAT:
+                sheetLayout.contractFab();
+                break;
         }
     }
 
@@ -182,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     public void onFabAnimationEnd()
     {
         if (getCurrentFragment() instanceof  ChatFragment)
-            startActivityForResult(new Intent(this, LoginActivity.class), REQUEST_CODE_POST);
+            startActivityForResult(new Intent(this, ContactActivity.class), REQUEST_CODE_CHAT);
         else
             startActivityForResult(new Intent(this, PostActivity.class), REQUEST_CODE_POST);
     }

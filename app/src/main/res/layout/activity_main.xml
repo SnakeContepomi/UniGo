@@ -16,7 +16,7 @@
         android:background="?attr/colorPrimary"
         app:popupTheme="@style/AppTheme"
         app:title="@string/app_name"
-        app:titleTextAppearance="@style/ToolbarTextAppearance"
+        app:titleTextAppearance="@style/ToolbarTitleTextAppearanceMedium"
         android:elevation="2dp"/>
     <com.miguelcatalan.materialsearchview.MaterialSearchView
         android:id="@+id/search_view"

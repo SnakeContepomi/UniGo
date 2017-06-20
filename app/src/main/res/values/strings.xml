@@ -135,6 +135,9 @@
     <string name="profile_comments">Commenti</string>
     <string name="profile_credits">Crediti</string>
 
+    <string name="contact_title">Seleziona</string>
+    <string name="contact_subtitle">%1$d contatti</string>
+
     <string name="empty_section">Nessuna domanda in questa sezione</string>
     <string name="empty_chat">Nessun messaggio da visualizzare</string>
 

@@ -21,8 +21,7 @@ import it.unibo.studio.unigo.utils.firebase.User;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> implements FastScroller.SectionIndexer{
 
-    private List<UserAdapterItem> userList;
-    protected Activity activity;
+    protected List<UserAdapterItem> userList;
 
     class UserHolder extends RecyclerView.ViewHolder
     {
@@ -41,9 +40,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
         }
     }
 
-    public UserAdapter(Activity activity, List<UserAdapterItem> userList)
+    public UserAdapter(List<UserAdapterItem> userList)
     {
-        this.activity = activity;
         this.userList = userList;
     }
 
@@ -78,7 +76,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
             @Override
             public void onClick(View view)
             {
-                activity.startActivity(new Intent(holder.context, ProfileActivity.class).putExtra("user_key", userList.get(holder.getAdapterPosition()).getUserKey()));
+                holder.context.startActivity(new Intent(holder.context, ProfileActivity.class).putExtra("user_key", userList.get(holder.getAdapterPosition()).getUserKey()));
             }
         });
     }
