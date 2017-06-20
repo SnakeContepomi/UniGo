@@ -31,6 +31,8 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
+
+import it.unibo.studio.unigo.LoginActivity;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.ChatFragment;
 import it.unibo.studio.unigo.main.fragments.FavoriteFragment;
@@ -179,8 +181,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     @Override
     public void onFabAnimationEnd()
     {
-        Intent intent = new Intent(this, PostActivity.class);
-        startActivityForResult(intent, REQUEST_CODE_POST);
+        if (getCurrentFragment() instanceof  ChatFragment)
+            startActivityForResult(new Intent(this, LoginActivity.class), REQUEST_CODE_POST);
+        else
+            startActivityForResult(new Intent(this, PostActivity.class), REQUEST_CODE_POST);
     }
 
     private void initComponents()
@@ -229,7 +233,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onClick(View view)
             {
-                ((SheetLayout) findViewById(R.id.bottom_sheet)).expandFab();
+                //if (getCurrentFragment() instanceof ChatFragment)
+                //    startActivityForResult(new Intent(getApplicationContext(), LoginActivity.class), REQUEST_CODE_POST);
+                //else
+                    ((SheetLayout) findViewById(R.id.bottom_sheet)).expandFab();
             }
         });
         sheetLayout.setFab(fab);
@@ -358,6 +365,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_tutte);
                                 toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_black_24dp));
                                 showFab();
                                 break;
                             case 2:
@@ -365,6 +373,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_preferiti);
                                 toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_black_24dp));
                                 showFab();
                                 break;
                             case 3:
@@ -372,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_domande);
                                 toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_black_24dp));
                                 showFab();
                                 break;
                             case 4:
@@ -379,7 +389,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_chat);
                                 toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
-                                hideFab();
+                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_chat_black_24dp));
+                                showFab();
                                 break;
                             case 5:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);

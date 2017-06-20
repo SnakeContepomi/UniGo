@@ -2,7 +2,6 @@ package it.unibo.studio.unigo.main.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,9 +53,6 @@ public class SocialFragment extends Fragment
         mAdapter = new UserAdapter(getActivity(), userList);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setFastScrollEnabled(true);
-
-        DividerItemDecoration divider = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
-        divider.setDrawable(v.getContext().getDrawable(R.drawable.item_divider));
 
         setRecyclerViewVisibility(false);
     }

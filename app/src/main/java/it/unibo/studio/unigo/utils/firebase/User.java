@@ -12,6 +12,7 @@ public class User
     // String 1 = answer key, String 2 = question key
     public HashMap<String, String> answers;
     public HashMap<String, Boolean> comments;
+    public HashMap<String, Boolean> chat_rooms;
 
     public User() { }
 

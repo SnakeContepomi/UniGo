@@ -74,6 +74,8 @@ dependencies {
     compile 'com.github.Triggertrap:SeekArc:v1.1'
     // CircleImageView
     compile 'de.hdodenhof:circleimageview:2.1.0'
+    // Android ChatBadge Notification
+    compile 'com.github.nekocode:Badge:2.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
