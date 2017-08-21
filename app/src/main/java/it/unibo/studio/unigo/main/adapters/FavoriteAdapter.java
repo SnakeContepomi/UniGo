@@ -2,10 +2,8 @@ package it.unibo.studio.unigo.main.adapters;
 
 
 import android.app.Activity;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 
 public class FavoriteAdapter extends QuestionAdapter
