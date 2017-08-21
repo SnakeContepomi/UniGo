@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -38,7 +39,6 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
 
     protected Filter mFilter = new ItemFilter();
     protected List<QuestionAdapterItem> questionList, backupList;
-    private boolean isFiltered;
     protected Activity activity;
 
     static class ViewHolder extends RecyclerView.ViewHolder
@@ -115,7 +115,6 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         this.questionList = questionList;
         this.backupList = questionList;
         this.activity = activity;
-        isFiltered = false;
     }
 
     @Override
@@ -165,15 +164,15 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 // Aggiornamento di tutte le Action della cardQuestion (Rating, Favorite e Answers)
                 case UPDATE_CODE_QUESTION:
                     // Action Rating
-                    holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
-                    holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
+                    holder.imgRating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorIconGray)));
+                    holder.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorIconGray)));
                     if (questionList.get(position).getQuestion().ratings != null)
                     {
                         holder.txtRating.setText(String.valueOf(questionList.get(position).getQuestion().ratings.size()));
                         if (questionList.get(position).getQuestion().ratings.keySet().contains(Util.encodeEmail(Util.getCurrentUser().getEmail())))
                         {
-                            holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
-                            holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                            holder.imgRating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
+                            holder.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
                             holder.rating.setClickable(false);
                         }
                     }
@@ -247,8 +246,8 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             public void onClick(View view)
             {
                 Util.getDatabase().getReference("Question").child(qItem.getQuestionKey()).child("ratings").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
-                holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
-                holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                holder.imgRating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
+                holder.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
                 Util.startBounceAnimation(activity, holder.rating);
                 holder.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(holder.txtRating.getText())) + 1));
                 holder.rating.setClickable(false);
@@ -257,8 +256,8 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
 
         // Al caricamento di ogni domanda, viene controllato se l'utente ha già votato la domanda
         // (un utente può votare la domanda una sola volta)
-        holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
-        holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorIconGray)));
+        holder.imgRating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorIconGray)));
+        holder.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorIconGray)));
         if (qItem.getQuestion().ratings != null)
         {
             // Inizializzazione del numero di rating della domanda corrente
@@ -266,8 +265,8 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
 
             if (qItem.getQuestion().ratings.keySet().contains(Util.encodeEmail(Util.getCurrentUser().getEmail())))
             {
-                holder.imgRating.setImageTintList(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
-                holder.txtRating.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                holder.imgRating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
+                holder.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
                 holder.rating.setClickable(false);
             }
         }
@@ -289,9 +288,9 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             {
                 // Se la domanda risulta tra i preferiti, viene evidenziata
                 if (dataSnapshot.getValue() != null)
-                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
+                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorAmber)));
                 else
-                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
+                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorIconGray)));
             }
 
             @Override
@@ -311,14 +310,14 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                         if (dataSnapshot.getValue() == null)
                         {
                             favoriteReference.setValue(true);
-                            holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
+                            holder.imgFavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorAmber)));
                             Util.startBounceAnimation(activity, holder.imgFavorite);
                         }
                         // Se la domanda è già nei preferiti, essa viene rimossa
                         else
                         {
                             favoriteReference.removeValue();
-                            holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
+                            holder.imgFavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorIconGray)));
                             Util.startBounceAnimation(activity, holder.imgFavorite);
                         }
                     }
@@ -328,13 +327,6 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                 });
             }
         });
-    }
-
-    // Metodo utilizzato per aggiornare l'inserimento dell'elemento in posizione "position" nella recyclerview
-    public void updateElement(int position)
-    {
-        if (!isFiltered)
-            notifyItemInserted(position);
     }
 
     // Metodo utilizzato per aggiornare i campi "rating", "favorite" e "answers" della domanda corrente, ad ogni eventuale cambiamento
@@ -366,9 +358,9 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 if (dataSnapshot.getValue() != null)
-                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorAmber)));
+                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorAmber)));
                 else
-                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(holder.imgFavorite.getContext().getResources().getColor(R.color.colorIconGray)));
+                    holder.imgFavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorIconGray)));
             }
 
             @Override
@@ -383,12 +375,6 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         this.questionList = questionList;
         this.backupList = questionList;
         notifyDataSetChanged();
-    }
-
-    // Metodo utilizzato per mantenere aggiornato lo stato della SearchView (Aperta/Chiusa)
-    public void setFilterState(boolean state)
-    {
-        isFiltered = state;
     }
 
     // Data una chiave di una domanda, viene restituita la posizione della stessa all'interno della lista

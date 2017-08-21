@@ -7,6 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
@@ -19,7 +21,8 @@ import it.unibo.studio.unigo.main.adapteritems.UserAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> implements FastScroller.SectionIndexer{
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> implements FastScroller.SectionIndexer, Filterable
+{
 
     protected List<UserAdapterItem> userList;
 
@@ -43,6 +46,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
     public UserAdapter(List<UserAdapterItem> userList)
     {
         this.userList = userList;
+    }
+
+    @Override
+    public Filter getFilter()
+    {
+        return null;
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -236,10 +237,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onClick(View view)
             {
-                //if (getCurrentFragment() instanceof ChatFragment)
-                //    startActivityForResult(new Intent(getApplicationContext(), LoginActivity.class), REQUEST_CODE_POST);
-                //else
-                    ((SheetLayout) findViewById(R.id.bottom_sheet)).expandFab();
+                ((SheetLayout) findViewById(R.id.bottom_sheet)).expandFab();
             }
         });
         sheetLayout.setFab(fab);
@@ -368,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_tutte);
                                 toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_black_24dp));
+                                fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_add_black_24dp));
                                 showFab();
                                 break;
                             case 2:
@@ -376,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_preferiti);
                                 toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_black_24dp));
+                                fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_add_black_24dp));
                                 showFab();
                                 break;
                             case 3:
@@ -384,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_domande);
                                 toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_add_black_24dp));
+                                fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_add_black_24dp));
                                 showFab();
                                 break;
                             case 4:
@@ -392,7 +390,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 toolbar.setTitle(R.string.drawer_chat);
                                 toolbar.getMenu().getItem(0).setVisible(false);
                                 navDrawer.closeDrawer();
-                                fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_chat_black_24dp));
+                                fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_chat_black_24dp));
                                 showFab();
                                 break;
                             case 5:
