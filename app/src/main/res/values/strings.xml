@@ -62,6 +62,7 @@
     <string name="alert_dialog_step1_content">Attendere prego</string>
     <string name="alert_dialog_step3_title">Creazione account</string>
     <string name="alert_dialog_step3_content">L\'operazione può richiedere alcuni minuti..</string>
+    <string name="alert_dialog_warning">Attenzione</string>
     <string name="alert_dialog_cancel">Annulla</string>
     <string name="alert_dialog_send">Invia</string>
     <string name="alert_dialog_post_creation">Invio in corso..</string>

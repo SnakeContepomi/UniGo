@@ -125,6 +125,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         {
             // Connessione non disponibile
             case NETWORK_UNAVAILABLE:
+                builder.setTitle(getString(R.string.alert_dialog_warning));
                 builder.setMessage(getString(R.string.error_network_unavailable));
                 builder.setPositiveButton(getString(android.R.string.ok),
                         new DialogInterface.OnClickListener() {
