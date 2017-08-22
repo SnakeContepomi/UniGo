@@ -138,7 +138,7 @@ public class HomeFragment extends android.support.v4.app.Fragment
         mAdapter.getFilter().filter(filterConstraint);
     }
 
-    // Metodo per riempire la lista con tutte le domande presenti nella lista in Util
+    // Metodo per reimpostare la lista utilizzando quella di backup presente nell'adapter QuestionAdapter
     public void resetFilter()
     {
         mAdapter.resetFilter(questionList);
