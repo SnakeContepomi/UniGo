@@ -1,6 +1,5 @@
 package it.unibo.studio.unigo.main.adapters;
 
-
 import android.app.Activity;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +37,6 @@ public class FavoriteAdapter extends QuestionAdapter
     public void addToBackupList(QuestionAdapterItem qItem)
     {
         backupList.add(0, qItem);
-    }
-
-    public void resetFilter()
-    {
-        this.questionList = backupList;
-        notifyDataSetChanged();
     }
 
     private int getQuestionPosition(String questionKey, List<QuestionAdapterItem> list)

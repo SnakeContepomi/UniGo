@@ -368,15 +368,6 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         });
     }
 
-    // Metodo che reinizializza la lista delle domande presente nell'Adapter, con quella presente in Util
-    // (ogni volta che viene chiusa la SearchView)
-    public void resetFilter(List<QuestionAdapterItem> questionList)
-    {
-        this.questionList = questionList;
-        this.backupList = questionList;
-        notifyDataSetChanged();
-    }
-
     // Data una chiave di una domanda, viene restituita la posizione della stessa all'interno della lista
     protected int getQuestionPosition(String questionKey)
     {

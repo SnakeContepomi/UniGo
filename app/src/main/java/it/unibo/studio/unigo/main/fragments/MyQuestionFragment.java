@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -150,12 +149,6 @@ public class MyQuestionFragment extends android.support.v4.app.Fragment
     public void filterResults(String filterConstraint)
     {
         mAdapter.getFilter().filter(filterConstraint);
-    }
-
-    // Metodo per riempire la lista con tutte le domande presenti nella lista in Util
-    public void resetFilter()
-    {
-        mAdapter.resetFilter(myQuestionList);
     }
 
     private void addQuestionListener(String questionKey)

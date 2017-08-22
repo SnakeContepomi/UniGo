@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +14,7 @@ import com.google.firebase.database.DatabaseError;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapters.QuestionAdapter;
 import it.unibo.studio.unigo.utils.Util;
@@ -65,7 +65,8 @@ public class HomeFragment extends android.support.v4.app.Fragment
                 if (getQuestionPosition(dataSnapshot.getKey()) == -1)
                 {
                     questionList.add(0, new QuestionAdapterItem(dataSnapshot.getValue(Question.class), dataSnapshot.getKey()));
-                    mAdapter.notifyItemInserted(0);
+                    if (!((MainActivity) getActivity()).isSearchViewShown())
+                        mAdapter.notifyItemInserted(0);
                     setRecyclerViewVisibility(true);
                 }
             }
@@ -136,11 +137,5 @@ public class HomeFragment extends android.support.v4.app.Fragment
     public void filterResults(String filterConstraint)
     {
         mAdapter.getFilter().filter(filterConstraint);
-    }
-
-    // Metodo per reimpostare la lista utilizzando quella di backup presente nell'adapter QuestionAdapter
-    public void resetFilter()
-    {
-        mAdapter.resetFilter(questionList);
     }
 }

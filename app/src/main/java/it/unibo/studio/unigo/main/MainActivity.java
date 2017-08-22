@@ -196,7 +196,12 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         searchView = (MaterialSearchView) findViewById(R.id.search_view);
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) { return false; }
+            public boolean onQueryTextSubmit(String query)
+            {
+                searchView.clearFocus();
+
+                return true;
+            }
 
             @Override
             public boolean onQueryTextChange(String newText)
@@ -221,12 +226,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onSearchViewClosed()
             {
-                if (getCurrentFragment() instanceof HomeFragment)
-                    ((HomeFragment) getCurrentFragment()).resetFilter();
-                if (getCurrentFragment() instanceof FavoriteFragment)
-                    ((FavoriteFragment) getCurrentFragment()).resetFilter();
-                if (getCurrentFragment() instanceof MyQuestionFragment)
-                    ((MyQuestionFragment) getCurrentFragment()).resetFilter();
+                searchView.setQuery("", false);
             }
         });
 
@@ -467,5 +467,10 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     {
         if (fab.isShown())
             fab.hide();
+    }
+
+    public boolean isSearchViewShown()
+    {
+        return searchView.isShown();
     }
 }
