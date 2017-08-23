@@ -111,4 +111,10 @@ public class SocialFragment extends Fragment
             loadingLayout.setVisibility(View.VISIBLE);
         }
     }
+
+    // Metodo per filtrare la ricerca degli utenti in base al nome/cognome
+    public void filterResults(String filterConstraint)
+    {
+        mAdapter.getFilter().filter(filterConstraint);
+    }
 }

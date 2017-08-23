@@ -28,6 +28,7 @@
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login">Accedi</string>
+    <string name="login_confirm_email">Per continuare, seguire le istruzioni riportate\nsulla mail ricevuta</string>
     <string name="register">Nuovo utente? Registrati ora</string>
 
     <string name="snackbar_success">Registrazione completata\nTi è stata inviata una mail di conferma</string>

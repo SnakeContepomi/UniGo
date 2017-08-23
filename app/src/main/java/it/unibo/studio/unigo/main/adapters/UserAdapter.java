@@ -14,17 +14,24 @@ import android.widget.TextView;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.l4digital.fastscroll.FastScroller;
 import com.squareup.picasso.Picasso;
+
+import org.apache.commons.lang3.builder.CompareToBuilder;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.ProfileActivity;
+import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapteritems.UserAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> implements FastScroller.SectionIndexer, Filterable
 {
-
-    protected List<UserAdapterItem> userList;
+    protected Filter mFilter = new ItemFilter();
+    protected List<UserAdapterItem> userList, backupList;
 
     class UserHolder extends RecyclerView.ViewHolder
     {
@@ -46,12 +53,56 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
     public UserAdapter(List<UserAdapterItem> userList)
     {
         this.userList = userList;
+        this.backupList = userList;
+    }
+
+    // Classe per filtrare la lista dell'Adapter
+    private class ItemFilter extends Filter
+    {
+        // Il filtro restituisce gli elementi che contengono la chiave di ricerca
+        // nei campi Titolo, Descrizione e Materia
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint)
+        {
+            String filterString = constraint.toString().toLowerCase();
+            userList = backupList;
+            List<UserAdapterItem> filteredList = new ArrayList<>();
+            FilterResults results = new FilterResults();
+
+            for(int i = 0; i < userList.size(); i++)
+                if (userList.get(i).getUser().name.toLowerCase().contains(filterString)
+                        || userList.get(i).getUser().lastName.toLowerCase().contains(filterString))
+                    filteredList.add(0, userList.get(i));
+
+            results.values = filteredList;
+            results.count = filteredList.size();
+
+            return results;
+        }
+
+        // Metodo per aggiornare graficamente la lista
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results)
+        {
+            userList = (ArrayList<UserAdapterItem>) results.values;
+            Collections.sort(userList, new Comparator<UserAdapterItem>() {
+                @Override
+                public int compare(UserAdapterItem qItem1, UserAdapterItem qItem2)
+                {
+                    return new CompareToBuilder()
+                            .append(qItem1.getUser().name, qItem2.getUser().name)
+                            .append(qItem1.getUser().lastName, qItem2.getUser().lastName).toComparison();
+                }
+            });
+            notifyDataSetChanged();
+        }
     }
 
     @Override
     public Filter getFilter()
     {
-        return null;
+        return mFilter;
     }
 
     @Override

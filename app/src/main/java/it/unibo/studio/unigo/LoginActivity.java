@@ -146,7 +146,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (user != null)
                 {
                     // L'utente è autenticato e ha verificato l'email, quindi può utilizzare l'App
-                    if (user.isEmailVerified()) {
+                    if (user.isEmailVerified())
+                    {
                         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(myIntent);
                         finish();
@@ -218,6 +219,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             // Credenziali errate
                             if (!task.isSuccessful())
                                 errorHandler(Error.Type.INVALID_CREDENTIALS);
+                            else if (!Util.getCurrentUser().isEmailVerified())
+                                Snackbar
+                                        .make(findViewById(R.id.l_login), R.string.login_confirm_email, Snackbar.LENGTH_LONG)
+                                        .show();
                         }
                     });
     }

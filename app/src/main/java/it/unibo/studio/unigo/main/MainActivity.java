@@ -212,6 +212,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                     ((FavoriteFragment) getCurrentFragment()).filterResults(newText);
                 if (getCurrentFragment() instanceof MyQuestionFragment)
                     ((MyQuestionFragment) getCurrentFragment()).filterResults(newText);
+                if (getCurrentFragment() instanceof  SocialFragment)
+                    ((SocialFragment) getCurrentFragment()).filterResults(newText);
 
                 return false;
             }
@@ -396,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                             case 5:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
                                 toolbar.setTitle(R.string.drawer_social);
-                                toolbar.getMenu().getItem(0).setVisible(false);
+                                toolbar.getMenu().getItem(0).setVisible(true);
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
@@ -471,6 +473,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
     public boolean isSearchViewShown()
     {
-        return searchView.isShown();
+        return searchView.isSearchOpen();
     }
 }
