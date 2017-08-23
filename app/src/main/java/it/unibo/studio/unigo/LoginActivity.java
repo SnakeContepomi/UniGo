@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,12 +18,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
 import com.mikepenz.materialdrawer.util.KeyboardUtil;
-
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
-
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.signup.SignupActivity;
 import it.unibo.studio.unigo.utils.Error;
@@ -209,7 +205,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             errorHandler(Error.Type.PASSWORD_IS_EMPTY);
             emptyField = true;
         }
-        if (emptyField == false)
+        if (!emptyField)
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
                     {

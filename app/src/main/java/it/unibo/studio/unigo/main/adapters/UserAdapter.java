@@ -1,6 +1,5 @@
 package it.unibo.studio.unigo.main.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.l4digital.fastscroll.FastScroller;
 import com.squareup.picasso.Picasso;
-
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.ProfileActivity;
-import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.main.adapteritems.UserAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.User;
