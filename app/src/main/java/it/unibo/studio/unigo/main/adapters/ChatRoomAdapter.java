@@ -1,7 +1,8 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.content.res.ColorStateList;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +13,6 @@ import android.widget.TextView;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.squareup.picasso.Picasso;
 import java.util.List;
-
 import cn.nekocode.badge.BadgeDrawable;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
@@ -99,7 +99,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         final BadgeDrawable drawable =
                 new BadgeDrawable.Builder()
                         .type(BadgeDrawable.TYPE_NUMBER)
-                        .badgeColor(holder.context.getResources().getColor(R.color.colorPrimary))
+                        .badgeColor(ContextCompat.getColor(holder.context, R.color.colorPrimary))
                         .textSize(sp2px(holder.context, 8))
                         .number(6)
                         .build();
@@ -120,7 +120,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                 // Sono presenti nuovi messaggi
                 case ChatFragment.CODE_NEW_MESSAGE:
                     // ** Grassetto **
-                    //holder.txtDate.setTextColor(ColorStateList.valueOf(holder.context.getResources().getColor(R.color.colorPrimary)));
+                    holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
                     break;
 
                 // Non sono presenti nuovi messaggi
