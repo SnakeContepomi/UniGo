@@ -19,7 +19,7 @@
         app:titleTextAppearance="@style/ToolbarTitleTextAppearanceMedium"
         android:elevation="2dp"/>
     <com.miguelcatalan.materialsearchview.MaterialSearchView
-        android:id="@+id/search_view"
+        android:id="@+id/search_view_main"
         style="@style/MaterialSearchViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -3,7 +3,6 @@ package it.unibo.studio.unigo.main;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
@@ -13,8 +12,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import com.github.fabtransitionactivity.SheetLayout;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +34,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
+import it.unibo.studio.unigo.LoginActivity;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.fragments.ChatFragment;
 import it.unibo.studio.unigo.main.fragments.FavoriteFragment;
@@ -45,6 +48,9 @@ import it.unibo.studio.unigo.utils.Util;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+
+import static android.media.CamcorderProfile.get;
+import static android.os.Build.VERSION_CODES.M;
 
 public class MainActivity extends AppCompatActivity implements SheetLayout.OnFabAnimationEndListener
 {
@@ -60,8 +66,9 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private final String FRAGMENT_INFO = "info";
 
     private boolean firstTime;
+    private int subItemSelection;
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
+    private Intent serviceIntent;
 
     private HomeFragment fragmentHome;
     private FavoriteFragment fragmentFavorite;
@@ -85,22 +92,19 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
+        serviceIntent = new Intent(this, BackgroundService.class);
 
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).keepSynced(true);
 
         // Background Service
         if (!BackgroundService.isRunning)
-        {
-            Intent intent = new Intent(this, BackgroundService.class);
-            startService(intent);
-        }
+            startService(serviceIntent);
     }
 
     @Override
     protected void onStart()
     {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
 
         // Avvio dell'utente loggato con attivazione del listener sullo stato della connessione
         if (firstTime)
@@ -132,14 +136,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 .show();
             firstTime = false;
         }
-    }
-
-    @Override
-    protected void onStop()
-    {
-        super.onStop();
-        if (mAuthListener != null)
-            mAuth.removeAuthStateListener(mAuthListener);
     }
 
     @Override
@@ -193,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
     private void initComponents()
     {
-        searchView = (MaterialSearchView) findViewById(R.id.search_view);
+        searchView = (MaterialSearchView) findViewById(R.id.search_view_main);
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query)
@@ -223,8 +219,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             @Override
             public void onSearchViewShown() { }
 
-            // Alla chiusura della SearchView, viene resettata la lista delle domande, prendendole da quella presente in Util
-            // (mantenuta aggiornata)
+            // Alla chiusura della SearchView, viene resettata la lista delle domande
             @Override
             public void onSearchViewClosed()
             {
@@ -265,20 +260,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         // Inizializzazione NavDrawer
         initNavDrawer();
-
-        // Gestione Logout
-        mAuthListener = new FirebaseAuth.AuthStateListener()
-        {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
-            {
-                // L'utente si è disconnesso
-                if (Util.getCurrentUser() == null)
-                {
-
-                }
-            }
-        };
     }
 
     // Inizializzazione della Toolbar e del NavDrawer
@@ -286,6 +267,20 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     {
         toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         toolbar.inflateMenu(R.menu.menu_item_search);
+        toolbar.inflateMenu(R.menu.menu_item_option);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.menu_exit  )
+                {
+                    mAuth.signOut();
+                    stopService(serviceIntent);
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
+                }
+                return false;
+            }
+        });
         searchView.setMenuItem(toolbar.getMenu().getItem(0));
 
         fragmentHome = new HomeFragment();
@@ -331,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(7).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
-        ExpandableBadgeDrawerItem nav_expandable = new ExpandableBadgeDrawerItem()
+        final ExpandableBadgeDrawerItem nav_expandable = new ExpandableBadgeDrawerItem()
                 .withName(R.string.drawer_principale)
                 .withIcon(R.drawable.ic_home_black_24dp)
                 .withIconTintingEnabled(true)
@@ -342,6 +337,15 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                         nav_favorite,
                         nav_question
                 );
+        nav_expandable.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem)
+            {
+                if (subItemSelection <= 2)
+                    nav_expandable.getSubItems().get(subItemSelection).withSetSelected(true);
+                return false;
+            }
+        });
 
         // Creazione del navDrawer con le varie caratteristiche sopra definite
         navDrawer = new DrawerBuilder()
@@ -367,6 +371,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentHome, FRAGMENT_HOME);
                                 toolbar.setTitle(R.string.drawer_tutte);
                                 toolbar.getMenu().getItem(0).setVisible(true);
+                                subItemSelection = 0;
                                 navDrawer.closeDrawer();
                                 fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_add_black_24dp));
                                 showFab();
@@ -375,6 +380,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentFavorite, FRAGMENT_FAVORITE);
                                 toolbar.setTitle(R.string.drawer_preferiti);
                                 toolbar.getMenu().getItem(0).setVisible(true);
+                                subItemSelection = 1;
                                 navDrawer.closeDrawer();
                                 fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_add_black_24dp));
                                 showFab();
@@ -383,6 +389,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentQuestion, FRAGMENT_QUESTION);
                                 toolbar.setTitle(R.string.drawer_domande);
                                 toolbar.getMenu().getItem(0).setVisible(true);
+                                subItemSelection = 2;
                                 navDrawer.closeDrawer();
                                 fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_add_black_24dp));
                                 showFab();
@@ -391,6 +398,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentChat, FRAGMENT_CHAT);
                                 toolbar.setTitle(R.string.drawer_chat);
                                 toolbar.getMenu().getItem(0).setVisible(false);
+                                subItemSelection = 3;
                                 navDrawer.closeDrawer();
                                 fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_chat_black_24dp));
                                 showFab();
@@ -399,6 +407,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
                                 toolbar.setTitle(R.string.drawer_social);
                                 toolbar.getMenu().getItem(0).setVisible(true);
+                                subItemSelection = 4;
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
@@ -406,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
                                 toolbar.setTitle(R.string.drawer_impostazioni);
                                 toolbar.getMenu().getItem(0).setVisible(false);
+                                subItemSelection = 5;
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
@@ -413,6 +423,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 loadFragment(fragmentInfo, FRAGMENT_INFO);
                                 toolbar.setTitle(R.string.drawer_guida);
                                 toolbar.getMenu().getItem(0).setVisible(false);
+                                subItemSelection = 6;
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
@@ -424,6 +435,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         // Viene caricato il Fragment 'Home' all'avvio dell'Activity
         navDrawer.setSelection(navDrawer.getDrawerItem(1));
+        subItemSelection = 0;
     }
 
     // Metodo per caricare un fragment nella Main Activity

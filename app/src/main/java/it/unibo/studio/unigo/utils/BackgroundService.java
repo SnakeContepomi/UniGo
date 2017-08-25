@@ -18,8 +18,13 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -77,6 +82,18 @@ public class BackgroundService extends Service
     {
         super.onCreate();
         isRunning = true;
+        /*
+        DEBUG FOR LOGOUT FUNCTION
+        Log.d("prova", "BackgroundService, user: " + FirebaseAuth.getInstance().getCurrentUser());
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (FirebaseAuth.getInstance().getCurrentUser() == null)
+                    Log.d("prova", "Logged out");
+                else
+                    Log.d("prova", "Logged in");
+            }
+        });*/
         initBackgroundService();
     }
 

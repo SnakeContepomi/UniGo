@@ -37,6 +37,7 @@
     <string name="snackbar_retry_login">riprova</string>
     <string name="snackbar_registration_failed">Si è verificato un errore di rete. Riprovare</string>
     <string name="snackbar_login_message">Accesso eseguito come\n</string>
+    <string name="snackbar_logout_message">Logout effettuato</string>
 
     <string name="toast_post_sent">Post creato</string>
 
@@ -87,6 +88,8 @@
     <string name="spinner_course_hint">Corso</string>
 
     <string name="toolbar_search_hint">Cerca...</string>
+    <string name="toolbar_option_hint">Opzioni...</string>
+    <string name="toolbar_logout">Logout</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="drawer_principale">Principale</string>

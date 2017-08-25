@@ -11,6 +11,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.l4digital.fastscroll.FastScrollRecyclerView;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +29,7 @@ public class ContactActivity extends AppCompatActivity
     private List<UserAdapterItem> userList;
 
     private Toolbar toolbar;
+    private MaterialSearchView searchView;
     private LinearLayout loadingLayout;
     private FastScrollRecyclerView mRecyclerView;
     private ContactAdapter mAdapter;
@@ -49,6 +51,15 @@ public class ContactActivity extends AppCompatActivity
         super.onPause();
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        if (searchView.isSearchOpen())
+            searchView.closeSearch();
+        else
+            super.onBackPressed();
+    }
+
     private void initComponents()
     {
         userList = new ArrayList<>();
@@ -60,6 +71,35 @@ public class ContactActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 onBackPressed();
+            }
+        });
+        toolbar.inflateMenu(R.menu.menu_item_search);
+        searchView = (MaterialSearchView) findViewById(R.id.search_view_contact);
+        searchView.setMenuItem(toolbar.getMenu().getItem(0));
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query)
+            {
+                searchView.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText)
+            {
+                mAdapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() { }
+
+            // Alla chiusura della SearchView, viene ripristinata la lista iniziale dei contatti
+            @Override
+            public void onSearchViewClosed()
+            {
+                searchView.setQuery("", false);
             }
         });
 
