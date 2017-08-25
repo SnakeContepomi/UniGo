@@ -15,8 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
-
 import com.github.fabtransitionactivity.SheetLayout;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,9 +46,6 @@ import it.unibo.studio.unigo.utils.Util;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-
-import static android.media.CamcorderProfile.get;
-import static android.os.Build.VERSION_CODES.M;
 
 public class MainActivity extends AppCompatActivity implements SheetLayout.OnFabAnimationEndListener
 {
