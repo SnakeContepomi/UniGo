@@ -34,7 +34,7 @@ import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.Picasso;
 import it.unibo.studio.unigo.LoginActivity;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.fragments.ChatFragment;
+import it.unibo.studio.unigo.main.fragments.ChatRoomFragment;
 import it.unibo.studio.unigo.main.fragments.FavoriteFragment;
 import it.unibo.studio.unigo.main.fragments.HomeFragment;
 import it.unibo.studio.unigo.main.fragments.InfoFragment;
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private HomeFragment fragmentHome;
     private FavoriteFragment fragmentFavorite;
     private MyQuestionFragment fragmentQuestion;
-    private ChatFragment fragmentChat;
+    private ChatRoomFragment fragmentChat;
     private SocialFragment fragmentSocial;
     private SettingsFragment fragmentSettings;
     private InfoFragment fragmentInfo;
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     @Override
     public void onFabAnimationEnd()
     {
-        if (getCurrentFragment() instanceof  ChatFragment)
+        if (getCurrentFragment() instanceof ChatRoomFragment)
             startActivityForResult(new Intent(this, ContactActivity.class), REQUEST_CODE_CHAT);
         else
             startActivityForResult(new Intent(this, PostActivity.class), REQUEST_CODE_POST);
@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         fragmentHome = new HomeFragment();
         fragmentFavorite = new FavoriteFragment();
         fragmentQuestion = new MyQuestionFragment();
-        fragmentChat = new ChatFragment();
+        fragmentChat = new ChatRoomFragment();
         fragmentSocial = new SocialFragment();
         fragmentSettings = new SettingsFragment();
         fragmentInfo = new InfoFragment();
@@ -454,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             return fragmentFavorite;
         if (fragment instanceof MyQuestionFragment)
             return fragmentQuestion;
-        if (fragment instanceof  ChatFragment)
+        if (fragment instanceof ChatRoomFragment)
             return fragmentChat;
         if (fragment instanceof SocialFragment)
             return fragmentSocial;

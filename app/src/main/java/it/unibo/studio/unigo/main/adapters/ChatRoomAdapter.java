@@ -1,6 +1,8 @@
 package it.unibo.studio.unigo.main.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -15,27 +17,31 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 import cn.nekocode.badge.BadgeDrawable;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.ChatActivity;
+import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
-import it.unibo.studio.unigo.main.fragments.ChatFragment;
+import it.unibo.studio.unigo.main.fragments.ChatRoomFragment;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Chat;
-import static it.unibo.studio.unigo.R.layout.chat_item;
+import static it.unibo.studio.unigo.R.layout.chat_room_item;
 
 public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>
 {
     private List<ChatRoomAdapterItem> chatList;
+    private Activity activity;
 
     static class ViewHolder extends RecyclerView.ViewHolder
     {
         Context context;
+        LinearLayout layout;
         TextView txtName, txtDate, txtLastMessage;
         MaterialLetterIcon userPhoto;
         ImageView imgBadge;
 
-        ViewHolder(View v)
+        ViewHolder(LinearLayout v)
         {
             super(v);
-
+            layout = v;
             context = v.getContext();
             txtName = (TextView) v.findViewById(R.id.chat_name);
             txtDate = (TextView) v.findViewById(R.id.chat_date);
@@ -45,16 +51,17 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         }
     }
 
-    public ChatRoomAdapter(List<ChatRoomAdapterItem> chatList)
+    public ChatRoomAdapter(List<ChatRoomAdapterItem> chatList, Activity activity)
     {
         this.chatList = chatList;
+        this.activity = activity;
     }
 
     @Override
     public ChatRoomAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(chat_item, parent, false);
+                .inflate(chat_room_item, parent, false);
 
         return new ViewHolder(v);
     }
@@ -70,17 +77,21 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     {
         Chat chat = chatList.get(position).getChat();
         // Nome e foto profilo dell'utente destinatario
-        String photoUrl, name;
+        final String id, name, photoUrl, lastRead;
 
         if (chat.id_1.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
         {
+            id = chat.id_2;
             name = chat.name_2;
             photoUrl = chat.photo_url_2;
+            lastRead = chat.last_read_1;
         }
         else
         {
+            id = chat.id_1;
             name = chat.name_1;
             photoUrl = chat.photo_url_1;
+            lastRead = chat.last_read_2;
         }
 
         // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
@@ -96,14 +107,27 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         holder.txtDate.setText(Util.formatDate(chat.last_time));
         holder.txtLastMessage.setText(chat.last_message);
 
-        final BadgeDrawable drawable =
+        // Al click viene aperta l'activity contenente la chat
+        holder.layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Intent intent = new Intent(holder.context, ChatActivity.class);
+                intent.putExtra("user_key", id);
+                activity.startActivity(intent);
+            }
+        });
+
+        // Inizializzazione Badge per le notifiche dei messaggi non letti
+        final BadgeDrawable unreadMessage =
                 new BadgeDrawable.Builder()
                         .type(BadgeDrawable.TYPE_NUMBER)
                         .badgeColor(ContextCompat.getColor(holder.context, R.color.colorPrimary))
                         .textSize(sp2px(holder.context, 8))
-                        .number(6)
                         .build();
-        holder.imgBadge.setImageDrawable(drawable);
+
+
+        holder.imgBadge.setImageDrawable(unreadMessage);
     }
 
     // Aggiornamento parziale di uno o più elementi della recyclerview in realtime (rating, commenti, favourite)
@@ -118,13 +142,13 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
             switch ((int) payloads.get(0))
             {
                 // Sono presenti nuovi messaggi
-                case ChatFragment.CODE_NEW_MESSAGE:
+                case ChatRoomFragment.CODE_NEW_MESSAGE:
                     // ** Grassetto **
                     holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
                     break;
 
                 // Non sono presenti nuovi messaggi
-                case ChatFragment.CODE_NO_NEW_MESSAGE:
+                case ChatRoomFragment.CODE_NO_NEW_MESSAGE:
                     // ** NON Grassetto **
                     break;
 

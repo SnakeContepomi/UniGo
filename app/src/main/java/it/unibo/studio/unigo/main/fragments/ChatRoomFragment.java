@@ -22,7 +22,7 @@ import it.unibo.studio.unigo.main.adapters.ChatRoomAdapter;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Chat;
 
-public class ChatFragment extends android.support.v4.app.Fragment
+public class ChatRoomFragment extends android.support.v4.app.Fragment
 {
     public static final int CODE_NO_NEW_MESSAGE = 0;
     public static final int CODE_NEW_MESSAGE = 1;
@@ -54,7 +54,7 @@ public class ChatFragment extends android.support.v4.app.Fragment
         wheel = (LinearLayout) v.findViewById(R.id.chatWheelLayout);
 
         // Inizializzazione adapter della lista delle domande
-        mAdapter = new ChatRoomAdapter(chatList);
+        mAdapter = new ChatRoomAdapter(chatList, getActivity());
         mRecyclerView.setAdapter(mAdapter);
 
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").addChildEventListener(new ChildEventListener() {

@@ -9,6 +9,7 @@ public class Chat
     public String photo_url_1, photo_url_2;
     public String last_message;
     public String last_time;
+    public String last_read_1, last_read_2;
     public HashMap<String, Message> messages;
 
     public Chat() { }

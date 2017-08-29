@@ -145,7 +145,7 @@
 
     <string name="empty_section">Nessuna domanda in questa sezione</string>
     <string name="empty_chat">Nessun messaggio da visualizzare</string>
-
+    <string name="chat_message_hint">Inserisci un messaggio...</string>
     <!-- notification strings -->
     <string name="no_ringtone">Silenzioso</string>
     <string name="alert_dialog_confirm">Ok</string>
