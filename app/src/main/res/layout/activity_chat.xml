@@ -39,7 +39,8 @@
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:hint="@string/chat_message_hint"
-            android:maxLines="4" />
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="6" />
 
         <ImageView
             android:id="@+id/chatSend"

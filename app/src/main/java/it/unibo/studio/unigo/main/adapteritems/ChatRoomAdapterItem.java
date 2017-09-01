@@ -1,21 +1,21 @@
 package it.unibo.studio.unigo.main.adapteritems;
 
-import it.unibo.studio.unigo.utils.firebase.Chat;
+import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 
 public class ChatRoomAdapterItem
 {
-    private Chat chat;
+    private ChatRoom chatRoom;
     private String chat_key;
 
-    public ChatRoomAdapterItem(Chat chat, String chatKey)
+    public ChatRoomAdapterItem(ChatRoom chatRoom, String chatKey)
     {
-        this.chat = chat;
+        this.chatRoom = chatRoom;
         this.chat_key = chatKey;
     }
 
-    public Chat getChat()
+    public ChatRoom getChatRoom()
     {
-        return chat;
+        return chatRoom;
     }
 
     public String getChatKey()

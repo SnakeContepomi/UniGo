@@ -109,7 +109,7 @@ public class ContactActivity extends AppCompatActivity
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         // Inizializzazione adapter della lista degli utenti
-        mAdapter = new ContactAdapter(userList);
+        mAdapter = new ContactAdapter(userList, this);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setFastScrollEnabled(true);
 

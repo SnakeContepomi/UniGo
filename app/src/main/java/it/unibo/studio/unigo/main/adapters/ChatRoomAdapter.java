@@ -18,11 +18,10 @@ import java.util.List;
 import cn.nekocode.badge.BadgeDrawable;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.ChatActivity;
-import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
 import it.unibo.studio.unigo.main.fragments.ChatRoomFragment;
 import it.unibo.studio.unigo.utils.Util;
-import it.unibo.studio.unigo.utils.firebase.Chat;
+import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 import static it.unibo.studio.unigo.R.layout.chat_room_item;
 
 public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>
@@ -75,23 +74,23 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position)
     {
-        Chat chat = chatList.get(position).getChat();
+        ChatRoom chatRoom = chatList.get(position).getChatRoom();
         // Nome e foto profilo dell'utente destinatario
         final String id, name, photoUrl, lastRead;
 
-        if (chat.id_1.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+        if (chatRoom.id_1.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
         {
-            id = chat.id_2;
-            name = chat.name_2;
-            photoUrl = chat.photo_url_2;
-            lastRead = chat.last_read_1;
+            id = chatRoom.id_2;
+            name = chatRoom.name_2;
+            photoUrl = chatRoom.photo_url_2;
+            lastRead = chatRoom.last_read_1;
         }
         else
         {
-            id = chat.id_1;
-            name = chat.name_1;
-            photoUrl = chat.photo_url_1;
-            lastRead = chat.last_read_2;
+            id = chatRoom.id_1;
+            name = chatRoom.name_1;
+            photoUrl = chatRoom.photo_url_1;
+            lastRead = chatRoom.last_read_2;
         }
 
         // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
@@ -104,10 +103,10 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
             Picasso.with(holder.userPhoto.getContext()).load(photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(holder.userPhoto);
 
         holder.txtName.setText(name);
-        holder.txtDate.setText(Util.formatDate(chat.last_time));
-        holder.txtLastMessage.setText(chat.last_message);
+        holder.txtDate.setText(Util.formatDate(chatRoom.last_time));
+        holder.txtLastMessage.setText(chatRoom.last_message);
 
-        // Al click viene aperta l'activity contenente la chat
+        // Al click viene aperta l'activity contenente la chatRoom
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)

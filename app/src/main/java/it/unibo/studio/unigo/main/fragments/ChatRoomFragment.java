@@ -20,7 +20,7 @@ import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
 import it.unibo.studio.unigo.main.adapters.ChatRoomAdapter;
 import it.unibo.studio.unigo.utils.Util;
-import it.unibo.studio.unigo.utils.firebase.Chat;
+import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 
 public class ChatRoomFragment extends android.support.v4.app.Fragment
 {
@@ -105,7 +105,7 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                chatList.add(0, new ChatRoomAdapterItem(dataSnapshot.getValue(Chat.class), dataSnapshot.getKey()));
+                chatList.add(0, new ChatRoomAdapterItem(dataSnapshot.getValue(ChatRoom.class), dataSnapshot.getKey()));
                 mAdapter.notifyItemInserted(0);
                 setRecyclerViewVisibility(true);
             }
