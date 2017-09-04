@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.squareup.picasso.Picasso;
 import java.util.List;
@@ -160,5 +162,29 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     {
         final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
+    }
+
+    public boolean contains(String chatKey)
+    {
+        for(ChatRoomAdapterItem chat : chatList)
+            if (chat.getChatKey().equals(chatKey))
+                return true;
+        return false;
+    }
+
+    private int getPositionByKey(String chatKey)
+    {
+        for(int i = 0; i < chatList.size(); i++)
+            if (chatList.get(i).getChatKey().equals(chatKey))
+                return i;
+        return -1;
+    }
+
+    public void updateChatRoom(ChatRoom chat, String chatKey)
+    {
+        int pos = getPositionByKey(chatKey);
+
+        chatList.set(pos, new ChatRoomAdapterItem(chat, chatKey));
+        notifyItemChanged(pos);
     }
 }

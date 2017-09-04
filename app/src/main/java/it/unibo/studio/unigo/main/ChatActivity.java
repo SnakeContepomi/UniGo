@@ -27,23 +27,27 @@ import it.unibo.studio.unigo.utils.firebase.User;
 
 public class ChatActivity extends AppCompatActivity
 {
-    private final int ID_1 = 1;
-    private final int ID_2 = 2;
+    private final int ID_0 = 0; // Valore Default
+    private final int ID_1 = 1; // L'utente è 'id_1'
+    private final int ID_2 = 2; // L'utente è 'id_2'
 
     private String recipientEmail;
     private User recipient;
     // Stringa che memorizza l'id della ChatRoom esistente tra due persone
     private String chatId;
     // Intero utilizzato per verificare se l'utente è 'id_1' o 'id_2' della chatRoom
-    private int user_id;
+    private int user_id = 0;
     // Boolean che indica se esiste la ChatRoom tra le persone in questione
     private boolean chatCreated = false;
+    // Stringa utilizzata per memorizzare l'ultimo messaggio letto da parte dell'utente
+    private String lastMsgRead = "";
     // Oggetto che consente la creazione di una nuova Chatroom
     private ChatRoom chatRoom;
+    // Listener che permette l'aggiornamento della chat in tempo reale
+    private ChildEventListener chatListener;
     private List<Message> messageList;
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
-
     private Toolbar toolbar;
     private EditText txtMessage;
 
@@ -54,6 +58,13 @@ public class ChatActivity extends AppCompatActivity
         setContentView(R.layout.activity_chat);
         initializeComponents();
         getUserInfo();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().removeEventListener(chatListener);
+        super.onDestroy();
     }
 
     private void initializeComponents()
@@ -121,6 +132,36 @@ public class ChatActivity extends AppCompatActivity
                 }
             }
         });
+
+        // Listener che permette di mantenere la chat aggiornata, utilizzato nel metodo "getChatDetails"
+        chatListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                messageList.add(0, dataSnapshot.getValue(Message.class));
+                mRecyclerView.smoothScrollToPosition(0);
+                mAdapter.notifyItemInserted(0);
+
+                // Il campo 'last_read_x' viene mantenuto aggiornato quando la chat è aperta
+                if (dataSnapshot.getKey().compareTo(lastMsgRead) > 0)
+                {
+                    lastMsgRead = dataSnapshot.getKey();
+                    Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_read_" + user_id).setValue(lastMsgRead);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        };
     }
 
     // Metodo utilizzato per recuperare i dati del destinatario della conversazione
@@ -142,8 +183,8 @@ public class ChatActivity extends AppCompatActivity
         });
     }
 
-    // Metodo utilizzato per recuperare l'eventuale conversazione esistente con il destinatario
-    // o, nel caso di nuova conversazione, per creare il riferimento alla nuova chat
+    // Metodo utilizzato per recuperare l'eventuale conversazione esistente con il destinatario o,
+    // nel caso di nuova conversazione, per creare il riferimento alla nuova chat
     private void getChat()
     {
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -154,14 +195,12 @@ public class ChatActivity extends AppCompatActivity
                 if (dataSnapshot.child(Util.encodeEmail(Util.getCurrentUser().getEmail()) + "_" + Util.encodeEmail(recipientEmail)).getValue() != null)
                 {
                     chatId = dataSnapshot.child(Util.encodeEmail(Util.getCurrentUser().getEmail()) + "_" + Util.encodeEmail(recipientEmail)).getKey();
-                    checkUserId();
                     chatCreated = true;
                 }
                 // In caso negativo, viene verificata l'esistenza dell'opposto 'destinatario_mittente'
                 else if (dataSnapshot.child(Util.encodeEmail(recipientEmail) + "_" + (Util.encodeEmail(Util.getCurrentUser().getEmail()))).getValue() != null)
                 {
                     chatId = dataSnapshot.child((Util.encodeEmail(recipientEmail)) + "_" + Util.encodeEmail(Util.getCurrentUser().getEmail())).getKey();
-                    checkUserId();
                     chatCreated = true;
                 }
                 // Non esiste una chat tra le due persone, quindi viene inizializzato l'oggetto ChatRoom: se viene inviato almeno un messaggio, ChatRoom verrà
@@ -178,7 +217,7 @@ public class ChatActivity extends AppCompatActivity
                                                                 Util.getCurrentUser().getPhotoUrl().toString(),
                                                                 recipient.photoUrl);
                 }
-                getChatDetails(chatId);
+                checkUserId();
             }
 
             @Override
@@ -186,17 +225,35 @@ public class ChatActivity extends AppCompatActivity
         });
     }
 
-    // Metodo che permette di capire se l'utente è colui che ha iniziato la chat (id_1) o colui che è stato contattato (id_2)
+    // Metodo che permette di capire se l'utente è colui che ha iniziato la chat (id_1) o colui che è stato contattato (id_2),
+    // e di aggiornare inoltre l'ultimo messaggio letto quando l'activity viene aperta
     private void checkUserId()
     {
         Util.getDatabase().getReference("ChatRoom").child(chatId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                if (dataSnapshot.child("id_1").getValue().equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                if ((user_id == ID_0) && (dataSnapshot.child("id_1").getValue().equals(Util.encodeEmail(Util.getCurrentUser().getEmail()))))
                     user_id = ID_1;
                 else
                     user_id = ID_2;
+
+                // Aggiornamento dell'ultimo messaggio letto da parte dell'utente
+                Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        for(DataSnapshot child : dataSnapshot.getChildren())
+                        {
+                            lastMsgRead = child.getKey();
+                            Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_read_" + user_id).setValue(lastMsgRead);
+                        }
+                        getChatDetails();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
             }
 
             @Override
@@ -204,30 +261,10 @@ public class ChatActivity extends AppCompatActivity
         });
     }
 
-    // Metodo che consente di recuperare i messaggi di una chat esistente e di avviare un listener per recuperare quelli futuri
-    private void getChatDetails(String chatId)
+    // Metodo che consente di recuperare i messaggi di una chat esistente e di mantenere la chat aggiornata in tempo reale
+    private void getChatDetails()
     {
-        Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s)
-            {
-                messageList.add(0, dataSnapshot.getValue(Message.class));
-                mRecyclerView.smoothScrollToPosition(0);
-                mAdapter.notifyItemInserted(0);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) { }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
+        Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().addChildEventListener(chatListener);
     }
 
     private String formatName(String name, String lastName)
