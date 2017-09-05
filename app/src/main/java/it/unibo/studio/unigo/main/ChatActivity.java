@@ -98,16 +98,7 @@ public class ChatActivity extends AppCompatActivity
                     // Se la ChatRoom esiste, viene semplicemente collegato il nuovo messaggio ad essa
                     if (chatCreated)
                     {
-                        Util.getDatabase().getReference("ChatRoom").child(chatId).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot)
-                            {
-                                createMsg();
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) { }
-                        });
+                        createMsg();
                         //ToDo: impostare a 'true' i campi in user -> chat_rooms?
                     }
                     // Se la conversazione tra le due persone non è mai avvenuta, viene prima di tutto creata una nuova ChatRoom
