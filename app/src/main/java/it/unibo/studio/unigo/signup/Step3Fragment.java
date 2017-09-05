@@ -132,11 +132,8 @@ public class Step3Fragment extends Fragment implements BlockingStep
 
         // Abilitazione dell'utilizzo di Firebase in modalità offline per le tabelle University, School e Course
         dbUni = Util.getDatabase().getReference("University");
-        dbUni.keepSynced(true);
         dbSchool = Util.getDatabase().getReference("School");
-        dbSchool.keepSynced(true);
         dbCourse = Util.getDatabase().getReference("Course");
-        dbCourse.keepSynced(true);
 
         spRegion = (MaterialBetterSpinner ) v.findViewById(R.id.spinner_region);
         spUni = (MaterialBetterSpinner ) v.findViewById(R.id.spinner_uni);
@@ -314,10 +311,8 @@ public class Step3Fragment extends Fragment implements BlockingStep
     // Metodo che controlla se è stato selezionato un corso
     private boolean isValid()
     {
-        if (spCourse.getText().toString().equals(""))
-            return false;
+        return !spCourse.getText().toString().equals("");
 
-        return true;
     }
 
     // Metodo per creare un account Firebase con email e password
@@ -440,10 +435,6 @@ public class Step3Fragment extends Fragment implements BlockingStep
 
                         dialog.dismiss();
                         callback.complete();
-
-                        dbUni.keepSynced(false);
-                        dbSchool.keepSynced(false);
-                        dbCourse.keepSynced(false);
 
                         Intent returnIntent = new Intent();
                         returnIntent.putExtra("result_email",SignupData.getEmail());
