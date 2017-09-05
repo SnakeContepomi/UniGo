@@ -269,12 +269,13 @@ public class ChatActivity extends AppCompatActivity
     private void createMsg()
     {
         Message msg = new Message(Util.encodeEmail(Util.getCurrentUser().getEmail()), txtMessage.getText().toString(), Util.getDate());
+        txtMessage.getText().clear();
 
         // Inserimento messaggio in Chat
         String msgKey = Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").push().getKey();
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").child(msgKey).setValue(msg);
-        txtMessage.getText().clear();
 
+        // Aggiornamento dell'ultimo messaggio della ChatRoom
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message").setValue(msg.message);
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_time").setValue(msg.date);
         if (user_id == ID_1)
