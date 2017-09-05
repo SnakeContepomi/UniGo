@@ -2,6 +2,7 @@ package it.unibo.studio.unigo.main.fragments;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,9 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +52,9 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     @Override
     public void onDestroyView()
     {
-        removeChatListener();
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").removeEventListener(chatRoomCreationListener);
+        //for(ChatRoomAdapterItem chat : chatList)
+          //Util.getDatabase().getReference("ChatRoom").child(chat.getChatKey()).removeEventListener(chatRoomUpdateListener);
         super.onDestroyView();
     }
 
@@ -79,10 +85,11 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s)
             {
-                if (dataSnapshot.getValue(Boolean.class))
+                //ToDo
+                /*if (dataSnapshot.getValue(Boolean.class))
                     mAdapter.notifyItemChanged(0, CODE_NEW_MESSAGE);
                 else
-                    mAdapter.notifyItemChanged(0, CODE_NO_NEW_MESSAGE);
+                    mAdapter.notifyItemChanged(0, CODE_NO_NEW_MESSAGE);*/
             }
 
             @Override
@@ -137,13 +144,6 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
         };
 
         Util.getDatabase().getReference("ChatRoom").child(chatKey).addValueEventListener(chatRoomUpdateListener);
-    }
-
-    private void removeChatListener()
-    {
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").removeEventListener(chatRoomCreationListener);
-        for(ChatRoomAdapterItem chat : chatList)
-            Util.getDatabase().getReference("ChatRoom").child(chat.getChatKey()).removeEventListener(chatRoomUpdateListener);
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview
