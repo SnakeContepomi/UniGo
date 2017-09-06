@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,22 +13,23 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 import cn.nekocode.badge.BadgeDrawable;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.ChatActivity;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
-import it.unibo.studio.unigo.main.fragments.ChatRoomFragment;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 import static it.unibo.studio.unigo.R.layout.chat_room_item;
 
 public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>
 {
+    private final int NEW_MSG = 1;
     private List<ChatRoomAdapterItem> chatList;
     private Activity activity;
 
@@ -78,21 +80,21 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     {
         ChatRoom chatRoom = chatList.get(position).getChatRoom();
         // Nome e foto profilo dell'utente destinatario
-        final String id, name, photoUrl, lastRead;
+        final String id, name, photoUrl;
 
         if (chatRoom.id_1.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
         {
             id = chatRoom.id_2;
             name = chatRoom.name_2;
             photoUrl = chatRoom.photo_url_2;
-            lastRead = chatRoom.last_read_1;
+            highlightChatRoom(chatRoom.last_read_1, chatRoom.last_read_2, holder);
         }
         else
         {
             id = chatRoom.id_1;
             name = chatRoom.name_1;
             photoUrl = chatRoom.photo_url_1;
-            lastRead = chatRoom.last_read_2;
+            highlightChatRoom(chatRoom.last_read_2, chatRoom.last_read_1, holder);
         }
 
         // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
@@ -116,6 +118,8 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                 Intent intent = new Intent(holder.context, ChatActivity.class);
                 intent.putExtra("user_key", id);
                 activity.startActivity(intent);
+                holder.txtLastMessage.setTypeface(null, Typeface.NORMAL);
+                holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.md_grey_500)));
             }
         });
 
@@ -139,37 +143,36 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         if (payloads.isEmpty())
             onBindViewHolder(holder, position);
 
-        else if (payloads.get(0) instanceof Integer)
-            switch ((int) payloads.get(0))
+        // Sono presenti nuovi messaggi nella conversazione
+        else
+        {
+            if ((int) payloads.get(0) == NEW_MSG)
             {
-                // Sono presenti nuovi messaggi
-                case ChatRoomFragment.CODE_NEW_MESSAGE:
-                    // ** Grassetto **
-                    holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
-                    break;
+                final ChatRoomAdapterItem chat = chatList.get(position);
+                Util.getDatabase().getReference("ChatRoom").child(chat.getChatKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        holder.txtLastMessage.setText(dataSnapshot.child("last_message").getValue(String.class));
+                        holder.txtDate.setText(Util.formatDate(dataSnapshot.child("last_time").getValue(String.class)));
 
-                // Non sono presenti nuovi messaggi
-                case ChatRoomFragment.CODE_NO_NEW_MESSAGE:
-                    // ** NON Grassetto **
-                    break;
+                        if (Util.getCurrentUser().getEmail().equals(dataSnapshot.child("id_1").getValue(String.class)))
+                            highlightChatRoom(dataSnapshot.child("last_read_1").getValue(String.class), dataSnapshot.child("last_read_2").getValue(String.class), holder);
+                        else
+                            highlightChatRoom(dataSnapshot.child("last_read_2").getValue(String.class), dataSnapshot.child("last_read_1").getValue(String.class), holder);
+                    }
 
-                default:
-                    break;
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
             }
+        }
     }
 
     private int sp2px(Context context, float spValue)
     {
         final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
-    }
-
-    public boolean contains(String chatKey)
-    {
-        for(ChatRoomAdapterItem chat : chatList)
-            if (chat.getChatKey().equals(chatKey))
-                return true;
-        return false;
     }
 
     private int getPositionByKey(String chatKey)
@@ -180,11 +183,18 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         return -1;
     }
 
-    public void updateChatRoom(ChatRoom chat, String chatKey)
+    public void updateChatRoom(String chatKey)
     {
-        int pos = getPositionByKey(chatKey);
+        notifyItemChanged(getPositionByKey(chatKey), NEW_MSG);
+    }
 
-        chatList.set(pos, new ChatRoomAdapterItem(chat, chatKey));
-        notifyItemChanged(pos);
+    private void highlightChatRoom(String msg1, String msg2, ViewHolder holder)
+    {
+        // Se l'ultimo messaggio letto non è stato scritto dall'utente, viene evidenziato come 'da leggere'
+        if (msg1.compareTo(msg2) < 0)
+        {
+            holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
+            holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
+        }
     }
 }

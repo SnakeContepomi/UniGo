@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,7 +32,7 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     // Listener che permette di aggiungere una ChatRoom per ogni conversazione
     private ChildEventListener chatRoomCreationListener;
     // Listener utilizzato per aggiornare l'ultimo messaggio di ogni ChatRoom
-    private ValueEventListener chatRoomUpdateListener;
+    private ChildEventListener chatRoomUpdateListener;
     private List<ChatRoomAdapterItem> chatList;
     private RecyclerView mRecyclerView;
     private LinearLayout wheel;
@@ -74,6 +76,17 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
+                Util.getDatabase().getReference("ChatRoom").child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        chatList.add(0, new ChatRoomAdapterItem(dataSnapshot.getValue(ChatRoom.class), dataSnapshot.getKey()));
+                        mAdapter.notifyItemInserted(0);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
                 addConversation(dataSnapshot.getKey());
                 setRecyclerViewVisibility(true);
             }
@@ -120,26 +133,28 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     // Viene inoltre aggiunto un listener per ogni ChatRoom esistente, permettendo l'aggiornamento dell'ultimo messaggio inviato
     private void addConversation(final String chatKey)
     {
-        chatRoomUpdateListener = new ValueEventListener() {
+        chatRoomUpdateListener = new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s)
             {
-                // Se la ChatRoom non esiste, viene creata e aggiunta alla recyclerView
-                if (!mAdapter.contains(chatKey))
-                {
-                    chatList.add(0, new ChatRoomAdapterItem(dataSnapshot.getValue(ChatRoom.class), dataSnapshot.getKey()));
-                    mAdapter.notifyItemInserted(0);
-                }
-                // Altrimenti viene sostituito l'elemento su cui vi è stato un aggiornamento (nuovo messaggio)
-                else
-                    mAdapter.updateChatRoom(dataSnapshot.getValue(ChatRoom.class), chatKey);
+                if (dataSnapshot.getKey().equals("last_message"))
+                    mAdapter.updateChatRoom(chatKey);
             }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         };
 
-        Util.getDatabase().getReference("ChatRoom").child(chatKey).addValueEventListener(chatRoomUpdateListener);
+        Util.getDatabase().getReference("ChatRoom").child(chatKey).addChildEventListener(chatRoomUpdateListener);
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview
