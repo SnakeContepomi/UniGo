@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ChatActivity extends AppCompatActivity
     private final int ID_1 = 1; // L'utente è 'id_1'
     private final int ID_2 = 2; // L'utente è 'id_2'
 
+    private DatabaseReference userChatReference;
     private String recipientEmail;
     private User recipient;
     // Stringa che memorizza l'id della ChatRoom esistente tra due persone
@@ -64,6 +66,7 @@ public class ChatActivity extends AppCompatActivity
     protected void onDestroy()
     {
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().removeEventListener(chatListener);
+        userChatReference.keepSynced(false);
         super.onDestroy();
     }
 
@@ -114,8 +117,8 @@ public class ChatActivity extends AppCompatActivity
                                 {
                                     createMsg();
                                     // Collegamento delle persone alla ChatRoom
-                                    Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(true);
-                                    Util.getDatabase().getReference("User").child(recipientEmail).child("chat_rooms").child(chatId).setValue(true);
+                                    Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(0);
+                                    userChatReference.setValue(0);
                                 }
                             }
                         });
@@ -138,6 +141,7 @@ public class ChatActivity extends AppCompatActivity
                 {
                     lastMsgRead = dataSnapshot.getKey();
                     Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_read_" + user_id).setValue(lastMsgRead);
+                    Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(0);
                 }
             }
 
@@ -208,6 +212,8 @@ public class ChatActivity extends AppCompatActivity
                                                                 Util.getCurrentUser().getPhotoUrl().toString(),
                                                                 recipient.photoUrl);
                 }
+                userChatReference = Util.getDatabase().getReference("User").child(recipientEmail).child("chat_rooms").child(chatId);
+                userChatReference.keepSynced(true);
                 checkUserId();
             }
 
@@ -238,6 +244,7 @@ public class ChatActivity extends AppCompatActivity
                         {
                             lastMsgRead = child.getKey();
                             Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_read_" + user_id).setValue(lastMsgRead);
+                            Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(0);
                         }
                         getChatDetails();
                     }
@@ -282,5 +289,18 @@ public class ChatActivity extends AppCompatActivity
             Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_read_1").setValue(msgKey);
         else
             Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_read_2").setValue(msgKey);
+
+        // Al fine di evitare continue letture dei valori 'last_read' e dei successivi messaggi non letti,
+        // viene introdotto un contatore di messaggi non letti e viene memorizzato nella tabella 'User', nella sezione dedicata ad una specifica chat
+        userChatReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                userChatReference.setValue(dataSnapshot.getValue(Integer.class) + 1);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 }
