@@ -10,8 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
-
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,9 +24,6 @@ import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 
 public class ChatRoomFragment extends android.support.v4.app.Fragment
 {
-    public static final int CODE_NO_NEW_MESSAGE = 0;
-    public static final int CODE_NEW_MESSAGE = 1;
-
     // Listener che permette di aggiungere una ChatRoom per ogni conversazione
     private ChildEventListener chatRoomCreationListener;
     // Listener utilizzato per aggiornare l'ultimo messaggio di ogni ChatRoom
