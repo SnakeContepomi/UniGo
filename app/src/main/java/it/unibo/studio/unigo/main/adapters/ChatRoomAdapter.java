@@ -32,6 +32,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     private final int NEW_MSG = 1;
     private List<ChatRoomAdapterItem> chatList;
     private Activity activity;
+    private BadgeDrawable unreadMsgBadge;
 
     static class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -58,6 +59,12 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     {
         this.chatList = chatList;
         this.activity = activity;
+        unreadMsgBadge =
+            new BadgeDrawable.Builder()
+                    .type(BadgeDrawable.TYPE_NUMBER)
+                    .badgeColor(ContextCompat.getColor(activity.getApplicationContext(), R.color.colorPrimary))
+                    .textSize(sp2px(activity.getApplicationContext(), 8))
+                    .build();
     }
 
     @Override
@@ -87,14 +94,14 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
             id = chatRoom.id_2;
             name = chatRoom.name_2;
             photoUrl = chatRoom.photo_url_2;
-            highlightChatRoom(chatRoom.last_read_1, chatRoom.last_read_2, holder);
+            setUnreadMessagesNumber(chatRoom.id_1, chatList.get(position).getChatKey(), holder);
         }
         else
         {
             id = chatRoom.id_1;
             name = chatRoom.name_1;
             photoUrl = chatRoom.photo_url_1;
-            highlightChatRoom(chatRoom.last_read_2, chatRoom.last_read_1, holder);
+            setUnreadMessagesNumber(chatRoom.id_2, chatList.get(position).getChatKey(), holder);
         }
 
         // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
@@ -118,21 +125,12 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                 Intent intent = new Intent(holder.context, ChatActivity.class);
                 intent.putExtra("user_key", id);
                 activity.startActivity(intent);
+
                 holder.txtLastMessage.setTypeface(null, Typeface.NORMAL);
                 holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.md_grey_500)));
+                holder.imgBadge.setImageDrawable(null);
             }
         });
-
-        // Inizializzazione Badge per le notifiche dei messaggi non letti
-        final BadgeDrawable unreadMessage =
-                new BadgeDrawable.Builder()
-                        .type(BadgeDrawable.TYPE_NUMBER)
-                        .badgeColor(ContextCompat.getColor(holder.context, R.color.colorPrimary))
-                        .textSize(sp2px(holder.context, 8))
-                        .build();
-
-
-        holder.imgBadge.setImageDrawable(unreadMessage);
     }
 
     // Aggiornamento parziale di uno o più elementi della recyclerview in realtime (rating, commenti, favourite)
@@ -156,10 +154,10 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                         holder.txtLastMessage.setText(dataSnapshot.child("last_message").getValue(String.class));
                         holder.txtDate.setText(Util.formatDate(dataSnapshot.child("last_time").getValue(String.class)));
 
-                        if (Util.getCurrentUser().getEmail().equals(dataSnapshot.child("id_1").getValue(String.class)))
-                            highlightChatRoom(dataSnapshot.child("last_read_1").getValue(String.class), dataSnapshot.child("last_read_2").getValue(String.class), holder);
+                        if (Util.encodeEmail(Util.getCurrentUser().getEmail()).equals(dataSnapshot.child("id_1").getValue(String.class)))
+                            setUnreadMessagesNumber(dataSnapshot.child("id_1").getValue(String.class), chat.getChatKey(), holder);
                         else
-                            highlightChatRoom(dataSnapshot.child("last_read_2").getValue(String.class), dataSnapshot.child("last_read_1").getValue(String.class), holder);
+                            setUnreadMessagesNumber(dataSnapshot.child("id_2").getValue(String.class), chat.getChatKey(), holder);
                     }
 
                     @Override
@@ -188,13 +186,23 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         notifyItemChanged(getPositionByKey(chatKey), NEW_MSG);
     }
 
-    private void highlightChatRoom(String msg1, String msg2, ViewHolder holder)
+    private void setUnreadMessagesNumber(final String userId, final String chatId, final ViewHolder holder)
     {
-        // Se l'ultimo messaggio letto non è stato scritto dall'utente, viene evidenziato come 'da leggere'
-        if (msg1.compareTo(msg2) < 0)
-        {
-            holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
-            holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
-        }
+        Util.getDatabase().getReference("User").child(userId).child("chat_rooms").child(chatId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (dataSnapshot.getValue(Integer.class) != 0)
+                {
+                    holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
+                    holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
+                    unreadMsgBadge.setNumber(dataSnapshot.getValue(Integer.class));
+                    holder.imgBadge.setImageDrawable(unreadMsgBadge);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 }
