@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="56dp"
     android:orientation="horizontal"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:background="?android:attr/selectableItemBackground">
 
     <com.github.akashandroid90.imageletter.MaterialLetterIcon
         android:id="@+id/itemp_photo"

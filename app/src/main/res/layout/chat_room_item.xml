@@ -4,7 +4,8 @@
     android:layout_height="88dp"
     android:padding="16dp"
     android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground">
     <com.github.akashandroid90.imageletter.MaterialLetterIcon
         android:id="@+id/chat_userPhoto"
         android:layout_width="40dp"

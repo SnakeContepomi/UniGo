@@ -51,7 +51,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@null"
-            android:clickable="true"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_send_white_24px"
             android:tint="@color/colorIconGray"/>
