@@ -60,6 +60,9 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
         // Impostazione di ottimizzazione da usare se gli elementi non comportano il ridimensionamento della RecyclerView
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(v.getContext()));
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        dividerItemDecoration.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.item_divider));
+        mRecyclerView.addItemDecoration(dividerItemDecoration);
 
         wheel = (LinearLayout) v.findViewById(R.id.chatWheelLayout);
 
@@ -67,6 +70,7 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
         mAdapter = new ChatRoomAdapter(chatList, getActivity());
         mRecyclerView.setAdapter(mAdapter);
 
+        // Listener che recupera tutte le conversazioni avvenute con l'utente
         chatRoomCreationListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
@@ -87,14 +91,7 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s)
-            {
-                //ToDo
-                /*if (dataSnapshot.getValue(Boolean.class))
-                    mAdapter.notifyItemChanged(0, CODE_NEW_MESSAGE);
-                else
-                    mAdapter.notifyItemChanged(0, CODE_NO_NEW_MESSAGE);*/
-            }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) { }
@@ -117,10 +114,6 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
                     wheel.setVisibility(View.GONE);
             }
         }.start();
-
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
-        dividerItemDecoration.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.item_divider));
-        mRecyclerView.addItemDecoration(dividerItemDecoration);
     }
 
     // Metodo che aggiunge un elemento ChatRoom alla recyclerView. Questo evento viene richiamato sia quando l'utente avvia una nuova
