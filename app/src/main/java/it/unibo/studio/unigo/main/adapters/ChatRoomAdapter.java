@@ -199,7 +199,13 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         {
             holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
             holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
-            unreadMsgBadge.setNumber(msgUnread);
+            unreadMsgBadge =
+                    new BadgeDrawable.Builder()
+                            .type(BadgeDrawable.TYPE_NUMBER)
+                            .badgeColor(ContextCompat.getColor(activity.getApplicationContext(), R.color.colorPrimary))
+                            .textSize(sp2px(activity.getApplicationContext(), 8))
+                            .number(msgUnread)
+                            .build();
             holder.imgBadge.setImageDrawable(unreadMsgBadge);
         }
         else
