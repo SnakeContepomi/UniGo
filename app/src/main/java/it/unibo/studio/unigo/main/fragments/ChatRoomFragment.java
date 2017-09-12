@@ -128,6 +128,9 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s)
             {
+                // Se un evento fa scatenare 'onChildChanged', significa che un messaggio è stato aggiunto.
+                // Al fine di evitare 'eventi multipli' (last_message, last_time, messages, msg_unread_1 e 2
+                // scattano tutti allo stesso tempo), viene controllato solamente uno dei campi modificati
                 if (dataSnapshot.getKey().equals("last_message"))
                     mAdapter.updateChatRoom(chatKey);
             }

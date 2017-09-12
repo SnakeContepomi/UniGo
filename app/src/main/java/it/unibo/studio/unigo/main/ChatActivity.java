@@ -111,8 +111,8 @@ public class ChatActivity extends AppCompatActivity
                                 if (task.isSuccessful())
                                 {
                                     // Collegamento delle persone alla ChatRoom
-                                    Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(0);
-                                    userChatReference.setValue(0);
+                                    Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(true);
+                                    Util.getDatabase().getReference("User").child(recipientEmail).child("chat_rooms").child(chatId).setValue(true);
                                     createMsg();
                                 }
                             }
@@ -130,7 +130,7 @@ public class ChatActivity extends AppCompatActivity
                 messageList.add(0, dataSnapshot.getValue(Message.class));
                 mRecyclerView.smoothScrollToPosition(0);
                 mAdapter.notifyItemInserted(0);
-                Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(0);
+                Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_" + user_id).setValue(0);
             }
 
             @Override
@@ -200,14 +200,7 @@ public class ChatActivity extends AppCompatActivity
                                                                 Util.getCurrentUser().getPhotoUrl().toString(),
                                                                 recipient.photoUrl);
                 }
-
-                // Viene creato il riferimento al numero di messagig non letti del destinatario
-                userChatReference = Util.getDatabase().getReference("User").child(recipientEmail).child("chat_rooms").child(chatId);
-                userChatReference.keepSynced(true);
-
                 checkUserId();
-                // Recupero dei messaggi di una chat esistente e di mantenere la chat aggiornata in tempo reale
-                Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().addChildEventListener(chatListener);
             }
 
             @Override
@@ -222,10 +215,24 @@ public class ChatActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                if ((user_id == ID_0) && (dataSnapshot.child("id_1").getValue().equals(Util.encodeEmail(Util.getCurrentUser().getEmail()))))
-                    user_id = ID_1;
+                // Se l'ID è 0 (valore default) significa che è stata riscontrata una conversazione tra i due utenti,
+                // quindi occorre stabilire se l'utente ha ID_1 o ID_2
+                // In caso contrario, user_id è già stato impostato ad 1 quando la conversazione non esiste,
+                // fissando il creatore della conversazione come 'id_1'
+                if (user_id == ID_0)
+                    if (dataSnapshot.child("id_1").getValue(String.class).equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                        user_id = ID_1;
+                    else
+                        user_id = ID_2;
+
+                // Viene creato il riferimento al numero di messaggi non letti del destinatario
+                if (user_id == ID_1)
+                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
                 else
-                    user_id = ID_2;
+                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_1");
+                userChatReference.keepSynced(true);
+                // Recupero dei messaggi di una chat esistente e di mantenere la chat aggiornata in tempo reale
+                Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().addChildEventListener(chatListener);
             }
 
             @Override
@@ -254,7 +261,7 @@ public class ChatActivity extends AppCompatActivity
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message").setValue(msg.message);
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_time").setValue(msg.date);
 
-        // Viene introdotto un contatore di messaggi non letti e viene memorizzato nella tabella 'User', nella sezione dedicata ad una specifica chat
+        // Viene introdotto un contatore di messaggi non letti
         userChatReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)

@@ -9,6 +9,7 @@ public class ChatRoom
     public String photo_url_1, photo_url_2;
     public String last_message;
     public String last_time;
+    public int msg_unread_1, msg_unread_2;
     public HashMap<String, Message> messages;
 
     public ChatRoom() { }

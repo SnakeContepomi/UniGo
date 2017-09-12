@@ -89,19 +89,21 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         // Nome e foto profilo dell'utente destinatario
         final String id, name, photoUrl;
 
+        // Se l'utilizzatore è l'utente "1", allora verranno caricate le informazioni del destinatario 'utente_2'
         if (chatRoom.id_1.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
         {
             id = chatRoom.id_2;
             name = chatRoom.name_2;
             photoUrl = chatRoom.photo_url_2;
-            setUnreadMessagesNumber(chatRoom.id_1, chatList.get(position).getChatKey(), holder);
+            // Viene impostato il numero di messaggi non letti, qualora ve ne fossero
+            showUnreadMessagesNumber(chatRoom.msg_unread_1, holder);
         }
         else
         {
             id = chatRoom.id_1;
             name = chatRoom.name_1;
             photoUrl = chatRoom.photo_url_1;
-            setUnreadMessagesNumber(chatRoom.id_2, chatList.get(position).getChatKey(), holder);
+            showUnreadMessagesNumber(chatRoom.msg_unread_2, holder);
         }
 
         // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
@@ -146,18 +148,22 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         {
             if ((int) payloads.get(0) == NEW_MSG)
             {
+                // Viene recuperato l'oggetto interessato all'aggiornamento in modo da cambiare solamente i campi da aggiornare,
+                // senza quindi ricaricare un intero oggetto
                 final ChatRoomAdapterItem chat = chatList.get(position);
                 Util.getDatabase().getReference("ChatRoom").child(chat.getChatKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
-                        holder.txtLastMessage.setText(dataSnapshot.child("last_message").getValue(String.class));
-                        holder.txtDate.setText(Util.formatDate(dataSnapshot.child("last_time").getValue(String.class)));
+                        ChatRoom newItem = dataSnapshot.getValue(ChatRoom.class);
 
-                        if (Util.encodeEmail(Util.getCurrentUser().getEmail()).equals(dataSnapshot.child("id_1").getValue(String.class)))
-                            setUnreadMessagesNumber(dataSnapshot.child("id_1").getValue(String.class), chat.getChatKey(), holder);
+                        holder.txtLastMessage.setText(newItem.last_message);
+                        holder.txtDate.setText(Util.formatDate(newItem.last_time));
+
+                        if (Util.encodeEmail(Util.getCurrentUser().getEmail()).equals(newItem.id_1))
+                            showUnreadMessagesNumber(newItem.msg_unread_1, holder);
                         else
-                            setUnreadMessagesNumber(dataSnapshot.child("id_2").getValue(String.class), chat.getChatKey(), holder);
+                            showUnreadMessagesNumber(newItem.msg_unread_2, holder);
                     }
 
                     @Override
@@ -186,23 +192,21 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         notifyItemChanged(getPositionByKey(chatKey), NEW_MSG);
     }
 
-    private void setUnreadMessagesNumber(final String userId, final String chatId, final ViewHolder holder)
+    // Metodo che permette di impostare un badge di notifica per evidenziare il numero di messaggi non letti di una conversazione
+    private void showUnreadMessagesNumber(int msgUnread, ViewHolder holder)
     {
-        Util.getDatabase().getReference("User").child(userId).child("chat_rooms").child(chatId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                if (dataSnapshot.getValue(Integer.class) != 0)
-                {
-                    holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
-                    holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
-                    unreadMsgBadge.setNumber(dataSnapshot.getValue(Integer.class));
-                    holder.imgBadge.setImageDrawable(unreadMsgBadge);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
+        if (msgUnread != 0)
+        {
+            holder.txtLastMessage.setTypeface(null, Typeface.BOLD);
+            holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.colorPrimary)));
+            unreadMsgBadge.setNumber(msgUnread);
+            holder.imgBadge.setImageDrawable(unreadMsgBadge);
+        }
+        else
+        {
+            holder.txtLastMessage.setTypeface(null, Typeface.NORMAL);
+            holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.md_grey_500)));
+            holder.imgBadge.setImageDrawable(null);
+        }
     }
 }
