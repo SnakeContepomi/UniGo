@@ -18,6 +18,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
+import java.util.ArrayList;
 import java.util.List;
 import cn.nekocode.badge.BadgeDrawable;
 import it.unibo.studio.unigo.R;
@@ -26,10 +27,10 @@ import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 import static it.unibo.studio.unigo.R.layout.chat_room_item;
+import static it.unibo.studio.unigo.utils.Util.NEW_MSG;
 
 public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>
 {
-    private final int NEW_MSG = 1;
     private List<ChatRoomAdapterItem> chatList;
     private Activity activity;
     private BadgeDrawable unreadMsgBadge;
@@ -55,9 +56,9 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         }
     }
 
-    public ChatRoomAdapter(List<ChatRoomAdapterItem> chatList, Activity activity)
+    public ChatRoomAdapter(Activity activity)
     {
-        this.chatList = chatList;
+        this.chatList = new ArrayList<>();
         this.activity = activity;
         unreadMsgBadge =
             new BadgeDrawable.Builder()
@@ -137,7 +138,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 
     // Aggiornamento parziale di uno o più elementi della recyclerview in realtime (rating, commenti, favourite)
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position, List<Object> payloads)
+    public void onBindViewHolder(final ViewHolder holder, final int position, List<Object> payloads)
     {
         // Non sono presenti nuovi messaggi
         if (payloads.isEmpty())
@@ -157,6 +158,9 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                     {
                         ChatRoom newItem = dataSnapshot.getValue(ChatRoom.class);
 
+                        chatList.remove(position);
+                        notifyItemRemoved(position);
+
                         holder.txtLastMessage.setText(newItem.last_message);
                         holder.txtDate.setText(Util.formatDate(newItem.last_time));
 
@@ -164,6 +168,13 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                             showUnreadMessagesNumber(newItem.msg_unread_1, holder);
                         else
                             showUnreadMessagesNumber(newItem.msg_unread_2, holder);
+
+                        chatList.add(0, new ChatRoomAdapterItem(newItem, chat.getChatKey()));
+                        notifyItemInserted(0);
+
+                        // Per rimuovere l'animazione "pop-out - pop-in" della conversazione aggiornata,
+                        // utilizzare il metodo notifyDataSetChanged() al posto di ItemRemoved + ItemInserted
+                        //notifyDataSetChanged();
                     }
 
                     @Override
@@ -179,17 +190,12 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
         return (int) (spValue * fontScale + 0.5f);
     }
 
-    private int getPositionByKey(String chatKey)
+    public int getPositionByKey(String chatKey)
     {
         for(int i = 0; i < chatList.size(); i++)
             if (chatList.get(i).getChatKey().equals(chatKey))
                 return i;
         return -1;
-    }
-
-    public void updateChatRoom(String chatKey)
-    {
-        notifyItemChanged(getPositionByKey(chatKey), NEW_MSG);
     }
 
     // Metodo che permette di impostare un badge di notifica per evidenziare il numero di messaggi non letti di una conversazione
@@ -214,5 +220,17 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
             holder.txtDate.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(holder.context, R.color.md_grey_500)));
             holder.imgBadge.setImageDrawable(null);
         }
+    }
+
+    public void addElement(ChatRoomAdapterItem chatRoom)
+    {
+        int pos;
+
+        for(pos = 0; pos < chatList.size(); pos++)
+            if (chatRoom.getChatRoom().last_time.compareTo(chatList.get(pos).getChatRoom().last_time) > 0)
+                break;
+
+        chatList.add(pos, chatRoom);
+        notifyItemInserted(pos);
     }
 }

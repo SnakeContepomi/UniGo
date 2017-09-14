@@ -257,11 +257,7 @@ public class ChatActivity extends AppCompatActivity
         String msgKey = Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").push().getKey();
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").child(msgKey).setValue(msg);
 
-        // Aggiornamento dell'ultimo messaggio della ChatRoom
-        Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message").setValue(msg.message);
-        Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_time").setValue(msg.date);
-
-        // Viene introdotto un contatore di messaggi non letti
+        // Viene aggiornato il contatore di messaggi non letti
         userChatReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
@@ -272,5 +268,9 @@ public class ChatActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
+
+        // Aggiornamento dell'ultimo messaggio della ChatRoom
+        Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message").setValue(msg.message);
+        Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_time").setValue(msg.date);
     }
 }

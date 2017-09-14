@@ -31,6 +31,8 @@ public class Util
     // Moltiplicatore di exp utilizzato nella formula per calcolare l'exp necessaria per il livelo successivo
     public static final int EXP_MULTIPLIER = 3;
     public static final int MAX_LEVEL = 30;
+    // Costante che indica la presenza di nuovi messaggi all'interno di una conversazione (ChatRoom)
+    public static final int NEW_MSG = 1;
 
     private static FirebaseDatabase database;
     private static FirebaseUser user;
@@ -151,7 +153,7 @@ public class Util
     {
         int[] colors = context.getResources().getIntArray(R.array.colors);
 
-        s.toLowerCase();
+        s.toUpperCase();
         switch (s.charAt(0))
         {
             case 'A':
