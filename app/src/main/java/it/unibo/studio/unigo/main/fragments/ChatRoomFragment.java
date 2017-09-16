@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     // Listener utilizzato per aggiornare l'ultimo messaggio di ogni ChatRoom
     private ChildEventListener chatRoomUpdateListener;
     // Lista contenente tutti i listener, utilizzata per disattivarli quando il fragment viene sostituito
-    private List<String> chatRoomActiveListener;
+    private List<DatabaseReference> chatRoomActiveListener;
     private RecyclerView mRecyclerView;
     private LinearLayout wheel;
     private ChatRoomAdapter mAdapter;
@@ -40,17 +41,25 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     {
         View v = inflater.inflate(R.layout.fragment_chat, container, false);
         initComponents(v);
-        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").addChildEventListener(chatRoomCreationListener);
         return v;
     }
 
     @Override
-    public void onDestroyView()
+    public void onResume()
     {
+        Log.d("prova", "onResume method");
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").addChildEventListener(chatRoomCreationListener);
+        super.onResume();
+    }
+
+    @Override
+    public void onPause()
+    {
+        Log.d("prova", "onPause method");
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").removeEventListener(chatRoomCreationListener);
-        for(String key : chatRoomActiveListener)
-            Util.getDatabase().getReference("ChatRoom").child(key).removeEventListener(chatRoomUpdateListener);
-        super.onDestroyView();
+        for(DatabaseReference reference : chatRoomActiveListener)
+            reference.removeEventListener(chatRoomUpdateListener);
+        super.onPause();
     }
 
     private void initComponents(View v)
@@ -81,7 +90,11 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
                     {
-                        mAdapter.addElement(new ChatRoomAdapterItem(dataSnapshot.getValue(ChatRoom.class), dataSnapshot.getKey()));
+                        if (mAdapter.getPositionByKey(dataSnapshot.getKey()) == -1)
+                        {
+                            Log.d("prova", "user/" + dataSnapshot.getKey() + " added");
+                            mAdapter.addElement(new ChatRoomAdapterItem(dataSnapshot.getValue(ChatRoom.class), dataSnapshot.getKey()));
+                        }
                     }
 
                     @Override
@@ -147,9 +160,9 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
             public void onCancelled(DatabaseError databaseError) { }
         };
 
-        Util.getDatabase().getReference("ChatRoom").child(chatKey).addChildEventListener(chatRoomUpdateListener);
+        chatRoomActiveListener.add(Util.getDatabase().getReference("ChatRoom").child(chatKey));
         // Viene memorizzato il riferimento al listener creato, in modo da poterlo disattivare una volta che il fragment non risulti più visibile
-        chatRoomActiveListener.add(chatKey);
+        Util.getDatabase().getReference("ChatRoom").child(chatKey).addChildEventListener(chatRoomUpdateListener);
     }
 
     // Metodo utilizzato per nascondere/mostrare la recyclerview
