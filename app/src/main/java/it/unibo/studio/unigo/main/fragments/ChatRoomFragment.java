@@ -86,6 +86,7 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
+                // Quando viene aggiunta una voce in User/user@mail.com/chat_rooms, viene recuperata l'intera conversazione dalla tabella ChatRoom
                 Util.getDatabase().getReference("ChatRoom").child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot)
