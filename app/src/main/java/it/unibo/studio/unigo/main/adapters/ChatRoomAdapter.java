@@ -159,7 +159,9 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                         ChatRoom newItem = dataSnapshot.getValue(ChatRoom.class);
 
                         chatList.remove(position);
-                        notifyItemRemoved(position);
+                        // Il primo elemento della lista non deve avere l'effetto grafico fade-out fade-in
+                        if (position != 0)
+                            notifyItemRemoved(position);
 
                         holder.txtLastMessage.setText(newItem.last_message);
                         holder.txtDate.setText(Util.formatDate(newItem.last_time));
@@ -170,7 +172,8 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                             showUnreadMessagesNumber(newItem.msg_unread_2, holder);
 
                         chatList.add(0, new ChatRoomAdapterItem(newItem, chat.getChatKey()));
-                        notifyItemInserted(0);
+                        if (position != 0)
+                            notifyItemInserted(0);
 
                         // Per rimuovere l'animazione "pop-out - pop-in" della conversazione aggiornata,
                         // utilizzare il metodo notifyDataSetChanged() al posto di ItemRemoved + ItemInserted

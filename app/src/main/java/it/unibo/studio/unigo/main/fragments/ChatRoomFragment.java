@@ -13,25 +13,19 @@ import android.widget.LinearLayout;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import java.util.ArrayList;
-import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
 import it.unibo.studio.unigo.main.adapters.ChatRoomAdapter;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.ChatRoom;
-import android.util.Log;
 
 public class ChatRoomFragment extends android.support.v4.app.Fragment
 {
     // Listener che permette di aggiungere una ChatRoom per ogni conversazione
     private ChildEventListener chatRoomCreationListener;
-    // Listener utilizzato per aggiornare l'ultimo messaggio di ogni ChatRoom
-    private ChildEventListener chatRoomUpdateListener;
     // Lista contenente tutti i listener, utilizzata per disattivarli quando il fragment viene sostituito
-    private List<DatabaseReference> chatRoomActiveListener;
+    //private List<String> chatRoomActiveListener;
     private RecyclerView mRecyclerView;
     private LinearLayout wheel;
     private ChatRoomAdapter mAdapter;
@@ -47,7 +41,6 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     @Override
     public void onResume()
     {
-        Log.d("prova", "onResume method");
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").addChildEventListener(chatRoomCreationListener);
         super.onResume();
     }
@@ -55,16 +48,16 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     @Override
     public void onPause()
     {
-        Log.d("prova", "onPause method");
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").removeEventListener(chatRoomCreationListener);
-        for(DatabaseReference reference : chatRoomActiveListener)
-            reference.removeEventListener(chatRoomUpdateListener);
+        //for(String key: chatRoomActiveListener)
+            //Util.getDatabase().getReference("ChatRoom").child(key).removeEventListener(chatRoomUpdateListener);
         super.onPause();
     }
 
     private void initComponents(View v)
     {
-        chatRoomActiveListener = new ArrayList<>();
+        // Lista di stringhe utilizzata per memorizzare tutte le DatabaseReference delle ChatRoom esistenti
+        //chatRoomActiveListener = new ArrayList<>();
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerViewChat);
         setRecyclerViewVisibility(false);
@@ -93,16 +86,17 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
                     {
                         if (mAdapter.getPositionByKey(dataSnapshot.getKey()) == -1)
                         {
-                            Log.d("prova", "user/" + dataSnapshot.getKey() + " added");
                             mAdapter.addElement(new ChatRoomAdapterItem(dataSnapshot.getValue(ChatRoom.class), dataSnapshot.getKey()));
+                            addConversation(dataSnapshot.getKey());
                         }
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) { }
                 });
-                addConversation(dataSnapshot.getKey());
-                setRecyclerViewVisibility(true);
+
+                if (mRecyclerView.getVisibility() == View.GONE)
+                    setRecyclerViewVisibility(true);
             }
 
             @Override
@@ -136,33 +130,35 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
     // Viene inoltre aggiunto un listener per ogni ChatRoom esistente, permettendo l'aggiornamento dell'ultimo messaggio inviato
     private void addConversation(final String chatKey)
     {
-        chatRoomUpdateListener = new ChildEventListener() {
+        ChildEventListener chatRoomUpdateListener = new ChildEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {}
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s)
-            {
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 // Se un evento fa scatenare 'onChildChanged', significa che un messaggio è stato aggiunto.
                 // Al fine di evitare 'eventi multipli' (last_message, last_time, messages, msg_unread_1 e 2
                 // scattano tutti allo stesso tempo), viene controllato solamente uno dei campi modificati
                 if (dataSnapshot.getKey().equals("last_time"))
                     mAdapter.notifyItemChanged(mAdapter.getPositionByKey(chatKey), Util.NEW_MSG);
-                Log.d("prova", "triggered on: " + dataSnapshot.getKey());
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) { }
+            public void onCancelled(DatabaseError databaseError) {
+            }
         };
 
-        chatRoomActiveListener.add(Util.getDatabase().getReference("ChatRoom").child(chatKey));
         // Viene memorizzato il riferimento al listener creato, in modo da poterlo disattivare una volta che il fragment non risulti più visibile
+        //chatRoomActiveListener.add(chatKey);
         Util.getDatabase().getReference("ChatRoom").child(chatKey).addChildEventListener(chatRoomUpdateListener);
     }
 
