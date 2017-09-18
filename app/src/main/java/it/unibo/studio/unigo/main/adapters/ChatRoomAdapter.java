@@ -138,7 +138,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 
     // Aggiornamento parziale di uno o più elementi della recyclerview in realtime (rating, commenti, favourite)
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position, List<Object> payloads)
+    public void onBindViewHolder(final ViewHolder holder, int position, List<Object> payloads)
     {
         // Non sono presenti nuovi messaggi
         if (payloads.isEmpty())
@@ -158,10 +158,10 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                     {
                         ChatRoom newItem = dataSnapshot.getValue(ChatRoom.class);
 
-                        chatList.remove(position);
+                        chatList.remove(holder.getAdapterPosition());
                         // Il primo elemento della lista non deve avere l'effetto grafico fade-out fade-in
-                        if (position != 0)
-                            notifyItemRemoved(position);
+                        if (holder.getAdapterPosition() != 0)
+                            notifyItemRemoved(holder.getAdapterPosition());
 
                         holder.txtLastMessage.setText(newItem.last_message);
                         holder.txtDate.setText(Util.formatDate(newItem.last_time));
@@ -172,7 +172,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                             showUnreadMessagesNumber(newItem.msg_unread_2, holder);
 
                         chatList.add(0, new ChatRoomAdapterItem(newItem, chat.getChatKey()));
-                        if (position != 0)
+                        if (holder.getAdapterPosition() != 0)
                             notifyItemInserted(0);
 
                         // Per rimuovere l'animazione "pop-out - pop-in" della conversazione aggiornata,
