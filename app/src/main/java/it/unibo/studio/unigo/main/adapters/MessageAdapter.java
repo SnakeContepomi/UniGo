@@ -5,34 +5,36 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import com.github.akashandroid90.imageletter.MaterialLetterIcon;
+import com.squareup.picasso.Picasso;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Message;
 
-import static it.unibo.studio.unigo.R.id.txtSenderMsg;
-
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private List<Message> messageList;
 
-    static class ViewHolderSender extends RecyclerView.ViewHolder
+    private class ViewHolderSender extends RecyclerView.ViewHolder
     {
         TextView txtSenderMsg, txtSenderDate;
+        MaterialLetterIcon imgLastRead;
 
-        public ViewHolderSender(View v)
+        ViewHolderSender(View v)
         {
             super(v);
             txtSenderMsg = (TextView) v.findViewById(R.id.txtSenderMsg);
             txtSenderDate = (TextView) v.findViewById(R.id.txtSenderDate);
+            imgLastRead = (MaterialLetterIcon) v.findViewById(R.id.imgLastRead);
         }
     }
 
-    static class ViewHolderRecipient extends RecyclerView.ViewHolder
+    private class ViewHolderRecipient extends RecyclerView.ViewHolder
     {
         TextView txtSenderMsg, txtSenderDate;
 
-        public ViewHolderRecipient(View v)
+        ViewHolderRecipient(View v)
         {
             super(v);
             txtSenderMsg = (TextView) v.findViewById(R.id.txtRecipientMsg);
@@ -90,7 +92,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 ((ViewHolderRecipient)holder).txtSenderMsg.setText(msg.message);
                 ((ViewHolderRecipient)holder).txtSenderDate.setText(Util.formatDate(msg.date));
                 break;
-
         }
     }
 }

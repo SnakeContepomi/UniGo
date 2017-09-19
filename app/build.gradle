@@ -70,8 +70,6 @@ dependencies {
     compile "com.android.support:preference-v7:$supportLibsVersion"
     // Color Picker Preference
     compile 'net.xpece.android:support-preference-color:1.2.7'
-    // SeekArc
-    compile 'com.github.Triggertrap:SeekArc:v1.1'
     // CircleImageView
     compile 'de.hdodenhof:circleimageview:2.1.0'
     // Android ChatBadge Notification

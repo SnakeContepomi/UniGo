@@ -218,18 +218,20 @@ public class ChatActivity extends AppCompatActivity
                 // Se l'ID è 0 (valore default) significa che è stata riscontrata una conversazione tra i due utenti,
                 // quindi occorre stabilire se l'utente ha ID_1 o ID_2
                 // In caso contrario, user_id è già stato impostato ad 1 quando la conversazione non esiste,
-                // fissando il creatore della conversazione come 'id_1'
+                // fissando il creatore della conversazione come 'id_1'.
+                // Viene inoltre creato il riferimento al numero di messaggi non letti del destinatario
                 if (user_id == ID_0)
                     if (dataSnapshot.child("id_1").getValue(String.class).equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                    {
                         user_id = ID_1;
+                        userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
+                    }
                     else
+                    {
                         user_id = ID_2;
+                        userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_1");
+                    }
 
-                // Viene creato il riferimento al numero di messaggi non letti del destinatario
-                if (user_id == ID_1)
-                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
-                else
-                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_1");
                 userChatReference.keepSynced(true);
                 // Recupero dei messaggi di una chat esistente e di mantenere la chat aggiornata in tempo reale
                 Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().addChildEventListener(chatListener);
