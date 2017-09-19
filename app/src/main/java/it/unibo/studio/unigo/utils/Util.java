@@ -153,7 +153,7 @@ public class Util
     {
         int[] colors = context.getResources().getIntArray(R.array.colors);
 
-        s.toUpperCase();
+        s = s.toUpperCase();
         switch (s.charAt(0))
         {
             case 'A':
@@ -318,7 +318,7 @@ public class Util
         // Altrimenti viene creata una stringa in cui, dopo ogni 3 cifre, viene aggiunta una virgola
         else
         {
-            ArrayList<String> newExp = new ArrayList<String>();
+            ArrayList<String> newExp = new ArrayList<>();
             int counter = 0;
 
             // Aggiunta di una virgola ogni 3 cifre
