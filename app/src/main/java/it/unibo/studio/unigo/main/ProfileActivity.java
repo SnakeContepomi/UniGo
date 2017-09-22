@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -91,7 +92,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
         txtNComments = (TextView) findViewById(R.id.txtProfileNComments);
         txtNCredits = (TextView) findViewById(R.id.txtProfileNCredits);
 
-        this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorDarkPurple));
+        this.getWindow().setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.colorDarkPurple));
 
         // Se il profilo dell'utente è quello dell'utilizzatore, sarà possibile modificare
         // le proprie informazioni, altrimenti sarà possibile inviare una mail all'utente destinatario
@@ -119,9 +120,9 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
             {
                 startAlphaAnimation(txtToolbarTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
                 mIsTheTitleVisible = true;
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                toolbar.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
                 avatar.setBorderWidth(0);
-                this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+                this.getWindow().setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimaryDark));
             }
         }
         else
@@ -132,7 +133,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 mIsTheTitleVisible = false;
                 toolbar.setBackgroundColor(Color.TRANSPARENT);
                 avatar.setBorderWidth((int) (2 * getResources().getDisplayMetrics().density + 0.5f));
-                this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorDarkPurple));
+                this.getWindow().setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.colorDarkPurple));
             }
         }
     }
@@ -175,10 +176,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
                 userLvl = Util.getUserLevel(user.exp);
 
                 // Caricamento dell'immagine utente
-                if (!Util.isNetworkAvailable(getApplicationContext()) || user.photoUrl.equals(getResources().getString(R.string.empty_profile_pic_url)))
-                    avatar.setImageDrawable(getResources().getDrawable(R.drawable.empty_profile_pic, null));
-                else
-                    Picasso.with(avatar.getContext()).load(user.photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(avatar);
+                Picasso.with(avatar.getContext()).load(user.photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(avatar);
 
                 // Caricamento nome-cognome
                 txtName.setText(user.name + " " + user.lastName);

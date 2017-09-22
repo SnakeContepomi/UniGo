@@ -217,4 +217,10 @@ public class DetailActivity extends AppCompatActivity
             public void onCancelled(DatabaseError databaseError) { }
         });
     }
+
+    public void collapseCommentList(int position)
+    {
+        DetailAdapter.answerHolder holder = (DetailAdapter.answerHolder) recyclerViewQuestionDetail.findViewHolderForAdapterPosition(position);
+        holder.closeCommentList();
+    }
 }

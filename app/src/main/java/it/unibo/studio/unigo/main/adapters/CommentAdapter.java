@@ -11,6 +11,7 @@ import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import java.util.Collections;
@@ -19,7 +20,6 @@ import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Comment;
-
 import static it.unibo.studio.unigo.R.layout.comment;
 
 class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
@@ -70,17 +70,22 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
         // Query per recuperare le informazioni riguardanti l'autore del commento
         Util.getDatabase().getReference("User").child(comment.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(final DataSnapshot dataSnapshot)
             {
                 holder.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                 holder.txtLvl.setText(Util.getUserTitle(Util.getUserLevel(dataSnapshot.child("exp").getValue(Integer.class))));
-                if (!Util.isNetworkAvailable(holder.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(holder.context.getResources().getString(R.string.empty_profile_pic_url)))
-                {
-                    holder.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
-                    holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.child("name").getValue(String.class)));
-                }
-                else
-                    Picasso.with(holder.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile);
+
+                Picasso.with(holder.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile, new Callback() {
+                    @Override
+                    public void onSuccess() { }
+
+                    @Override
+                    public void onError()
+                    {
+                        holder.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
+                        holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.child("name").getValue(String.class)));
+                    }
+                });
             }
 
             @Override

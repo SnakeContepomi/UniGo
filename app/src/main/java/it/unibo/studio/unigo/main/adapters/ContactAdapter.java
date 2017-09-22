@@ -9,7 +9,7 @@ import it.unibo.studio.unigo.main.adapteritems.UserAdapterItem;
 
 public class ContactAdapter extends UserAdapter
 {
-    Activity activity;
+    private Activity activity;
 
     public ContactAdapter(List<UserAdapterItem> userList, Activity activity)
     {

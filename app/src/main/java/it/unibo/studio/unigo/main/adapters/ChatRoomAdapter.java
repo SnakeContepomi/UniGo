@@ -17,6 +17,7 @@ import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,14 +108,18 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
             showUnreadMessagesNumber(chatRoom.msg_unread_2, holder);
         }
 
-        // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
-        if (!Util.isNetworkAvailable(holder.context) || photoUrl.equals(holder.context.getResources().getString(R.string.empty_profile_pic_url)))
-        {
-            holder.userPhoto.setLetter(name);
-            holder.userPhoto.setShapeColor(Util.getLetterBackgroundColor(holder.context, name));
-        }
-        else
-            Picasso.with(holder.userPhoto.getContext()).load(photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(holder.userPhoto);
+        // Se non è presente una connessione, viene visualizzata la lettera corrispondente al nome utente
+        Picasso.with(holder.userPhoto.getContext()).load(photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(holder.userPhoto, new Callback() {
+            @Override
+            public void onSuccess() { }
+
+            @Override
+            public void onError()
+            {
+                holder.userPhoto.setLetter(name);
+                holder.userPhoto.setShapeColor(Util.getLetterBackgroundColor(holder.context, name));
+            }
+        });
 
         holder.txtName.setText(name);
         holder.txtDate.setText(Util.formatDate(chatRoom.last_time));

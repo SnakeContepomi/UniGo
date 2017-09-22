@@ -20,6 +20,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import java.util.ArrayList;
@@ -31,13 +32,14 @@ import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
+import it.unibo.studio.unigo.utils.firebase.User;
 
 public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder> implements Filterable
 {
     private final int UPDATE_CODE_QUESTION = 1;
     private final int UPDATE_CODE_FAVORITE = 2;
 
-    protected Filter mFilter = new ItemFilter();
+    private Filter mFilter = new ItemFilter();
     protected List<QuestionAdapterItem> questionList, backupList;
     protected Activity activity;
 
@@ -221,14 +223,20 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                holder.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
-                if (!Util.isNetworkAvailable(holder.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(holder.context.getResources().getString(R.string.empty_profile_pic_url)))
-                {
-                    holder.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
-                    holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, dataSnapshot.child("name").getValue(String.class)));
-                }
-                else
-                    Picasso.with(holder.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile);
+                final User user = dataSnapshot.getValue(User.class);
+
+                holder.txtName.setText(user.name + " " + user.lastName);
+                Picasso.with(holder.imgProfile.getContext()).load(user.photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile, new Callback() {
+                    @Override
+                    public void onSuccess() { }
+
+                    @Override
+                    public void onError()
+                    {
+                        holder.imgProfile.setLetter(user.name);
+                        holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, user.name));
+                    }
+                });
             }
 
             @Override

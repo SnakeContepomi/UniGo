@@ -6,10 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import net.cachapa.expandablelayout.ExpandableLayout;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -34,11 +35,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
+import static it.unibo.studio.unigo.R.drawable.empty_profile_pic;
 import static it.unibo.studio.unigo.utils.Util.getCurrentUser;
 
 
@@ -52,6 +55,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int UPDATE_CODE_COMMENTS = 4;
 
     private boolean answerAllowed = true;
+    // Intero che indica qual'è il layout con i commenti visibili
+    private int layoutExpanded;
     private Question question;
     private List<Answer> answerList;
     private List<String> answerKeyList;
@@ -88,7 +93,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    private static class answerHolder extends RecyclerView.ViewHolder
+    public static class answerHolder extends RecyclerView.ViewHolder
     {
         Context context;
         List<Comment> commentList;
@@ -121,6 +126,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             recyclerViewComment = (RecyclerView) v.findViewById(R.id.recyclerViewComment);
             recyclerViewComment.setLayoutManager(new LinearLayoutManager(context));
         }
+
+        public void closeCommentList()
+        {
+            expandableLayout.collapse();
+        }
     }
 
     public DetailAdapter(Question question, String questionKey, Activity activity)
@@ -128,6 +138,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.question = question;
         this.questionKey = questionKey;
         this.activity = activity;
+        layoutExpanded = -1;
         answerList = new ArrayList<>();
         answerKeyList = new ArrayList<>();
 
@@ -262,18 +273,23 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         // Query per l'utente
         Util.getDatabase().getReference("User").child(question.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(final DataSnapshot dataSnapshot)
             {
                 // Impostazione dei campi relativi all'utente
                 qh.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                 qh.txtLvl.setText(Util.getUserTitle(Util.getUserLevel(dataSnapshot.child("exp").getValue(Integer.class))));
-                if (!Util.isNetworkAvailable(qh.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(qh.context.getResources().getString(R.string.empty_profile_pic_url)))
-                {
-                    qh.userPhoto.setLetter(dataSnapshot.child("name").getValue(String.class));
-                    qh.userPhoto.setShapeColor(Util.getLetterBackgroundColor(qh.context, dataSnapshot.child("name").getValue(String.class)));
-                }
-                else
-                    Picasso.with(qh.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(qh.userPhoto);
+
+                Picasso.with(qh.context).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(empty_profile_pic).fit().into(qh.userPhoto, new Callback() {
+                    @Override
+                    public void onSuccess() { }
+
+                    @Override
+                    public void onError()
+                    {
+                        qh.userPhoto.setLetter(dataSnapshot.child("name").getValue(String.class));
+                        qh.userPhoto.setShapeColor(Util.getLetterBackgroundColor(qh.context, dataSnapshot.child("name").getValue(String.class)));
+                    }
+                });
             }
 
             @Override
@@ -298,8 +314,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             public void onClick(View view)
             {
                 Util.getDatabase().getReference("Question").child(questionKey).child("ratings").child(Util.encodeEmail(getCurrentUser().getEmail())).setValue(true);
-                qh.imgrating.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
-                qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                qh.imgrating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorPrimary)));
+                qh.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorPrimary)));
                 Util.startBounceAnimation(activity, qh.rating);
                 qh.txtRating.setText(String.valueOf(Integer.valueOf(String.valueOf(qh.txtRating.getText())) + 1));
                 qh.rating.setClickable(false);
@@ -307,8 +323,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Inizializzazione della Action "Rating"
-        qh.imgrating.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
-        qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
+        qh.imgrating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorIconGray)));
+        qh.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorIconGray)));
         if (question.ratings != null)
         {
             // Inizializzazione del numero di rating della domanda corrente
@@ -317,8 +333,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             for (String key : question.ratings.keySet())
                 if (key.equals(Util.encodeEmail(getCurrentUser().getEmail())))
                 {
-                    qh.imgrating.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
-                    qh.txtRating.setTextColor(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorPrimary)));
+                    qh.imgrating.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorPrimary)));
+                    qh.txtRating.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorPrimary)));
                     qh.rating.setClickable(false);
                     break;
                 }
@@ -337,9 +353,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 if (dataSnapshot.getValue() != null)
-                    qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
+                    qh.imgfavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorAmber)));
                 else
-                    qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
+                    qh.imgfavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorIconGray)));
             }
 
             @Override
@@ -359,13 +375,13 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         if (dataSnapshot.getValue() == null)
                         {
                             favoriteReference.setValue(true);
-                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorAmber)));
+                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorAmber)));
                             Util.startBounceAnimation(activity, qh.imgfavorite);
                         }
                         else
                         {
                             favoriteReference.removeValue();
-                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(qh.context.getResources().getColor(R.color.colorIconGray)));
+                            qh.imgfavorite.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(qh.context, R.color.colorIconGray)));
                             Util.startBounceAnimation(activity, qh.imgfavorite);
                         }
                     }
@@ -411,15 +427,19 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         // Query per recuperare le informazioni dell'autore della risposta
         Util.getDatabase().getReference("User").child(answer.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(final DataSnapshot dataSnapshot)
             {
-                if (!Util.isNetworkAvailable(ah.context) || dataSnapshot.child("photoUrl").getValue(String.class).equals(ah.context.getResources().getString(R.string.empty_profile_pic_url)))
-                {
-                    ah.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
-                    ah.imgProfile.setShapeColor(Util.getLetterBackgroundColor(ah.context, dataSnapshot.child("name").getValue(String.class)));
-                }
-                else
-                    Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(R.drawable.empty_profile_pic).fit().into(ah.imgProfile);
+                Picasso.with(ah.imgProfile.getContext()).load(dataSnapshot.child("photoUrl").getValue(String.class)).placeholder(empty_profile_pic).fit().into(ah.imgProfile, new Callback() {
+                    @Override
+                    public void onSuccess() { }
+
+                    @Override
+                    public void onError()
+                    {
+                        ah.imgProfile.setLetter(dataSnapshot.child("name").getValue(String.class));
+                        ah.imgProfile.setShapeColor(Util.getLetterBackgroundColor(ah.context, dataSnapshot.child("name").getValue(String.class)));
+                    }
+                });
 
                 ah.txtName.setText(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
                 ah.txtLvl.setText(Util.getUserTitle(Util.getUserLevel(dataSnapshot.child("exp").getValue(Integer.class))));
@@ -469,8 +489,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 else
                 {
                     Util.getDatabase().getReference("Question").child(questionKey).child("answers").child(answerKey).child("likes").child(Util.encodeEmail(getCurrentUser().getEmail())).setValue(true);
-                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
-                    ah.txtLike.setTextColor(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
+                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ah.context, R.color.colorBlue)));
+                    ah.txtLike.setTextColor(ColorStateList.valueOf(ContextCompat.getColor(ah.context, R.color.colorBlue)));
                     Util.startBounceAnimation(activity, ah.like);
                     ah.txtLike.setText(String.valueOf(Integer.valueOf(String.valueOf(ah.txtLike.getText())) + 1));
                     ah.like.setClickable(false);
@@ -480,8 +500,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
 
         // Verifica se l'utente ha già inserito il "Like" per la risposta corrente
-        ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorIconGray)));
-        ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorIconGray))));
+        ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ah.context, R.color.colorIconGray)));
+        ah.txtLike.setTextColor((ColorStateList.valueOf(ContextCompat.getColor(ah.context, R.color.colorIconGray))));
         if (answer.likes != null)
         {
             // Inizializzazione del numero di "Like" della risposta corrente
@@ -490,8 +510,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             for (String key : answer.likes.keySet())
                 if (key.equals(Util.encodeEmail(getCurrentUser().getEmail())))
                 {
-                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue)));
-                    ah.txtLike.setTextColor((ColorStateList.valueOf(ah.context.getResources().getColor(R.color.colorBlue))));
+                    ah.imgLike.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ah.context, R.color.colorBlue)));
+                    ah.txtLike.setTextColor((ColorStateList.valueOf(ContextCompat.getColor(ah.context, R.color.colorBlue))));
                     ah.like.setClickable(false);
                     break;
                 }
@@ -513,10 +533,20 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             public void onClick(View view)
             {
                 if (ah.expandableLayout.isExpanded())
+                {
                     ah.expandableLayout.collapse();
+                    layoutExpanded = -1;
+                }
                 else
                 {
+                    if (layoutExpanded != -1)
+                    {
+                        ((DetailActivity) activity).collapseCommentList(layoutExpanded);
+                        layoutExpanded = -1;
+                    }
+
                     ah.expandableLayout.expand();
+                    layoutExpanded = ah.getAdapterPosition();
                     Util.startBounceAnimation(activity, ah.layoutComments);
                     ah.cAdapter = new CommentAdapter(ah.commentList, ah.commentKeyList);
                     ah.recyclerViewComment.setAdapter(ah.cAdapter);
@@ -543,17 +573,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
 
-        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || getCurrentUser().getPhotoUrl().getPath().contains(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
-        {
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(getCurrentUser().getDisplayName());
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), getCurrentUser().getDisplayName()));
-        }
-        else
-            Picasso.with(activity.getApplicationContext())
-                    .load(getCurrentUser().getPhotoUrl())
-                    .placeholder(R.drawable.empty_profile_pic)
-                    .fit()
-                    .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
+        Picasso.with(activity.getApplicationContext()).load(getCurrentUser().getPhotoUrl()).placeholder(empty_profile_pic).fit().into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto), new Callback() {
+            @Override
+            public void onSuccess() { }
+
+            @Override
+            public void onError()
+            {
+                ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(getCurrentUser().getDisplayName());
+                ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), getCurrentUser().getDisplayName()));
+            }
+        });
 
         ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(getCurrentUser().getDisplayName());
         if (answerNotSent != null)
@@ -609,17 +639,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
 
-        if (!Util.isNetworkAvailable(activity.getApplicationContext()) || getCurrentUser().getPhotoUrl().equals(activity.getApplicationContext().getResources().getString(R.string.empty_profile_pic_url)))
-        {
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(getCurrentUser().getDisplayName());
-            ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), getCurrentUser().getDisplayName()));
-        }
-        else
-            Picasso.with(activity.getApplicationContext())
-                    .load(getCurrentUser().getPhotoUrl())
-                    .placeholder(R.drawable.empty_profile_pic)
-                    .fit()
-                    .into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto));
+        Picasso.with(activity.getApplicationContext()).load(getCurrentUser().getPhotoUrl()).placeholder(empty_profile_pic).fit().into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto), new Callback() {
+            @Override
+            public void onSuccess() { }
+
+            @Override
+            public void onError()
+            {
+                ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setLetter(getCurrentUser().getDisplayName());
+                ((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto)).setShapeColor(Util.getLetterBackgroundColor(activity.getApplicationContext(), getCurrentUser().getDisplayName()));
+            }
+        });
 
         ((TextView)dialogLayout.findViewById(R.id.reply_name)).setText(getCurrentUser().getDisplayName());
         if (commentNotSent != null)

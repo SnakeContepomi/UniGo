@@ -85,8 +85,6 @@ public class ChatActivity extends AppCompatActivity
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mLayoutManager.setReverseLayout(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MessageAdapter(messageList);
-        mRecyclerView.setAdapter(mAdapter);
         txtMessage = (EditText) findViewById(R.id.txtMessage);
         ImageView chatSend = (ImageView) findViewById(R.id.chatSend);
 
@@ -158,6 +156,8 @@ public class ChatActivity extends AppCompatActivity
             {
                 recipient = dataSnapshot.getValue(User.class);
                 toolbar.setTitle(formatName(recipient.name, recipient.lastName));
+                mAdapter = new MessageAdapter(messageList, recipient.photoUrl, recipient.name);
+                mRecyclerView.setAdapter(mAdapter);
                 getChat();
             }
 

@@ -12,9 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.l4digital.fastscroll.FastScroller;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import org.apache.commons.lang3.builder.CompareToBuilder;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,7 +27,7 @@ import it.unibo.studio.unigo.utils.firebase.User;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> implements FastScroller.SectionIndexer, Filterable
 {
-    protected Filter mFilter = new ItemFilter();
+    private Filter mFilter = new ItemFilter();
     protected List<UserAdapterItem> userList, backupList;
 
     class UserHolder extends RecyclerView.ViewHolder
@@ -116,14 +116,17 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
     {
         final User user = userList.get(position).getUser();
 
-        // Immagine profilo
-        if(!Util.isNetworkAvailable(holder.context) || user.photoUrl.equals(holder.context.getResources().getString(R.string.empty_profile_pic_url)))
-        {
-            holder.imgProfile.setLetter(user.name);
-            holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, user.name));
-        }
-        else
-            Picasso.with(holder.context).load(user.photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile);
+        Picasso.with(holder.context).load(user.photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(holder.imgProfile, new Callback() {
+            @Override
+            public void onSuccess() { }
+
+            @Override
+            public void onError()
+            {
+                holder.imgProfile.setLetter(user.name);
+                holder.imgProfile.setShapeColor(Util.getLetterBackgroundColor(holder.context, user.name));
+            }
+        });
 
         // Nome e cognome
         holder.txtName.setText(user.name + " " + user.lastName);
