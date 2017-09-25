@@ -191,6 +191,7 @@ public class ChatActivity extends AppCompatActivity
                 else
                 {
                     chatId = Util.encodeEmail(Util.getCurrentUser().getEmail()) + "_" + Util.encodeEmail(recipientEmail);
+                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
                     // Viene prefissato l'id dell'utente che avvia una conversazione a ID_1 (1)
                     user_id = ID_1;
                     chatRoom = new ChatRoom(Util.encodeEmail(Util.getCurrentUser().getEmail()),

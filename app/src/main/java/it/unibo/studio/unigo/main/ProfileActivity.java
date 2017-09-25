@@ -101,7 +101,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
             @Override
             public boolean onMenuItemClick(MenuItem item)
             {
-                inviaEmail(Util.decodeEmail(getIntent().getStringExtra("user_key")));
+                sendEmail(Util.decodeEmail(getIntent().getStringExtra("user_key")));
                 return false;
             }
         });
@@ -253,7 +253,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
 
     // Metodo che permette all'utente di scegliere con quale client inviare la mail
     // (tutto il testo già scritto verrà passato al client scelto)
-    private void inviaEmail(String mail)
+    private void sendEmail(String mail)
     {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("message/rfc822");

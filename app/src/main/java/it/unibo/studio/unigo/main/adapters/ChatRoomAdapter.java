@@ -151,7 +151,6 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 
         // Sono presenti nuovi messaggi nella conversazione
         else
-        {
             if ((int) payloads.get(0) == NEW_MSG)
             {
                 // Viene recuperato l'oggetto interessato all'aggiornamento in modo da cambiare solamente i campi da aggiornare,
@@ -189,7 +188,6 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
                     public void onCancelled(DatabaseError databaseError) { }
                 });
             }
-        }
     }
 
     private int sp2px(Context context, float spValue)
