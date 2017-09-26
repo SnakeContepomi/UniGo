@@ -23,13 +23,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private class ViewHolderSender extends RecyclerView.ViewHolder
     {
+        LinearLayout llSender, llSenderDetails;
         TextView txtSenderMsg, txtSenderDate;
         MaterialLetterIcon imgLastRead;
 
         ViewHolderSender(View v)
         {
             super(v);
+            llSender = (LinearLayout) v.findViewById(R.id.llSender);
             txtSenderMsg = (TextView) v.findViewById(R.id.txtSenderMsg);
+            llSenderDetails = (LinearLayout) v.findViewById(R.id.llSenderDetails);
             txtSenderDate = (TextView) v.findViewById(R.id.txtSenderDate);
             imgLastRead = (MaterialLetterIcon) v.findViewById(R.id.imgLastRead);
         }
@@ -102,6 +105,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 senderHolder.txtSenderMsg.setText(msg.message);
                 senderHolder.txtSenderDate.setText(Util.formatDate(msg.date));
 
+                if (!pictureToggleList.get(position))
+                    senderHolder.llSenderDetails.setVisibility(View.GONE);
+                else
+                    senderHolder.llSenderDetails.setVisibility(View.VISIBLE);
+
                 // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
                 Picasso.with(senderHolder.imgLastRead.getContext()).load(photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(senderHolder.imgLastRead, new Callback() {
                     @Override
@@ -112,6 +120,17 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     {
                         senderHolder.imgLastRead.setLetter(name);
                         senderHolder.imgLastRead.setShapeColor(Util.getLetterBackgroundColor(senderHolder.imgLastRead.getContext(), name));
+                    }
+                });
+
+                senderHolder.llSender.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        if (senderHolder.llSenderDetails.getVisibility() == View.VISIBLE)
+                            senderHolder.llSenderDetails.setVisibility(View.GONE);
+                        else
+                            senderHolder.llSenderDetails.setVisibility(View.VISIBLE);
                     }
                 });
                 break;
@@ -147,6 +166,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     }
                 });
 
+                // clickListener che mostra/nasconde la data di invio del messaggio
                 recipientHolder.llRecipient.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view)
@@ -163,43 +183,43 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // Metodo utilizato per inserire un messaggio in coda alla lista
     // 1) Se il messaggio proviene dall'utilizzatore dell'app, viene semplicemente visualizzato
-    // 2) Se il messaggio proviene dal mittente della conversazione, viene visualizzata la relativa immagine profilo
-    //    (solamente nell'ultimo messaggio da parte sua)
+    // 2) Se il messaggio proviene dal mittente della conversazione, viene visualizzata la relativa immagine profilo,
+    //    solamente nell'ultimo messaggio da parte sua. Per mostrare/nascondere immagine profilo/data, viene utilizzata
+    //    una lista di boolean
     public void addElement(Message msg)
     {
-        // Se il messaggio proviene dal destinatario della conversazione...
-        if (!msg.sender_id.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+        // Se il messaggio il primo messaggio della lista, allora l'icona utente viene visualizzata
+        if (messageList.size() == 0)
         {
-            // ...ed è il primo messaggio della lista, allora l'icona utente viene visualizzata
-            if (messageList.size() == 0)
+            pictureToggleList.add(true);
+            messageList.add(msg);
+        }
+        // Altrimenti se *non* è il primo della conversazione...
+        else
+            // Si controlla se il precedente provenga anch'esso dal destinatario, e in caso positivo,
+            // viene nascosta la penultima immagine profilo e mostrata quella relativa all'ultimo messaggio
+            if (messageList.get(messageList.size() - 1).sender_id.equals(msg.sender_id))
             {
+                pictureToggleList.set(pictureToggleList.size() - 1, false);
+                notifyItemChanged(pictureToggleList.size() - 1);
                 pictureToggleList.add(true);
                 messageList.add(msg);
             }
-            // ...e il messaggio *non* è il primo della conversazione...
+            // Altrimenti viene semplicemente visualizzata l'immagine profilo
             else
-                // Si controlla se il precedente proviene anch'esso dal destinatario, e in caso positivo,
-                // viene nascosta la penultima immagine profilo e mostrata quella relativa all'ultimo messaggio
-                if (messageList.get(messageList.size() - 1).sender_id.equals(msg.sender_id))
+            {
+                int i;
+                for(i = messageList.size() - 1; i >= 0; i--)
+                    if (messageList.get(i).sender_id.equals(msg.sender_id))
+                        break;
+                if (i != -1)
                 {
-                    pictureToggleList.set(pictureToggleList.size() - 1, false);
-                    notifyItemChanged(pictureToggleList.size() - 1);
-                    pictureToggleList.add(true);
-                    messageList.add(msg);
+                    pictureToggleList.set(i, false);
+                    notifyItemChanged(i);
                 }
-                // Altrimenti viene semplicemente visualizzata l'immagine profilo
-                else
-                {
-                    pictureToggleList.add(true);
-                    messageList.add(msg);
-                }
-        }
-        // Altrimenti se il messaggio è inviato dall'utente, viene semplicemente visualizzato (senza mostrare la propria immagine profilo)
-        else
-        {
-            pictureToggleList.add(false);
-            messageList.add(msg);
-        }
+                pictureToggleList.add(true);
+                messageList.add(msg);
+            }
 
         notifyItemInserted(messageList.size() - 1);
     }
