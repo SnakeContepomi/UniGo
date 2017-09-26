@@ -17,8 +17,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import java.util.ArrayList;
-import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapters.MessageAdapter;
 import it.unibo.studio.unigo.utils.Util;
@@ -45,7 +43,6 @@ public class ChatActivity extends AppCompatActivity
     private ChatRoom chatRoom;
     // Listener che permette l'aggiornamento della chat in tempo reale
     private ChildEventListener chatListener;
-    private List<Message> messageList;
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
     private Toolbar toolbar;
@@ -70,8 +67,6 @@ public class ChatActivity extends AppCompatActivity
 
     private void initializeComponents()
     {
-        messageList = new ArrayList<>();
-
         toolbar = (Toolbar) findViewById(R.id.chatToolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +78,7 @@ public class ChatActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.chatRecyclerView);
         mRecyclerView.setHasFixedSize(true);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        mLayoutManager.setReverseLayout(true);
+        mLayoutManager.setStackFromEnd(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
         txtMessage = (EditText) findViewById(R.id.txtMessage);
         ImageView chatSend = (ImageView) findViewById(R.id.chatSend);
@@ -125,9 +120,8 @@ public class ChatActivity extends AppCompatActivity
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
-                messageList.add(0, dataSnapshot.getValue(Message.class));
-                mRecyclerView.smoothScrollToPosition(0);
-                mAdapter.notifyItemInserted(0);
+                mAdapter.addElement(dataSnapshot.getValue(Message.class));
+                mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount() - 1);
                 Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_" + user_id).setValue(0);
             }
 
@@ -156,7 +150,7 @@ public class ChatActivity extends AppCompatActivity
             {
                 recipient = dataSnapshot.getValue(User.class);
                 toolbar.setTitle(formatName(recipient.name, recipient.lastName));
-                mAdapter = new MessageAdapter(messageList, recipient.photoUrl, recipient.name);
+                mAdapter = new MessageAdapter(recipient.photoUrl, recipient.name);
                 mRecyclerView.setAdapter(mAdapter);
                 getChat();
             }
