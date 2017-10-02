@@ -26,7 +26,6 @@ import it.unibo.studio.unigo.utils.firebase.User;
 
 public class ChatActivity extends AppCompatActivity
 {
-    private final int ID_0 = 0; // Valore Default
     private final int ID_1 = 1; // L'utente è 'id_1'
     private final int ID_2 = 2; // L'utente è 'id_2'
 
@@ -37,12 +36,17 @@ public class ChatActivity extends AppCompatActivity
     private String chatId;
     // Intero utilizzato per verificare se l'utente è 'id_1' o 'id_2' della chatRoom
     private int user_id = 0;
+    // Intero utilizzato per avviare in maniera ritardata il listener sull'ultimo messaggio letto da parte del destinatario
+    private int msgCounter = 0;
     // Boolean che indica se esiste la ChatRoom tra le persone in questione
     private boolean chatCreated = false;
     // Oggetto che consente la creazione di una nuova Chatroom
     private ChatRoom chatRoom;
     // Listener che permette l'aggiornamento della chat in tempo reale
     private ChildEventListener chatListener;
+    // Listener che consente di mantenere aggiornato lo stato dell'ultimo messaggio letto
+    // da parte del destinatario della conversazaione
+    private ValueEventListener unreadMessageListener;
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
     private Toolbar toolbar;
@@ -54,13 +58,16 @@ public class ChatActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         initializeComponents();
-        getUserInfo();
+        getRecipientUserInfo();
     }
 
     @Override
     protected void onDestroy()
     {
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().removeEventListener(chatListener);
+        // Viene rimosso il listener che si occupa di recuperare il numero di messaggi non letti del destinatario,
+        // utilizzato per mostrare un'icona sull'ultimo messaggio da lui letto
+        userChatReference.removeEventListener(unreadMessageListener);
         userChatReference.keepSynced(false);
         super.onDestroy();
     }
@@ -95,7 +102,6 @@ public class ChatActivity extends AppCompatActivity
                     // Se la conversazione tra le due persone non è mai avvenuta, viene prima di tutto creata una nuova ChatRoom
                     else
                     {
-                        chatCreated = true;
                         // Creazione ChatRoom
                         Util.getDatabase().getReference("ChatRoom").child(chatId).setValue(chatRoom).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
@@ -103,6 +109,7 @@ public class ChatActivity extends AppCompatActivity
                             {
                                 if (task.isSuccessful())
                                 {
+                                    chatCreated = true;
                                     // Collegamento delle persone alla ChatRoom
                                     Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").child(chatId).setValue(true);
                                     Util.getDatabase().getReference("User").child(recipientEmail).child("chat_rooms").child(chatId).setValue(true);
@@ -123,6 +130,23 @@ public class ChatActivity extends AppCompatActivity
                 mAdapter.addElement(dataSnapshot.getValue(Message.class));
                 mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount() - 1);
                 Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_" + user_id).setValue(0);
+
+                /*
+                    Avvio del listener su unread_msg_x in maniera ritardata:
+                    *   Problema:
+                    *    Se si avvia il listener dall'inizio, cercherà l'ultimo messaggio letto su una lista vuota,
+                    *    e fino a nuova modifica del valore, non verrà più eseguito
+                    *   Soluzione:
+                    *    Quando viene aggiunto l'ultimo messaggio (i == childrencount, recuperato da una query),
+                    *    avviare il listener
+                */
+                if (msgCounter > 0 )
+                    msgCounter--;
+                if (msgCounter == 0)
+                {
+                    msgCounter = -1;
+                    userChatReference.addValueEventListener(unreadMessageListener);
+                }
             }
 
             @Override
@@ -137,10 +161,25 @@ public class ChatActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         };
+
+        // Listener per mantenere aggiornato lo stato dell'ultimo messaggio letto da parte del destinatario
+        unreadMessageListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                // Controllo obbligatorio in quanto la query viene eseguita *anche* quando il listener viene avviato,
+                // quindi viene eseguita anche quando una conversazione tra due persone non esiste
+                if (dataSnapshot.getValue() != null)
+                    mAdapter.setLastMsgRead(dataSnapshot.getValue(Integer.class));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
     }
 
     // Metodo utilizzato per recuperare i dati del destinatario della conversazione
-    private void getUserInfo()
+    private void getRecipientUserInfo()
     {
         recipientEmail = getIntent().getStringExtra("user_key");
 
@@ -172,22 +211,28 @@ public class ChatActivity extends AppCompatActivity
                 if (dataSnapshot.child(Util.encodeEmail(Util.getCurrentUser().getEmail()) + "_" + Util.encodeEmail(recipientEmail)).getValue() != null)
                 {
                     chatId = dataSnapshot.child(Util.encodeEmail(Util.getCurrentUser().getEmail()) + "_" + Util.encodeEmail(recipientEmail)).getKey();
+                    user_id = ID_1;
+                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
                     chatCreated = true;
                 }
                 // In caso negativo, viene verificata l'esistenza dell'opposto 'destinatario_mittente'
                 else if (dataSnapshot.child(Util.encodeEmail(recipientEmail) + "_" + (Util.encodeEmail(Util.getCurrentUser().getEmail()))).getValue() != null)
                 {
                     chatId = dataSnapshot.child((Util.encodeEmail(recipientEmail)) + "_" + Util.encodeEmail(Util.getCurrentUser().getEmail())).getKey();
+                    user_id = ID_2;
+                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_1");
                     chatCreated = true;
                 }
-                // Non esiste una chat tra le due persone, quindi viene inizializzato l'oggetto ChatRoom: se viene inviato almeno un messaggio, ChatRoom verrà
-                // memorizzato effettivamente nel database, altrimenti verrà cancellato
+                // Non esiste una chat tra le due persone, quindi viene inizializzato l'oggetto ChatRoom: se viene inviato almeno un messaggio,
+                // ChatRoom verrà memorizzato effettivamente nel database, altrimenti verrà cancellato
                 else
                 {
+                    // Viene prefissato l'id dell'utente che avvia una conversazione a *ID_1 (1)*
+                    // L'identificativo della conversazione è composto da mail_id1_mail_id2, dove l'utente che la crea è sempre id_1
                     chatId = Util.encodeEmail(Util.getCurrentUser().getEmail()) + "_" + Util.encodeEmail(recipientEmail);
-                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
-                    // Viene prefissato l'id dell'utente che avvia una conversazione a ID_1 (1)
                     user_id = ID_1;
+                    userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
+
                     chatRoom = new ChatRoom(Util.encodeEmail(Util.getCurrentUser().getEmail()),
                                                                 Util.encodeEmail(recipientEmail),
                                                                 Util.getCurrentUser().getDisplayName(),
@@ -195,37 +240,8 @@ public class ChatActivity extends AppCompatActivity
                                                                 Util.getCurrentUser().getPhotoUrl().toString(),
                                                                 recipient.photoUrl);
                 }
-                checkUserId();
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
-    }
-
-    // Metodo che permette di capire se l'utente è colui che ha iniziato la chat (id_1) o colui che è stato contattato (id_2)
-    private void checkUserId()
-    {
-        Util.getDatabase().getReference("ChatRoom").child(chatId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                // Se l'ID è 0 (valore default) significa che è stata riscontrata una conversazione tra i due utenti,
-                // quindi occorre stabilire se l'utente ha ID_1 o ID_2
-                // In caso contrario, user_id è già stato impostato ad 1 quando la conversazione non esiste,
-                // fissando il creatore della conversazione come 'id_1'.
-                // Viene inoltre creato il riferimento al numero di messaggi non letti del destinatario
-                if (user_id == ID_0)
-                    if (dataSnapshot.child("id_1").getValue(String.class).equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
-                    {
-                        user_id = ID_1;
-                        userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_2");
-                    }
-                    else
-                    {
-                        user_id = ID_2;
-                        userChatReference = Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_1");
-                    }
+                getChatSize();
 
                 userChatReference.keepSynced(true);
                 // Recupero dei messaggi di una chat esistente e di mantenere la chat aggiornata in tempo reale
@@ -269,5 +285,23 @@ public class ChatActivity extends AppCompatActivity
         // Aggiornamento dell'ultimo messaggio della ChatRoom
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message").setValue(msg.message);
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_time").setValue(msg.date);
+    }
+
+    // Metodo che recupera il numero di messaggi scambiati tra i due utenti (nel caso di conversazione già esistente),
+    // utilizzato per la partenza ritardata del listener dell'ultimo messaggio letto
+    private void getChatSize()
+    {
+        Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (dataSnapshot.getValue() != null)
+                    msgCounter = (int) dataSnapshot.getChildrenCount();
+                else msgCounter = 0;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 }

@@ -18,12 +18,13 @@ import it.unibo.studio.unigo.utils.firebase.Message;
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private List<Message> messageList;
-    private List<Boolean> pictureToggleList;
+    private List<Boolean> msgListDetailToggle;
     private String photoUrl, name;
+    private int posLastReadMsg;
 
     private class ViewHolderSender extends RecyclerView.ViewHolder
     {
-        LinearLayout llSender, llSenderDetails;
+        LinearLayout llSender;
         TextView txtSenderMsg, txtSenderDate;
         MaterialLetterIcon imgLastRead;
 
@@ -32,7 +33,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             super(v);
             llSender = (LinearLayout) v.findViewById(R.id.llSender);
             txtSenderMsg = (TextView) v.findViewById(R.id.txtSenderMsg);
-            llSenderDetails = (LinearLayout) v.findViewById(R.id.llSenderDetails);
             txtSenderDate = (TextView) v.findViewById(R.id.txtSenderDate);
             imgLastRead = (MaterialLetterIcon) v.findViewById(R.id.imgLastRead);
         }
@@ -57,9 +57,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public MessageAdapter(String photoUrl, String name)
     {
         this.messageList = new ArrayList<>();
-        this.pictureToggleList = new ArrayList<>();
+        this.msgListDetailToggle = new ArrayList<>();
         this.photoUrl = photoUrl;
         this.name = name;
+        posLastReadMsg = -1;
+
     }
 
     // Metodo che permette di attribuire un layout diverso a seconda del mittende del messaggio
@@ -105,10 +107,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 senderHolder.txtSenderMsg.setText(msg.message);
                 senderHolder.txtSenderDate.setText(Util.formatDate(msg.date));
 
-                if (!pictureToggleList.get(position))
-                    senderHolder.llSenderDetails.setVisibility(View.GONE);
+                if (msgListDetailToggle.get(position))
+                    senderHolder.txtSenderDate.setVisibility(View.VISIBLE);
                 else
-                    senderHolder.llSenderDetails.setVisibility(View.VISIBLE);
+                    senderHolder.txtSenderDate.setVisibility(View.GONE);
 
                 // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
                 Picasso.with(senderHolder.imgLastRead.getContext()).load(photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(senderHolder.imgLastRead, new Callback() {
@@ -127,10 +129,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     @Override
                     public void onClick(View view)
                     {
-                        if (senderHolder.llSenderDetails.getVisibility() == View.VISIBLE)
-                            senderHolder.llSenderDetails.setVisibility(View.GONE);
+                        if (senderHolder.txtSenderDate.getVisibility() == View.VISIBLE)
+                            senderHolder.txtSenderDate.setVisibility(View.GONE);
                         else
-                            senderHolder.llSenderDetails.setVisibility(View.VISIBLE);
+                            senderHolder.txtSenderDate.setVisibility(View.VISIBLE);
                     }
                 });
                 break;
@@ -142,15 +144,15 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 recipientHolder.txtRecipientDate.setText(Util.formatDate(msg.date));
 
                 // Viene utilizzata una lista di boolean per mappare la visibilità dell'icona del destinatario
-                if (!pictureToggleList.get(position))
-                {
-                    recipientHolder.imgRecipientPhoto.setVisibility(View.INVISIBLE);
-                    recipientHolder.txtRecipientDate.setVisibility(View.GONE);
-                }
-                else
+                if (msgListDetailToggle.get(position))
                 {
                     recipientHolder.imgRecipientPhoto.setVisibility(View.VISIBLE);
                     recipientHolder.txtRecipientDate.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    recipientHolder.imgRecipientPhoto.setVisibility(View.INVISIBLE);
+                    recipientHolder.txtRecipientDate.setVisibility(View.GONE);
                 }
 
                 // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
@@ -181,6 +183,25 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads)
+    {
+        if (payloads.isEmpty())
+            onBindViewHolder(holder, holder.getAdapterPosition());
+
+        else
+        {
+            ViewHolderSender senderHolder = (ViewHolderSender) holder;
+            if ((boolean) payloads.get(0))
+            {
+                senderHolder.imgLastRead.setVisibility(View.VISIBLE);
+                posLastReadMsg = holder.getAdapterPosition();
+            }
+            else
+                senderHolder.imgLastRead.setVisibility(View.GONE);
+        }
+    }
+
     // Metodo utilizato per inserire un messaggio in coda alla lista
     // 1) Se il messaggio proviene dall'utilizzatore dell'app, viene semplicemente visualizzato
     // 2) Se il messaggio proviene dal mittente della conversazione, viene visualizzata la relativa immagine profilo,
@@ -191,18 +212,18 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         // Se il messaggio il primo messaggio della lista, allora l'icona utente viene visualizzata
         if (messageList.size() == 0)
         {
-            pictureToggleList.add(true);
+            msgListDetailToggle.add(true);
             messageList.add(msg);
         }
         // Altrimenti se *non* è il primo della conversazione...
         else
-            // Si controlla se il precedente provenga anch'esso dal destinatario, e in caso positivo,
-            // viene nascosta la penultima immagine profilo e mostrata quella relativa all'ultimo messaggio
+            // Si controlla se il messaggio precedente ha lo stesso mittente del messaggio da inserire, in caso positivo
+            // viene nascosta la penultima immagine profilo (e/o data di invio del messaggio) e mostrata quella relativa all'ultimo messaggio
             if (messageList.get(messageList.size() - 1).sender_id.equals(msg.sender_id))
             {
-                pictureToggleList.set(pictureToggleList.size() - 1, false);
-                notifyItemChanged(pictureToggleList.size() - 1);
-                pictureToggleList.add(true);
+                msgListDetailToggle.set(msgListDetailToggle.size() - 1, false);
+                notifyItemChanged(msgListDetailToggle.size() - 1);
+                msgListDetailToggle.add(true);
                 messageList.add(msg);
             }
             // Altrimenti viene semplicemente visualizzata l'immagine profilo
@@ -214,13 +235,30 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         break;
                 if (i != -1)
                 {
-                    pictureToggleList.set(i, false);
+                    msgListDetailToggle.set(i, false);
                     notifyItemChanged(i);
                 }
-                pictureToggleList.add(true);
+                msgListDetailToggle.add(true);
                 messageList.add(msg);
             }
 
         notifyItemInserted(messageList.size() - 1);
+    }
+
+    public void setLastMsgRead(int nrUnreadMsg)
+    {
+        int i;
+
+        for(i = messageList.size() - 1; i >= 0; i--)
+            if (messageList.get(i).sender_id.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                if (nrUnreadMsg > 0)
+                    nrUnreadMsg--;
+                else
+                    break;
+
+        if (posLastReadMsg != -1)
+            if (i != posLastReadMsg)
+                notifyItemChanged(posLastReadMsg, false);
+        notifyItemChanged(i, true);
     }
 }

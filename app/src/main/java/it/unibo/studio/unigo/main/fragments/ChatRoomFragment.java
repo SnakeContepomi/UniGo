@@ -140,7 +140,7 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
                 // Al fine di evitare 'eventi multipli' (last_message, last_time, messages, msg_unread_1 e 2
                 // scattano tutti allo stesso tempo), viene controllato solamente uno dei campi modificati
                 if (dataSnapshot.getKey().equals("last_time"))
-                    mAdapter.notifyItemChanged(mAdapter.getPositionByKey(chatKey), Util.NEW_MSG);
+                    mAdapter.updateChatRoom(chatKey);
             }
 
             @Override

@@ -27,11 +27,11 @@ import it.unibo.studio.unigo.main.ChatActivity;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.ChatRoom;
-import static it.unibo.studio.unigo.R.layout.chat_room_item;
-import static it.unibo.studio.unigo.utils.Util.NEW_MSG;
 
 public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHolder>
 {
+    // Costante che indica la presenza di nuovi messaggi all'interno di una conversazione (ChatRoom)
+    private final int NEW_MSG = 1;
     private List<ChatRoomAdapterItem> chatList;
     private Activity activity;
     private BadgeDrawable unreadMsgBadge;
@@ -73,7 +73,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     public ChatRoomAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(chat_room_item, parent, false);
+                .inflate(R.layout.chat_room_item, parent, false);
 
         return new ViewHolder(v);
     }
@@ -238,5 +238,10 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 
         chatList.add(pos, chatRoom);
         notifyItemInserted(pos);
+    }
+
+    public void updateChatRoom(String chatKey)
+    {
+        notifyItemChanged(getPositionByKey(chatKey), NEW_MSG);
     }
 }
