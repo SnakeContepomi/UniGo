@@ -1,6 +1,7 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +13,16 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.adapteritems.MessageAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Message;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
-    private List<Message> messageList;
+    private List<MessageAdapterItem> messageList;
     private List<Boolean> msgListDetailToggle;
     private String photoUrl, name;
-    private int posLastReadMsg;
+    private String idLastMsgRead;
 
     private class ViewHolderSender extends RecyclerView.ViewHolder
     {
@@ -60,7 +62,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.msgListDetailToggle = new ArrayList<>();
         this.photoUrl = photoUrl;
         this.name = name;
-        posLastReadMsg = -1;
+        idLastMsgRead = "";
 
     }
 
@@ -68,7 +70,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public int getItemViewType(int position)
     {
-        Message msg = messageList.get(position);
+        Message msg = messageList.get(position).getMessage();
 
         if (Util.decodeEmail(msg.sender_id).equals(Util.getCurrentUser().getEmail()))
             return 0;
@@ -97,7 +99,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position)
     {
-        Message msg = messageList.get(position);
+        Message msg = messageList.get(position).getMessage();
 
         switch (holder.getItemViewType())
         {
@@ -111,6 +113,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     senderHolder.txtSenderDate.setVisibility(View.VISIBLE);
                 else
                     senderHolder.txtSenderDate.setVisibility(View.GONE);
+
+                if (messageList.get(position).getMsgKey().equals(idLastMsgRead))
+                    senderHolder.imgLastRead.setVisibility(View.VISIBLE);
+                else
+                    senderHolder.imgLastRead.setVisibility(View.GONE);
 
                 // Se non è presente una connessione o l'utente non ha impostato un'immagine profilo, viene visualizzata la lettera corrispondente al nome utente
                 Picasso.with(senderHolder.imgLastRead.getContext()).load(photoUrl).placeholder(R.drawable.empty_profile_pic).fit().into(senderHolder.imgLastRead, new Callback() {
@@ -192,56 +199,42 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         else
         {
             ViewHolderSender senderHolder = (ViewHolderSender) holder;
-            if ((boolean) payloads.get(0))
+            if (!(boolean) payloads.get(0))
+                senderHolder.imgLastRead.setVisibility(View.GONE);
+            else
             {
                 senderHolder.imgLastRead.setVisibility(View.VISIBLE);
-                posLastReadMsg = holder.getAdapterPosition();
+                idLastMsgRead = messageList.get(position).getMsgKey();
             }
-            else
-                senderHolder.imgLastRead.setVisibility(View.GONE);
         }
     }
 
     // Metodo utilizato per inserire un messaggio in coda alla lista
-    // 1) Se il messaggio proviene dall'utilizzatore dell'app, viene semplicemente visualizzato
-    // 2) Se il messaggio proviene dal mittente della conversazione, viene visualizzata la relativa immagine profilo,
+    // 1) Se il messaggio in questione è quello del mittente, viene semplicemente visualizzato
+    // 2) Se il messaggio proviene dal destinatario della conversazione, viene visualizzata la relativa immagine profilo
     //    solamente nell'ultimo messaggio da parte sua. Per mostrare/nascondere immagine profilo/data, viene utilizzata
-    //    una lista di boolean
-    public void addElement(Message msg)
+    //    una lista di boolean, msgListeDetailToggle
+    public void addElement(Message msg, String msgKey)
     {
         // Se il messaggio il primo messaggio della lista, allora l'icona utente viene visualizzata
         if (messageList.size() == 0)
         {
             msgListDetailToggle.add(true);
-            messageList.add(msg);
+            messageList.add(new MessageAdapterItem(msg, msgKey));
         }
         // Altrimenti se *non* è il primo della conversazione...
         else
+        {
             // Si controlla se il messaggio precedente ha lo stesso mittente del messaggio da inserire, in caso positivo
-            // viene nascosta la penultima immagine profilo (e/o data di invio del messaggio) e mostrata quella relativa all'ultimo messaggio
-            if (messageList.get(messageList.size() - 1).sender_id.equals(msg.sender_id))
+            // viene nascosta la penultima immagine profilo (con relativa data di invio del messaggio) e mostrata quella dell'ultimo messaggio
+            if (messageList.get(messageList.size() - 1).getMessage().sender_id.equals(msg.sender_id))
             {
                 msgListDetailToggle.set(msgListDetailToggle.size() - 1, false);
                 notifyItemChanged(msgListDetailToggle.size() - 1);
-                msgListDetailToggle.add(true);
-                messageList.add(msg);
             }
-            // Altrimenti viene semplicemente visualizzata l'immagine profilo
-            else
-            {
-                int i;
-                for(i = messageList.size() - 1; i >= 0; i--)
-                    if (messageList.get(i).sender_id.equals(msg.sender_id))
-                        break;
-                if (i != -1)
-                {
-                    msgListDetailToggle.set(i, false);
-                    notifyItemChanged(i);
-                }
-                msgListDetailToggle.add(true);
-                messageList.add(msg);
-            }
-
+            msgListDetailToggle.add(true);
+            messageList.add(new MessageAdapterItem(msg, msgKey));
+        }
         notifyItemInserted(messageList.size() - 1);
     }
 
@@ -250,15 +243,25 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         int i;
 
         for(i = messageList.size() - 1; i >= 0; i--)
-            if (messageList.get(i).sender_id.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+            if (messageList.get(i).getMessage().sender_id.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
                 if (nrUnreadMsg > 0)
                     nrUnreadMsg--;
                 else
                     break;
 
-        if (posLastReadMsg != -1)
-            if (i != posLastReadMsg)
-                notifyItemChanged(posLastReadMsg, false);
-        notifyItemChanged(i, true);
+        if (i != -1)
+        {
+            if ((!idLastMsgRead.equals("")) && (!idLastMsgRead.equals(messageList.get(i).getMsgKey())))
+                notifyItemChanged(getElementByKey(idLastMsgRead), false);
+            notifyItemChanged(getElementByKey(messageList.get(i).getMsgKey()), true);
+        }
+    }
+
+    private int getElementByKey(String key)
+    {
+        for(int i = messageList.size() - 1; i >= 0; i--)
+            if (messageList.get(i).getMsgKey().equals(key))
+                return i;
+        return -1;
     }
 }

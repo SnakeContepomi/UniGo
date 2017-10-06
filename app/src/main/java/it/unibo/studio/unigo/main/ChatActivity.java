@@ -29,7 +29,6 @@ public class ChatActivity extends AppCompatActivity
     private final int ID_1 = 1; // L'utente è 'id_1'
     private final int ID_2 = 2; // L'utente è 'id_2'
 
-    private DatabaseReference userChatReference;
     private String recipientEmail;
     private User recipient;
     // Stringa che memorizza l'id della ChatRoom esistente tra due persone
@@ -47,6 +46,7 @@ public class ChatActivity extends AppCompatActivity
     // Listener che consente di mantenere aggiornato lo stato dell'ultimo messaggio letto
     // da parte del destinatario della conversazaione
     private ValueEventListener unreadMessageListener;
+    private DatabaseReference userChatReference;
     private RecyclerView mRecyclerView;
     private MessageAdapter mAdapter;
     private Toolbar toolbar;
@@ -127,7 +127,7 @@ public class ChatActivity extends AppCompatActivity
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
             {
-                mAdapter.addElement(dataSnapshot.getValue(Message.class));
+                mAdapter.addElement(dataSnapshot.getValue(Message.class), dataSnapshot.getKey());
                 mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount() - 1);
                 Util.getDatabase().getReference("ChatRoom").child(chatId).child("msg_unread_" + user_id).setValue(0);
 
