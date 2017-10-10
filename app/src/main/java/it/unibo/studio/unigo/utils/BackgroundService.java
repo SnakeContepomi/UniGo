@@ -26,16 +26,22 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.ChatActivity;
 import it.unibo.studio.unigo.main.DetailActivity;
+import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.fragments.SettingsFragment;
 import it.unibo.studio.unigo.utils.firebase.Answer;
+import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 import it.unibo.studio.unigo.utils.firebase.Comment;
+import it.unibo.studio.unigo.utils.firebase.Message;
 import it.unibo.studio.unigo.utils.firebase.Question;
+
 
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
 // i cambiamenti da Firebase
@@ -52,6 +58,7 @@ public class BackgroundService extends Service
     private static List<String> commentAnswerList = new ArrayList<>();
     private static List<String> ratingList = new ArrayList<>();
     private static List<String> likeList = new ArrayList<>();
+    private static List<String> chatRoomList = new ArrayList<>();
     // Numero di notifiche di ciascun tipo
     private static int questionCount = 0;
     private static int answerCount = 0;
@@ -59,6 +66,7 @@ public class BackgroundService extends Service
     private static int commentAnswerCount = 0;
     private static int ratingCount = 0;
     private static int likeCount = 0;
+    private static int chatRoomCount = 0;
     private SharedPreferences prefs;
     /*
         Tipi di Notifiche in base al valore della variabile notifyID:
@@ -68,8 +76,9 @@ public class BackgroundService extends Service
         4 - COMMENT_ANSWER: nuovo commento riguardante una risposta effettuata dall'utente
         5 - RATING: aumento di importanza di una domanda dell'utente
         6 - LIKE: like ricevuto ad una risposta del'utente
+        7 - CHATROOM: nuovo messaggio all'interno di una ChatRoom
      */
-    private enum NotificationType {QUESTION, ANSWER, COMMENT_QUESTION, COMMENT_ANSWER, RATING, LIKE}
+    private enum NotificationType {QUESTION, ANSWER, COMMENT_QUESTION, COMMENT_ANSWER, RATING, LIKE, CHATROOM}
 
     // Avvio del servizio in background
     @Override
@@ -112,8 +121,6 @@ public class BackgroundService extends Service
         // - Viene eseguita una query per recuperarla, conoscendo l'email dell'utente
         // - Viene eseguita una query per recuperare tutte le chiavi delle domande che fanno parte di quel corso,
         //   ordinate cronologicamente (sulla chiave push)
-        // - Per ogni chiave di domanda recuperata, viene eseguita una query sulla tabella "Question"
-        //   per ottenerne i dettagli e aggiungerla alla lista presente in Util.
         //   Letta l'ultima domanda, viene fatto partire il listener che si occupa di notificare l'inserimento delle nuove domande
         // - Il listener sul campo questions della tabella "Course" permette di avvisare l'utente riguardo l'inserimento di nuove domande
         //   tramite delle notifiche
@@ -146,7 +153,7 @@ public class BackgroundService extends Service
                                         DataSnapshot child;
                                         // Per ogni chiave recuperata, viene eseguita una query sulla tabella "Question" al fine di ottenerne
                                         // i dettagli. Ogni domanda viene quindi inserita nella lista presente in Utils ed infine
-                                        // viene inizializzato il listener per sull'inserimento delle nuove domande
+                                        // viene inizializzato il listener per l'inserimento delle nuove domande
                                         while (iterator.hasNext())
                                         {
                                             child = iterator.next();
@@ -177,6 +184,7 @@ public class BackgroundService extends Service
             addNewQuestionListener();
         }
 
+        // Vengono inizializzati i listener relativi alle domande effettuate (listener su nuove risposte, commenti o like ricevuti)
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("questions").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s)
@@ -211,6 +219,8 @@ public class BackgroundService extends Service
         // Listener sui like ricevuti sulle risposte dell'utente
         // + Listener sui commenti effettuati relativi alle risposte dell'utente
         addLikeCommentListener();
+
+        addChatRoomListener();
     }
 
     // Listener per notificare tutte le nuove domande inserite nel corso dell'utente
@@ -652,17 +662,184 @@ public class BackgroundService extends Service
         });
     }
 
+    private void addChatRoomListener()
+    {
+        // Per ogni conversazione viene avviato un listener che rileva i cambiamenti su "last_message_id"
+        Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                final String chatId = dataSnapshot.getKey();
+
+                Util.getDatabase().getReference("ChatRoom").child(chatId).addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) { }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s)
+                    {
+                        if (dataSnapshot.getKey().equals("last_message_id"))
+                        {
+                            final String msgId = dataSnapshot.getValue(String.class);
+
+                            // Se è il primo messaggio della conversazione, viene memorizzato il riferimento di essa nelle SharedPrefernce,
+                            // e viene notificato il messaggio solo se questo proviene dal destinatario
+                            if (prefs.getString(chatId, "").equals(""))
+                            {
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putString(chatId, dataSnapshot.getValue(String.class));
+                                editor.apply();
+
+                                Util.getDatabase().getReference("ChatRoom").child(chatId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot)
+                                    {
+                                        final ChatRoom chatRoom = dataSnapshot.getValue(ChatRoom.class);
+
+                                        // Se il messaggio proviene dal destinatario, viene notificato
+                                        if (!chatRoom.messages.get(msgId).sender_id.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                                        {
+                                            final String mail;
+                                            String name;
+
+                                            // Viene recuperato il nome del mittente del messagggio
+                                            // (se l'utilizzatore dell'app è 'utente_1', allora il mittente del messaggio sarà 'utente_2' e viceversa
+                                            if (chatRoom.name_1.equals(Util.getCurrentUser().getDisplayName()))
+                                            {
+                                                name = chatRoom.name_2;
+                                                mail = chatRoom.id_2;
+                                            }
+                                            else
+                                            {
+                                                name = chatRoom.name_1;
+                                                mail = chatRoom.id_1;
+                                            }
+
+                                            if (!chatRoomList.contains(name))
+                                                chatRoomList.add(name);
+                                            chatRoomCount++;
+
+                                            Util.getDatabase().getReference("User").child(mail).child("photoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot)
+                                                {
+                                                    new getBitmapFromUrl(NotificationType.CHATROOM, mail, chatRoom.messages.get(msgId)).execute(dataSnapshot.getValue(String.class));
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) { }
+                                            });
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) { }
+                                });
+                            }
+                            else
+                            {
+                                if (msgId.compareTo(prefs.getString(chatId, "")) > 0)
+                                {
+                                    SharedPreferences.Editor editor = prefs.edit();
+                                    editor.putString(chatId, dataSnapshot.getValue(String.class));
+                                    editor.apply();
+
+                                    Util.getDatabase().getReference("ChatRoom").child(chatId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot)
+                                        {
+                                            final ChatRoom chatRoom = dataSnapshot.getValue(ChatRoom.class);
+
+                                            // Se il messaggio proviene dal destinatario, viene notificato
+                                            if (!chatRoom.messages.get(msgId).sender_id.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                                            {
+                                                final String mail;
+                                                String name;
+
+                                                // Viene recuperato il nome del mittente del messagggio
+                                                // (se l'utilizzatore dell'app è 'utente_1', allora il mittente del messaggio sarà 'utente_2' e viceversa
+                                                if (chatRoom.name_1.equals(Util.getCurrentUser().getDisplayName()))
+                                                {
+                                                    name = chatRoom.name_2;
+                                                    mail = chatRoom.id_2;
+                                                }
+                                                else
+                                                {
+                                                    name = chatRoom.name_1;
+                                                    mail = chatRoom.id_1;
+                                                }
+
+                                                if (!chatRoomList.contains(name))
+                                                    chatRoomList.add(name);
+                                                chatRoomCount++;
+
+                                                Util.getDatabase().getReference("User").child(mail).child("photoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(DataSnapshot dataSnapshot)
+                                                    {
+                                                        new getBitmapFromUrl(NotificationType.CHATROOM, mail, chatRoom.messages.get(msgId)).execute(dataSnapshot.getValue(String.class));
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(DatabaseError databaseError) { }
+                                                });
+                                            }
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) { }
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) { }
+                });
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
     // Metodo per scaricare in background l'immagine profilo di un utente e inviare successivamente una notifica
     // del tipo desiderato
     private class getBitmapFromUrl extends AsyncTask<String, Void, Bitmap>
     {
         private NotificationType type;
-        private String questionKey;
+        private String questionKey, mail;
+        private Message msg;
 
         getBitmapFromUrl(NotificationType type, String questionKey)
         {
             this.type = type;
             this.questionKey = questionKey;
+        }
+
+        getBitmapFromUrl(NotificationType type, String mail, Message msg)
+        {
+            this.type = type;
+            this.mail = mail;
+            this.msg = msg;
         }
 
         protected Bitmap doInBackground(String... urls)
@@ -688,7 +865,10 @@ public class BackgroundService extends Service
 
         protected void onPostExecute(Bitmap result)
         {
-            sendNotification(type, result, questionKey);
+            if (type == NotificationType.CHATROOM)
+                sendNotification(type, result, mail, msg);
+            else
+                sendNotification(type, result, questionKey);
         }
     }
 
@@ -697,7 +877,8 @@ public class BackgroundService extends Service
     {
         // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment (SwitchPreference)
         // e l'utente desidera essere informato di quel particolare evento (MultiSelectListPreference)
-        if (prefs.getBoolean(SettingsFragment.KEY_PREF_NOTIF, getResources().getBoolean(R.bool.pref_notification_defVal)) && isNotificationEventSelected(type)) {
+        if (prefs.getBoolean(SettingsFragment.KEY_PREF_NOTIF, getResources().getBoolean(R.bool.pref_notification_defVal)) && isNotificationEventSelected(type))
+        {
             Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
                     .setColor(Color.RED)
                     .setSmallIcon(R.drawable.ic_school_black_24dp)
@@ -708,7 +889,8 @@ public class BackgroundService extends Service
                     .setSound(getNotificationRingtone())
                     .setAutoCancel(true);
 
-            switch (type) {
+            switch (type)
+            {
                 // Notifica di una nuova domanda inserita
                 case QUESTION:
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -1068,6 +1250,122 @@ public class BackgroundService extends Service
         }
     }
 
+    // Metodo per creare notifiche relative alla parte della Chat (non avendo questionKey, funzionano in modo diverso)
+    private void sendNotification(NotificationType type, Bitmap profilePic, String chatId, Message msg)
+    {
+        // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment (SwitchPreference)
+        // e l'utente desidera essere informato di quel particolare evento (MultiSelectListPreference), in questo caso messaggi dalla chat
+        if (prefs.getBoolean(SettingsFragment.KEY_PREF_NOTIF, getResources().getBoolean(R.bool.pref_notification_defVal)) && isNotificationEventSelected(type))
+        {
+            Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
+                    .setColor(Color.RED)
+                    .setSmallIcon(R.drawable.ic_school_black_24dp)
+                    .setPriority(getNotificationPriority())
+                    //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
+                    .setVibrate(getNotificationVibration())
+                    .setLights(getNotificationColor(), 800, 4000)
+                    .setSound(getNotificationRingtone())
+                    .setAutoCancel(true);
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+            {
+                // Numero di utenti che hanno inviato almeno un messaggio
+                if (chatRoomList.size() == 1)
+                {
+                    mBuilder.setContentTitle(chatRoomList.get(0));
+                    if (chatRoomCount == 1)
+                    {
+                        mBuilder.setContentText(msg.message);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(msg.message));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText(chatRoomCount + " nuovi messaggi");
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(chatRoomCount + " nuovi messaggi"));
+                    }
+                    mBuilder.setLargeIcon(profilePic);
+                }
+                else
+                {
+                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                    mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    mBuilder.setContentText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni");
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni"));
+                }
+            }
+            // Versione precedente a Nougat
+            else
+            {
+                mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+
+                // Numero nuove domande
+                /*if (chatRoomCount == 1)
+                    mBuilder.setSubText("1 nuovo messaggio");
+                else
+                    mBuilder.setSubText(chatRoomCount+ " nuovi messaggi");*/
+
+                // Numero di utenti che hanno inviato almeno un messaggio
+                if (chatRoomList.size() == 1)
+                {
+                    mBuilder.setContentTitle(chatRoomList.get(0));
+                    if (chatRoomCount == 1)
+                    {
+                        mBuilder.setContentText(msg.message);
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(msg.message));
+                    }
+                    else
+                    {
+                        mBuilder.setContentText(chatRoomCount + " nuovi messaggi");
+                        mBuilder.setStyle(new Notification.BigTextStyle()
+                                .bigText(chatRoomCount + " nuovi messaggi"));
+                    }
+                    mBuilder.setLargeIcon(profilePic);
+                }
+                else
+                {
+                    mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+                    mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    mBuilder.setContentText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni");
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni"));
+                }
+            }
+
+            Intent resultIntent;
+            if (chatRoomList.size() == 1)
+            {
+                resultIntent = new Intent(BackgroundService.this, ChatActivity.class);
+                resultIntent.putExtra("user_key", chatId);
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                stackBuilder.addParentStack(ChatActivity.class);
+                stackBuilder.addNextIntent(resultIntent);
+                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                mBuilder.setContentIntent(resultPendingIntent);
+
+                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+            }
+            // Se si ricevono messaggi da più di una chat
+            else
+            {
+                resultIntent = new Intent(BackgroundService.this, MainActivity.class);
+                resultIntent.putExtra("open_chatroom_fragment", true);
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                stackBuilder.addParentStack(MainActivity.class);
+                stackBuilder.addNextIntent(resultIntent);
+                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                mBuilder.setContentIntent(resultPendingIntent);
+
+                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+            }
+        }
+    }
+
     // Metodo per restituire l'identificativo della notifica, dato il tipo
     private int getNotificationID(NotificationType type)
     {
@@ -1085,6 +1383,8 @@ public class BackgroundService extends Service
                 return 5;
             case LIKE:
                 return 6;
+            case CHATROOM:
+                return 7;
             default:
                 return 0;
         }
@@ -1108,32 +1408,39 @@ public class BackgroundService extends Service
         likeCount = 0;
     }
 
+    public static void resetChatNotification()
+    {
+        chatRoomList.clear();
+
+        chatRoomCount = 0;
+    }
+
     // Metodo per modificare la forma dell'immagine utente, rendendola circolare
     private Bitmap getCircleBitmap(Bitmap bitmap)
     {
         Bitmap output;
         Rect srcRect, dstRect;
         float r;
-        final int width = bitmap.getWidth();
-        final int height = bitmap.getHeight();
+        final int larghezza = bitmap.getWidth();
+        final int altezza = bitmap.getHeight();
 
-        if (width > height)
+        if (larghezza > altezza)
         {
-            output = Bitmap.createBitmap(height, height, Bitmap.Config.ARGB_8888);
-            int left = (width - height) / 2;
-            int right = left + height;
-            srcRect = new Rect(left, 0, right, height);
-            dstRect = new Rect(0, 0, height, height);
-            r = height / 2;
+            output = Bitmap.createBitmap(altezza, altezza, Bitmap.Config.ARGB_8888);
+            int left = (larghezza - altezza) / 2;
+            int right = left + altezza;
+            srcRect = new Rect(left, 0, right, altezza);
+            dstRect = new Rect(0, 0, altezza, altezza);
+            r = altezza / 2;
         }
         else
         {
-            output = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
-            int top = (height - width)/2;
-            int bottom = top + width;
-            srcRect = new Rect(0, top, width, bottom);
-            dstRect = new Rect(0, 0, width, width);
-            r = width / 2;
+            output = Bitmap.createBitmap(larghezza, larghezza, Bitmap.Config.ARGB_8888);
+            int top = (altezza - larghezza)/2;
+            int bottom = top + larghezza;
+            srcRect = new Rect(0, top, larghezza, bottom);
+            dstRect = new Rect(0, 0, larghezza, larghezza);
+            r = larghezza / 2;
         }
 
         Canvas canvas = new Canvas(output);
@@ -1160,8 +1467,7 @@ public class BackgroundService extends Service
 
         String[] array = getResources().getStringArray(R.array.pref_notificationEvents_values);
         Set<String> set = new HashSet<>();
-        for(String s : array)
-            set.add(s);
+        Collections.addAll(set, array);
 
         Set<String> value = PreferenceManager
                 .getDefaultSharedPreferences(this)
@@ -1181,6 +1487,8 @@ public class BackgroundService extends Service
                 return (value.contains("4"));
             case LIKE:
                 return (value.contains("5"));
+            case CHATROOM:
+                return (value.contains("6"));
             default:
                 return false;
         }

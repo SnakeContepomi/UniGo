@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapters.MessageAdapter;
+import it.unibo.studio.unigo.utils.BackgroundService;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 import it.unibo.studio.unigo.utils.firebase.Message;
@@ -74,6 +75,8 @@ public class ChatActivity extends AppCompatActivity
 
     private void initializeComponents()
     {
+        BackgroundService.resetChatNotification();
+
         toolbar = (Toolbar) findViewById(R.id.chatToolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -269,6 +272,7 @@ public class ChatActivity extends AppCompatActivity
         // Inserimento messaggio in Chat
         String msgKey = Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").push().getKey();
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").child(msgKey).setValue(msg);
+        Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message_id").setValue(msgKey);
 
         // Viene aggiornato il contatore di messaggi non letti
         userChatReference.addListenerForSingleValueEvent(new ValueEventListener() {

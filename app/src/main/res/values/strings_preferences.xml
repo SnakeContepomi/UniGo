@@ -7,6 +7,7 @@
         <item>Commenti alle tue risposte</item>
         <item>Interesse per le tue domande</item>
         <item>Like alle tue risposte</item>
+        <item>Chat</item>
     </string-array>
     <string-array name="pref_notificationEvents_values">
         <item>0</item>
@@ -15,6 +16,7 @@
         <item>3</item>
         <item>4</item>
         <item>5</item>
+        <item>6</item>
     </string-array>
 
     <string-array name="pref_notificationVibration_entries">

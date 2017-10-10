@@ -255,6 +255,14 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         // Inizializzazione NavDrawer
         initNavDrawer();
+
+        if (getIntent().getBooleanExtra("open_chatroom_fragment", false))
+        {
+            // Viene caricato il Fragment 'ChatRoom' quadno viene selezionata una notifica relativa ad una ChatRoom
+            navDrawer.setSelection(navDrawer.getDrawerItem(4));
+            subItemSelection = 3;
+        }
+
     }
 
     // Inizializzazione della Toolbar e del NavDrawer
