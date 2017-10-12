@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menuItemAttachment"
+        android:icon="@drawable/ic_attachment_black_24dp"
+        android:orderInCategory="1"
+        android:title="@string/toolbar_attachment"
+        app:showAsAction="always">
+        <menu>
+            <item android:id="@+id/menuListItemCamera"
+                android:title="@string/toolbar_attachment_picture"/>
+            <item android:id="@+id/menuListItemGallery"
+                android:title="@string/toolbar_attachment_gallery"/>
+            <item android:id="@+id/menuListItemFile"
+                android:title="@string/toolbar_attachment_file"/>
+        </menu>
+    </item>
+</menu>

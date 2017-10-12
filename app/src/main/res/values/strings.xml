@@ -25,6 +25,17 @@
         <item>Veneto</item>
     </string-array>
 
+    <string name="permission_camera">Fotocamera</string>
+    <string name="permission_storage">Archiviazione</string>
+    <string name="permission_denied">Permesso negato</string>
+    <string name="intent_package">package</string>
+    <string name="permission_needed_camera_storage">Non disponi dei permessi necessari per utilizzare questa funzionalità.
+        \nPer continuare, consentire al dispositivo di accedere alla fotocamera e alla memoria di massa.</string>
+    <string name="permission_needed_camera">Non disponi dei permessi necessari per utilizzare questa funzionalità.
+        \nPer continuare, consentire al dispositivo di accedere alla fotocamera.</string>
+    <string name="permission_needed_storage">Non disponi dei permessi necessari per utilizzare questa funzionalità.
+        \nPer continuare, consentire al dispositivo di accedere all\'Archiviazione del sistema fornendo l\'autorizzazione necessaria.</string>
+
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login">Accedi</string>
@@ -67,7 +78,7 @@
     <string name="alert_dialog_warning">Attenzione</string>
     <string name="alert_dialog_cancel">Annulla</string>
     <string name="alert_dialog_send">Invia</string>
-    <string name="alert_dialog_post_creation">Invio in corso..</string>
+    <string name="alert_dialog_post_creation">Inserimento domanda</string>
 
     <string name="signup_toolbar">Nuovo utente</string>
     <string name="signup_icon_desc">Signup Icon</string>
@@ -89,7 +100,12 @@
 
     <string name="toolbar_search_hint">Cerca...</string>
     <string name="toolbar_option_hint">Opzioni...</string>
+    <string name="toolbar_attachment">Invia allegato</string>
+    <string name="toolbar_attachment_picture">Scatta foto</string>
+    <string name="toolbar_attachment_gallery">Scegli da galleria</string>
+    <string name="toolbar_attachment_file">Allega file</string>
     <string name="toolbar_logout">Logout</string>
+
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="drawer_principale">Principale</string>
@@ -148,8 +164,6 @@
     <string name="chat_message_hint">Inserisci un messaggio...</string>
     <!-- notification strings -->
     <string name="no_ringtone">Silenzioso</string>
-    <string name="alert_dialog_confirm">Ok</string>
-
     <string name="pref_category">Notifiche</string>
     <string name="pref_notification">Ricevi notifiche</string>
     <string name="pref_notificationEvents">Eventi</string>
@@ -163,4 +177,13 @@
     <string name="pref_notificationVibration_defVal">1</string>
     <string name="pref_notificationPriority_defVal">2</string>
     <string name="pref_notificationColor_defVal">2</string>
+
+    <string name="alert_dialog_confirm">Ok</string>
+    <string name="alert_dialog_max_picture">Non è possibile selezionare altre immagini</string>
+    <string name="alert_dialog_request_finish_content">Operazione in corso: \n - %1$s</string>
+    <string name="alert_dialog_request_finish_op_upload">Elementi caricati (%1$d/%2$d)</string>
+    <string name="imgpicker_select_folder">Seleziona una foto</string>
+    <string name="imgpicker_select_img">Seleziona</string>
+    <string name="trans_image">Transizione immagine</string>
+    <string name="storage_profile_attachment_folder">question_attachments</string>
 </resources>

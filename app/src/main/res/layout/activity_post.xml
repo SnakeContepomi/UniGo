@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorLightGray">
+
+    <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorLightGray"
@@ -47,8 +53,24 @@
         style="@style/FullWidthEditText"
         android:id="@+id/etPostDesc"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:inputType="textMultiLine|textCapSentences"
         android:gravity="top"
         android:hint="@string/post_description"/>
-</LinearLayout>
+
+    <it.unibo.studio.unigo.utils.StaticGridView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/requestGridView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorLightGray"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="8dp"
+        android:numColumns="2"
+        android:gravity="center"
+        android:stretchMode="columnWidth"
+        android:horizontalSpacing="1dp"
+        android:verticalSpacing="1dp" />
+    </LinearLayout>
+</android.support.v4.widget.NestedScrollView>

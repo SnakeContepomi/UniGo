@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<it.unibo.studio.unigo.main.adapteritems.GridViewItem
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemPhotoLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/itemPhotoImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:background="@color/colorBlack"
+        android:transitionName="@string/trans_image"
+        android:contentDescription="@null"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/colorSemiTransparentBlack">
+        <TextView
+            android:id="@+id/itemPhotoTxt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="16dp"
+            android:paddingEnd="0dp"
+            android:fontFamily="sans-serif"
+            android:textSize="16sp"
+            android:textColor="@color/colorWhite"
+            android:lines="1"
+            android:ellipsize="end"/>
+        <ImageView
+            android:id="@+id/itemPhotoIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:src="@drawable/ic_clear"
+            android:tint="@color/colorWhite"
+            android:contentDescription="@null"/>
+    </LinearLayout>
+</it.unibo.studio.unigo.main.adapteritems.GridViewItem>

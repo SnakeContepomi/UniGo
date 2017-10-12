@@ -12,6 +12,8 @@
     <color name="colorIconGray">#737373</color>
     <color name="colorDarkGray">#616161</color>
     <color name="colorBlack">#333333</color>
+    <color name="colorDarkBlack">#000000</color>
+    <color name="colorSemiTransparentBlack">#80000000</color>
     <color name="colorBlue">#2196f3</color>
     <color name="colorExpBarRemain">#757575</color>
     <color name="colorDarkPurple">#2b2234</color>

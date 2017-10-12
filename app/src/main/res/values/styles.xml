@@ -27,6 +27,13 @@
         <item name="android:elevation">4dp</item>
     </style>
 
+    <!-- FullImage Toolbar Style-->
+    <style name="FullImageToolbar">
+        <item name="theme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="navigationIcon">@drawable/ic_arrow_back_white_24px</item>
+        <item name="android:background">@color/colorSemiTransparentBlack</item>
+    </style>
+
     <!-- Toolbar Text Style -->
     <style name="ToolbarTitleTextAppearanceMedium">
         <item name="android:textColor">@color/colorWhite</item>
