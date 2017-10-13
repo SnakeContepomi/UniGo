@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.utils.Util;
@@ -71,6 +73,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         TextView txtName, txtDate, txtLvl, txtCourse, txtTitle, txtDesc, txtNAnswer, txtRating;
         LinearLayout rating, favorite, answer;
         ImageView imgrating, imgfavorite;
+        RecyclerView recyclerViewPicture;
 
         questionHolder(View v)
         {
@@ -83,6 +86,11 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtCourse = (TextView) v.findViewById(R.id.cardq_course);
             txtTitle = (TextView) v.findViewById(R.id.cardq_title);
             txtDesc = (TextView) v.findViewById(R.id.cardq_desc);
+
+            recyclerViewPicture = (RecyclerView) v.findViewById(R.id.recyclerViewPicture);
+            recyclerViewPicture.setHasFixedSize(true);
+            recyclerViewPicture.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+
             txtNAnswer = (TextView) v.findViewById(R.id.cardq_nanswer);
             rating = (LinearLayout) v.findViewById(R.id.cardq_rating);
             imgrating = (ImageView) v.findViewById(R.id.cardq_imgrating);
@@ -302,6 +310,17 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         qh.txtTitle.setText(question.title);
         qh.txtDesc.setText(question.desc);
         qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, answerList.size() - 1));
+
+        // Recupero delle eventuali immagini allegate nella domanda
+        if (question.attachments != null)
+        {
+            List<String> imgUrlList = new ArrayList<>();
+            for(Map.Entry<String, String> entry : question.attachments.entrySet())
+                imgUrlList.add(entry.getValue());
+
+            DetailPictureAdapter mAdapter = new DetailPictureAdapter(imgUrlList);
+            qh.recyclerViewPicture.setAdapter(mAdapter);
+        }
     }
 
     // Metodo che inizializza la logica del pulsante "Rating" relativo alla domanda in questione

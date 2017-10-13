@@ -18,8 +18,8 @@ import it.unibo.studio.unigo.R;
 // Intent richiesti dall'activity! Dichiarati dentro initComponents
 // IMAGE_PATH = path (o url) dell'immagine da caricare
 // LOAD_FROM_FILE = boolean, true se bisogna caricare un file dalla memoria, false se deve essere caricato tramite url
-public class FullSizeImageActivity extends AppCompatActivity {
-
+public class FullSizeImageActivity extends AppCompatActivity
+{
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -63,12 +63,14 @@ public class FullSizeImageActivity extends AppCompatActivity {
             ActivityCompat.postponeEnterTransition(this);
             Picasso.with(this).load(path).noFade().into(img, new Callback() {
                 @Override
-                public void onSuccess() {
+                public void onSuccess()
+                {
                     ActivityCompat.startPostponedEnterTransition(FullSizeImageActivity.this);
                 }
 
                 @Override
-                public void onError() {
+                public void onError()
+                {
                     ActivityCompat.startPostponedEnterTransition(FullSizeImageActivity.this);
                 }
             });

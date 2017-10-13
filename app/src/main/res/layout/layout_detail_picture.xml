@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/detailPic"
+    android:layout_marginStart="0dp"
+    android:layout_marginEnd="2dp"
+    android:layout_width="192dp"
+    android:layout_height="192dp"
+    android:scaleType="centerCrop"
+    android:adjustViewBounds="true"
+    android:contentDescription="@null"
+    android:src="@drawable/avd_progress_indeterminate_circular"
+    android:transitionName="@string/trans_image"/>
