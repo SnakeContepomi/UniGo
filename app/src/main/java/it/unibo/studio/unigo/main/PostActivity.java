@@ -37,6 +37,9 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
+import com.nbsp.materialfilepicker.MaterialFilePicker;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,6 +64,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // Permessi per accedere alla fotocamera e alla memoria interna del dispositivo
     private final int REQUEST_CAMERA_PERMISSION = 0;
     private final int REQUEST_GALLERY_PERMISSION = 1;
+    private final int REQUEST_FILE_PICKER = 2;
     private final int REQUEST_IMAGE_CAPTURE = 3;
     private final int REQUEST_IMAGE_FROM_GALLERY = 4;
 
@@ -129,6 +133,10 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 else
                     openGallery();
                 break;
+
+            case R.id.menuListItemFile:
+                openFilePicker();
+                break;
         }
         return true;
     }
@@ -174,6 +182,15 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                             imageAdapter.notifyDataSetChanged();
                         }
                     }
+                }
+                break;
+
+            case REQUEST_FILE_PICKER:
+                if (resultCode == RESULT_OK)
+                {
+                    String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
+                    Toast.makeText(this, "Path: " + filePath, Toast.LENGTH_LONG).show();
+                    // Do anything with file
                 }
                 break;
         }
@@ -389,6 +406,16 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                     .start(REQUEST_IMAGE_FROM_GALLERY);
         else
             openAlertDialog(getString(R.string.alert_dialog_max_picture));
+    }
+
+    // Metodo utilizzato per scegliere un file da caricare insieme alla domanda
+    private void openFilePicker()
+    {
+        new MaterialFilePicker()
+                .withActivity(this)
+                .withRequestCode(REQUEST_FILE_PICKER)
+                .withHiddenFiles(true)
+                .start();
     }
 
     // Metodo che permette di salvare la foto appena scattata nella cartella privata dell'app
