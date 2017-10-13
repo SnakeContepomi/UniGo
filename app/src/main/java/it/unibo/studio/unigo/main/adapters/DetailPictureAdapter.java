@@ -66,7 +66,6 @@ class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHolder>
                 holder.detailPic.setVisibility(View.GONE);
             }
         });
-        // ***onFailure*** impostare immagine quando la connessione non è presente, o togliere quell'obrobrio che gira
 
         // ClickListener per visualizzare a pieno schermo l'immagine
         holder.detailPic.setOnClickListener(new View.OnClickListener() {
