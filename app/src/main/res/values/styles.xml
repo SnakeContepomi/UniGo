@@ -94,4 +94,5 @@
     <style name="MaterialSearchViewStyle">
         <item name="android:hint">@string/toolbar_search_hint</item>
     </style>
+
 </resources>

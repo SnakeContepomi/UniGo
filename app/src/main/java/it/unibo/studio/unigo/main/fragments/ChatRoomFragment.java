@@ -39,8 +39,6 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
         View v = inflater.inflate(R.layout.fragment_chat, container, false);
         initComponents(v);
         Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("chat_rooms").addChildEventListener(chatRoomCreationListener);
-        for(String key: updateListenerMap.keySet())
-            Util.getDatabase().getReference("ChatRoom").child(key).addChildEventListener(updateListenerMap.get(key));
         return v;
     }
 

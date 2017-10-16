@@ -18,6 +18,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,7 +41,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
 import com.nbsp.materialfilepicker.MaterialFilePicker;
 import com.nbsp.materialfilepicker.ui.FilePickerActivity;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,9 +49,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.adapters.GridImageAdapter;
+import it.unibo.studio.unigo.main.adapters.DetailPictureAdapter;
+import it.unibo.studio.unigo.main.adapters.ChipAdapter;
 import it.unibo.studio.unigo.utils.Error;
-import it.unibo.studio.unigo.utils.StaticGridView;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
@@ -69,17 +70,17 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     private final int REQUEST_IMAGE_FROM_GALLERY = 4;
 
     private EditText etTitle, etCourse, etDesc;
-    private GridImageAdapter imageAdapter;
+    private ChipAdapter chipAdapter;
+    // Adapter utilizzato da StaticGridViewer per la rappresentazione delle immagini allegate
+    private DetailPictureAdapter photoAdapter;
     private MaterialDialog dialog, permissionDialog;
     // Percorso dell'immagine attualmente scattata dalla fotocamera
     private String currentPhotoPath;
-    // Lista contenente gli indirizzi fisici delle immagini inserite in un nuovo post
-    private List<String> attachmentPathList = new ArrayList<>();
-    // Lista di url delle immagini caricate con successo su Firebase
-    private List<String> urlList = new ArrayList<>();
     // Indice dell'immagine da caricare su FirebaseStorage, utilizzato per capire
     // se si sta caricando l'ultima immagine oppure se ve ne sono delle altre
     private int indexImageUploaded;
+    // Lista di url delle immagini caricate con successo su Firebase
+    private List<String> urlList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -154,8 +155,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                     File camFile = new File(currentPhotoPath);
                     File compressedFile = compressFile(camFile);
                     camFile.delete();
-                    attachmentPathList.add(compressedFile.getAbsolutePath());
-                    imageAdapter.notifyDataSetChanged();
+                    photoAdapter.addElement(compressedFile.getAbsolutePath());
                 }
                 break;
 
@@ -173,14 +173,10 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                         if ((file.length() / 1024) > IMAGE_SIZE_TO_COMPRESS_KB)
                         {
                             File compressedFile = compressFile(file);
-                            attachmentPathList.add(compressedFile.getAbsolutePath());
-                            imageAdapter.notifyDataSetChanged();
+                            photoAdapter.addElement(compressedFile.getAbsolutePath());
                         }
                         else
-                        {
-                            attachmentPathList.add(filePath);
-                            imageAdapter.notifyDataSetChanged();
-                        }
+                            photoAdapter.addElement(filePath);
                     }
                 }
                 break;
@@ -189,8 +185,12 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 if (resultCode == RESULT_OK)
                 {
                     String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
-                    Toast.makeText(this, "Path: " + filePath, Toast.LENGTH_LONG).show();
-                    // Do anything with file
+                    String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+
+                    if (fileName.length() > 23)
+                        fileName = fileName.replaceFirst("(.{10}).+(.{10})", "$1...$2");
+
+                    chipAdapter.addElement(fileName);
                 }
                 break;
         }
@@ -295,9 +295,17 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         etCourse = (EditText) findViewById(R.id.etPostCourse);
         etDesc = (EditText) findViewById(R.id.etPostDesc);
 
-        StaticGridView gridView = (StaticGridView) findViewById(R.id.requestGridView);
-        imageAdapter = new GridImageAdapter(this, attachmentPathList);
-        gridView.setAdapter(imageAdapter);
+        RecyclerView recyclerViewChips = (RecyclerView) findViewById(R.id.recyclerViewChip);
+        recyclerViewChips.setHasFixedSize(true);
+        recyclerViewChips.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false));
+        chipAdapter = new ChipAdapter(0); // UPLOAD = 0, DOWNLOAD = 1
+        recyclerViewChips.setAdapter(chipAdapter);
+
+        RecyclerView recyclerViewPhoto = (RecyclerView) findViewById(R.id.recyclerViewPhoto);
+        recyclerViewPhoto.setHasFixedSize(true);
+        recyclerViewPhoto.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false));
+        photoAdapter = new DetailPictureAdapter();
+        recyclerViewPhoto.setAdapter(photoAdapter);
 
         dialog = new MaterialDialog.Builder(PostActivity.this)
                 .content(String.format(getString(R.string.alert_dialog_request_finish_content), getString(R.string.alert_dialog_post_creation)))
@@ -361,7 +369,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // nella memoria di massa (qualità originale)
     private void openCamera()
     {
-        if (attachmentPathList.size() < NUM_IMAGE_ALLOWED)
+        if (photoAdapter.getItemCount() < NUM_IMAGE_ALLOWED)
         {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -393,14 +401,14 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // (tramite Maerial ImagePicker)
     private void openGallery()
     {
-        if (attachmentPathList.size() < NUM_IMAGE_ALLOWED)
+        if (photoAdapter.getItemCount() < NUM_IMAGE_ALLOWED)
             ImagePicker.create(this)
                     .returnAfterFirst(false)
                     .folderMode(true)
                     .folderTitle(getString(R.string.imgpicker_select_folder))
                     .imageTitle(getString(R.string.imgpicker_select_img))
                     .multi()
-                    .limit(NUM_IMAGE_ALLOWED - attachmentPathList.size())
+                    .limit(NUM_IMAGE_ALLOWED - photoAdapter.getItemCount())
                     .showCamera(false)
                     .theme(R.style.AppTheme)
                     .start(REQUEST_IMAGE_FROM_GALLERY);
@@ -573,10 +581,10 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                     if (success)
                     {
                         // Se è stato inserito almeno un allegato, questo/i verranno inseriti prima dell'inserimento della domanda stessa
-                        if (!attachmentPathList.isEmpty())
+                        if (photoAdapter.getItemCount() != 0)
                         {
                             urlList.clear();
-                            uploadImage(0, attachmentPathList.size());
+                            uploadImage(0, photoAdapter.getItemCount());
                         }
                         else
                             addPost();
@@ -592,7 +600,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     private void uploadImage(int positionInList, final int numImages)
     {
         String operation = String.format(getString(R.string.alert_dialog_request_finish_op_upload), positionInList, numImages);
-        String imagePath = attachmentPathList.get(positionInList);
+        String imagePath = photoAdapter.getPicture(positionInList);
         Bitmap image = BitmapFactory.decodeFile(imagePath);
 
         dialog.setContent(String.format(getString(R.string.alert_dialog_request_finish_content), operation));

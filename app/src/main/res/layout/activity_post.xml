@@ -58,19 +58,23 @@
         android:gravity="top"
         android:hint="@string/post_description"/>
 
-    <it.unibo.studio.unigo.utils.StaticGridView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/requestGridView"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerViewChip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorLightGray"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="8dp"
-        android:numColumns="2"
-        android:gravity="center"
-        android:stretchMode="columnWidth"
-        android:horizontalSpacing="1dp"
-        android:verticalSpacing="1dp" />
+        android:overScrollMode="never"
+        android:scrollbars="none" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerViewPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>
