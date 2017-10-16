@@ -14,8 +14,8 @@ import it.unibo.studio.unigo.R;
 
 public class ChipAdapter extends RecyclerView.Adapter<ChipAdapter.ImageHolder>
 {
-    private final int UPLOAD = 0;
-    private final int DOWNLOAD = 1;
+    private static final int UPLOAD = 0;
+    private static final int DOWNLOAD = 1;
     private List<String> chipsList;
     // Variabile che stabilisce quale icona attribuire alle chips. L'adapter viene utilizzato in due contesti differenti:
     // - PostActivity, type = UPLOAD, le chips avranno l'icona 'rimuovi' per annullare l'upload del file
@@ -60,11 +60,16 @@ public class ChipAdapter extends RecyclerView.Adapter<ChipAdapter.ImageHolder>
     @Override
     public void onBindViewHolder(final ImageHolder holder, int position)
     {
+        String fileName = chipsList.get(holder.getAdapterPosition()).substring(chipsList.get(holder.getAdapterPosition()).lastIndexOf("/") + 1);
+        if (fileName.length() > 23)
+            fileName = fileName.replaceFirst("(.{10}).+(.{10})", "$1...$2");
+
+        // Nome Chip
+        holder.text.setText(fileName);
+
         switch (type)
         {
             case UPLOAD:
-                holder.text.setText(chipsList.get(position));
-
                 holder.img.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view)
@@ -76,14 +81,18 @@ public class ChipAdapter extends RecyclerView.Adapter<ChipAdapter.ImageHolder>
                 break;
 
             case DOWNLOAD:
-                holder.text.setText(chipsList.get(position));
                 break;
         }
     }
 
-    public void addElement(String fileName)
+    public void addElement(String filePath)
     {
-        chipsList.add(fileName);
+        chipsList.add(filePath);
         notifyDataSetChanged();
+    }
+
+    public String getChipFile(int position)
+    {
+        return chipsList.get(position);
     }
 }

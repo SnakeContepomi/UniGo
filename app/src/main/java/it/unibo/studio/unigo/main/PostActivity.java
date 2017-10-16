@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
@@ -58,10 +59,12 @@ import it.unibo.studio.unigo.utils.firebase.User;
 
 public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
 {
-    // Dimensione massima consentita per ciascuna immagine
+    // Dimensione massima consentita per ciascuna immagine e file (in KiloBytes)
     private static final int IMAGE_SIZE_TO_COMPRESS_KB = 750;
-    // Numero masssimo di allegati per ciascuna domanda
-    private static final int NUM_IMAGE_ALLOWED = 5;
+    private static final int MAX_FILE_SIZE = 10000;
+    // Numero masssimo di allegati per ciascuna domanda (immagini e file hanno contatori separati)
+    private static final int NUM_FILE_ALLOWED = 5;
+    private final int NUM_IMAGE_ALLOWED = 5;
     // Permessi per accedere alla fotocamera e alla memoria interna del dispositivo
     private final int REQUEST_CAMERA_PERMISSION = 0;
     private final int REQUEST_GALLERY_PERMISSION = 1;
@@ -79,8 +82,12 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // Indice dell'immagine da caricare su FirebaseStorage, utilizzato per capire
     // se si sta caricando l'ultima immagine oppure se ve ne sono delle altre
     private int indexImageUploaded;
+    // Indice del file da caricare su FirebaseStorage
+    private int indexFileUploaded;
     // Lista di url delle immagini caricate con successo su Firebase
-    private List<String> urlList = new ArrayList<>();
+    private List<String> urlPicList = new ArrayList<>();
+    // Lista di url delle dei file caricati con successo su Firebase
+    private List<String> urlFileList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -184,13 +191,13 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
             case REQUEST_FILE_PICKER:
                 if (resultCode == RESULT_OK)
                 {
-                    String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
-                    String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-
-                    if (fileName.length() > 23)
-                        fileName = fileName.replaceFirst("(.{10}).+(.{10})", "$1...$2");
-
-                    chipAdapter.addElement(fileName);
+                    if (new File(data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)).length() / 1024 > MAX_FILE_SIZE)
+                        openAlertDialog(getString(R.string.alert_dialog_max_file_size));
+                    else
+                    {
+                        String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
+                        chipAdapter.addElement(filePath);
+                    }
                 }
                 break;
         }
@@ -308,7 +315,6 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         recyclerViewPhoto.setAdapter(photoAdapter);
 
         dialog = new MaterialDialog.Builder(PostActivity.this)
-                .content(String.format(getString(R.string.alert_dialog_request_finish_content), getString(R.string.alert_dialog_post_creation)))
                 .progress(true, 0)
                 .cancelable(false)
                 .build();
@@ -419,11 +425,14 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     // Metodo utilizzato per scegliere un file da caricare insieme alla domanda
     private void openFilePicker()
     {
-        new MaterialFilePicker()
-                .withActivity(this)
-                .withRequestCode(REQUEST_FILE_PICKER)
-                .withHiddenFiles(true)
-                .start();
+        if (chipAdapter.getItemCount() < NUM_FILE_ALLOWED)
+            new MaterialFilePicker()
+                    .withActivity(this)
+                    .withRequestCode(REQUEST_FILE_PICKER)
+                    .withHiddenFiles(true)
+                    .start();
+        else
+            openAlertDialog(getString(R.string.alert_dialog_max_file));
     }
 
     // Metodo che permette di salvare la foto appena scattata nella cartella privata dell'app
@@ -580,14 +589,23 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 {
                     if (success)
                     {
+                        // Se non è stato inserito nessun allegato (foto/file), viene aggiunta direttamente la domanda
+                        if (chipAdapter.getItemCount() == 0 && photoAdapter.getItemCount() == 0)
+                            addPost();
                         // Se è stato inserito almeno un allegato, questo/i verranno inseriti prima dell'inserimento della domanda stessa
+                        // (vengono creati i link di riferimento alle risorse, che andranno memorizzati all'interno della nuova domanda)
+                        if (chipAdapter.getItemCount() != 0)
+                        {
+                            urlFileList.clear();
+                            uploadFile(0, chipAdapter.getItemCount());
+                        }
+                        // Se è stata inserita almeno un'immagine, verranno caricate prima dell'inserimento della domanda stessa
+                        // (vengono creati i link di riferimento alle risorse, che andranno memorizzati all'interno della nuova domanda)
                         if (photoAdapter.getItemCount() != 0)
                         {
-                            urlList.clear();
+                            urlPicList.clear();
                             uploadImage(0, photoAdapter.getItemCount());
                         }
-                        else
-                            addPost();
                     }
                     else
                         errorHandler(Error.Type.NOT_ENOUGH_CREDITS);
@@ -597,9 +615,75 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
 
     // Caricamento degli allegati su FirebaseStorage. Per poter caricare più allegati in una domanda,
     // il metodo viene richiamato ricorsivamente affinché tutti gli elementi non sono stati caricati
+    private void uploadFile(int positionInList, final int numFile)
+    {
+        String operation = String.format(getString(R.string.alert_dialog_request_finish_op_upload), indexFileUploaded + indexImageUploaded, chipAdapter.getItemCount() + photoAdapter.getItemCount());
+        String filePath = chipAdapter.getChipFile(positionInList);
+
+        dialog.setContent(String.format(getString(R.string.alert_dialog_request_finish_content), operation));
+        if (!dialog.isShowing())
+            dialog.show();
+
+        final UploadTask uploadTask = FirebaseStorage.getInstance().getReference()
+                .child(getString(R.string.storage_profile_attachment_folder))
+                .child(String.valueOf(System.currentTimeMillis()/1000) + "_" + filePath.substring(filePath.lastIndexOf("/") + 1))
+                .putBytes(convertFileToByteArray(new File(filePath)));
+
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @SuppressWarnings({"VisibleForTests", "ConstantConditions"})
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+            {
+                indexFileUploaded++;
+                urlFileList.add(taskSnapshot.getDownloadUrl().toString());
+                String operation = String.format(getString(R.string.alert_dialog_request_finish_op_upload), indexFileUploaded + indexImageUploaded, chipAdapter.getItemCount() + photoAdapter.getItemCount());
+                dialog.setContent(String.format(getString(R.string.alert_dialog_request_finish_content), operation));
+
+                // Se vi sono altre immagini da caricare, si procede con il caricamento della foto successiva
+                if (indexFileUploaded != numFile)
+                    uploadFile(indexFileUploaded, numFile);
+
+                // Se sono stati caricati tutti gli allegati (foto/file), viene inserita la domadna
+                if (indexFileUploaded + indexImageUploaded == chipAdapter.getItemCount() + photoAdapter.getItemCount())
+                    addPost();
+            }
+        })
+        .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e)
+            {
+                uploadFile(indexFileUploaded, numFile);
+            }
+        });
+    }
+
+    private byte[] convertFileToByteArray(File f)
+    {
+        byte[] byteArray = null;
+        try
+        {
+            InputStream inputStream = new FileInputStream(f);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] b = new byte[1024*8];
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(b)) != -1)
+                bos.write(b, 0, bytesRead);
+
+            byteArray = bos.toByteArray();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return byteArray;
+    }
+
+    // Caricamento degli allegati su FirebaseStorage. Per poter caricare più allegati in una domanda,
+    // il metodo viene richiamato ricorsivamente affinché tutti gli elementi non sono stati caricati
     private void uploadImage(int positionInList, final int numImages)
     {
-        String operation = String.format(getString(R.string.alert_dialog_request_finish_op_upload), positionInList, numImages);
+        String operation = String.format(getString(R.string.alert_dialog_request_finish_op_upload), indexFileUploaded + indexImageUploaded, chipAdapter.getItemCount() + photoAdapter.getItemCount());
         String imagePath = photoAdapter.getPicture(positionInList);
         Bitmap image = BitmapFactory.decodeFile(imagePath);
 
@@ -618,16 +702,17 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
             {
                 indexImageUploaded++;
-                urlList.add(taskSnapshot.getDownloadUrl().toString());
-                String operation = String.format(getString(R.string.alert_dialog_request_finish_op_upload), indexImageUploaded, numImages);
+                urlPicList.add(taskSnapshot.getDownloadUrl().toString());
+                String operation = String.format(getString(R.string.alert_dialog_request_finish_op_upload), indexFileUploaded + indexImageUploaded, chipAdapter.getItemCount() + photoAdapter.getItemCount());
                 dialog.setContent(String.format(getString(R.string.alert_dialog_request_finish_content), operation));
 
-                // Se è stata caricata l'ultima foto si procede con l'inserimento della richiesta vera e propria
-                if (indexImageUploaded == numImages)
-                    addPost();
-                // Altrimenti si procede con il caricamento della foto successiva
-                else
+                // Se vi sono altre immagini da caricare, si procede con il caricamento della foto successiva
+                if (indexImageUploaded != numImages)
                     uploadImage(indexImageUploaded, numImages);
+
+                // Se sono stati caricati tutti gli allegati (foto/file), viene inserita la domadna
+                if (indexFileUploaded + indexImageUploaded == chipAdapter.getItemCount() + photoAdapter.getItemCount())
+                    addPost();
             }
         })
         .addOnFailureListener(new OnFailureListener() {
@@ -654,9 +739,13 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
-                if (urlList.size() != 0)
-                    for(String attachmentUrl : urlList)
-                        Util.getDatabase().getReference("Question").child(key).child("attachments").push().setValue(attachmentUrl);
+                // Vengono memorizzati, se presenti, tutti i link di riferimento alle risorse caricate assieme alla domanda (foto/documenti)
+                if (urlFileList.size() != 0)
+                    for(String fileUrl : urlFileList)
+                        Util.getDatabase().getReference("Question").child(key).child("attachments").push().setValue(fileUrl);
+                if (urlPicList.size() != 0)
+                    for(String imageUrl : urlPicList)
+                        Util.getDatabase().getReference("Question").child(key).child("images").push().setValue(imageUrl);
                 linkPostToCourse(key, question.date);
                 linkPostToUser(key);
                 if (dialog.isShowing())

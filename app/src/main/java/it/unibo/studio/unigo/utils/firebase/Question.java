@@ -15,6 +15,7 @@ public class Question implements Serializable
     public String course_key;
     public HashMap<String, Answer> answers;
     public HashMap<String, Boolean> ratings;
+    public HashMap<String, String> images;
     public HashMap<String, String> attachments;
 
     public Question() { }
