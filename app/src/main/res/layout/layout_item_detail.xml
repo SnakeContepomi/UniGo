@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fileItemLayout"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="vertical"
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/btn_rounded">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground">
+        <ImageView
+            android:id="@+id/fileItemExtensionIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="32dp"
+            android:contentDescription="@null"/>
+
+        <TextView
+            android:id="@+id/fileItemTxt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="16dp"
+            android:textSize="16sp"
+            android:ellipsize="middle"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/colorBlack"/>
+
+        <ImageView
+            android:id="@+id/fileItemDownloadIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_file_download_black_24dp"
+            android:contentDescription="@null"
+            android:tint="@color/colorIconGray"
+            android:background="?android:attr/selectableItemBackground"/>
+    </LinearLayout>
+
+</LinearLayout>

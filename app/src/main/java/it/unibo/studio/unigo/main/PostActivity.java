@@ -302,10 +302,10 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         etCourse = (EditText) findViewById(R.id.etPostCourse);
         etDesc = (EditText) findViewById(R.id.etPostDesc);
 
-        RecyclerView recyclerViewChips = (RecyclerView) findViewById(R.id.recyclerViewChip);
+        RecyclerView recyclerViewChips = (RecyclerView) findViewById(R.id.rvPostChip);
         recyclerViewChips.setHasFixedSize(true);
         recyclerViewChips.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false));
-        chipAdapter = new ChipAdapter(0); // UPLOAD = 0, DOWNLOAD = 1
+        chipAdapter = new ChipAdapter();
         recyclerViewChips.setAdapter(chipAdapter);
 
         RecyclerView recyclerViewPhoto = (RecyclerView) findViewById(R.id.recyclerViewPhoto);

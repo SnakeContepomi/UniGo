@@ -100,11 +100,21 @@
         android:textSize="14sp"/>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerViewPicture"
+        android:id="@+id/rvDetailPicture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvDetailFile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
         android:overScrollMode="never"
         android:scrollbars="none" />
 

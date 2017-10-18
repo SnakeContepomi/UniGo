@@ -55,7 +55,7 @@
         android:hint="@string/post_description"/>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerViewChip"
+        android:id="@+id/rvPostChip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="20dp"

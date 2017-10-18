@@ -73,7 +73,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         TextView txtName, txtDate, txtLvl, txtCourse, txtTitle, txtDesc, txtNAnswer, txtRating;
         LinearLayout rating, favorite, answer;
         ImageView imgrating, imgfavorite;
-        RecyclerView recyclerViewPicture;
+        RecyclerView rvDocs, rvPicture;
 
         questionHolder(View v)
         {
@@ -87,9 +87,13 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             txtTitle = (TextView) v.findViewById(R.id.cardq_title);
             txtDesc = (TextView) v.findViewById(R.id.cardq_desc);
 
-            recyclerViewPicture = (RecyclerView) v.findViewById(R.id.recyclerViewPicture);
-            recyclerViewPicture.setHasFixedSize(true);
-            recyclerViewPicture.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+            rvPicture = (RecyclerView) v.findViewById(R.id.rvDetailPicture);
+            rvPicture.setHasFixedSize(true);
+            rvPicture.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+
+            rvDocs = (RecyclerView) v.findViewById(R.id.rvDetailFile);
+            rvDocs.setHasFixedSize(true);
+            rvDocs.setLayoutManager((new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)));
 
             txtNAnswer = (TextView) v.findViewById(R.id.cardq_nanswer);
             rating = (LinearLayout) v.findViewById(R.id.cardq_rating);
@@ -312,14 +316,25 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         qh.txtNAnswer.setText(qh.context.getResources().getString(R.string.detail_nanswer, answerList.size() - 1));
 
         // Recupero delle eventuali immagini allegate nella domanda
-        if (question.attachments != null)
+        if (question.images != null)
         {
             List<String> imgUrlList = new ArrayList<>();
-            for(Map.Entry<String, String> entry : question.attachments.entrySet())
+            for(Map.Entry<String, String> entry : question.images.entrySet())
                 imgUrlList.add(entry.getValue());
 
             DetailPictureAdapter mAdapter = new DetailPictureAdapter(imgUrlList);
-            qh.recyclerViewPicture.setAdapter(mAdapter);
+            qh.rvPicture.setAdapter(mAdapter);
+        }
+
+        // Recupero degli eventuali allegati presenti nella domanda
+        if (question.attachments != null)
+        {
+            List<String> fileUrlList = new ArrayList<>();
+            for(Map.Entry<String, String> entry : question.attachments.entrySet())
+                fileUrlList.add(entry.getValue());
+
+            DocAdapter mAdapter = new DocAdapter(fileUrlList);
+            qh.rvDocs.setAdapter(mAdapter);
         }
     }
 
