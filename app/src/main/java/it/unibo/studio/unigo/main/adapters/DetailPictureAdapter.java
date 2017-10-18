@@ -71,7 +71,7 @@ public class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHold
     @Override
     public ImageHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        return new ImageHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_detail_picture, parent, false));
+        return new ImageHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_detail_picture, parent, false));
     }
 
     @Override

@@ -89,7 +89,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:minWidth="48dp"
-                android:paddingRight="12dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="12dp"
                 android:layout_weight="0"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
@@ -99,6 +100,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0dp"
                     android:layout_marginEnd="2dp"
+                    android:contentDescription="@null"
                     android:background="@drawable/ic_thumb_up_black_24dp"/>
                 <TextView
                     android:id="@+id/carda_txtlike"
@@ -121,6 +123,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0dp"
                     android:layout_marginEnd="2dp"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_mode_comment_black_24dp"
                     android:tint="@color/colorIconGray"/>
                 <TextView
@@ -141,6 +144,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:padding="12dp"
+                android:contentDescription="@null"
                 android:src="@drawable/ic_reply_black_24dp"
                 android:tint="@color/colorIconGray"/>
         </LinearLayout>

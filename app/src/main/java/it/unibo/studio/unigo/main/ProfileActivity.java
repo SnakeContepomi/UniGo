@@ -96,7 +96,7 @@ public class ProfileActivity extends AppCompatActivity implements AppBarLayout.O
 
         // Se il profilo dell'utente è quello dell'utilizzatore, sarà possibile modificare
         // le proprie informazioni, altrimenti sarà possibile inviare una mail all'utente destinatario
-        toolbar.inflateMenu(R.menu.menu_profile);
+        toolbar.inflateMenu(R.menu.toolbar_profile);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item)

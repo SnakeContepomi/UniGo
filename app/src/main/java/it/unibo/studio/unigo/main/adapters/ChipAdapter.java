@@ -38,7 +38,7 @@ public class ChipAdapter extends RecyclerView.Adapter<ChipAdapter.ImageHolder>
     @Override
     public ImageHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        return new ImageHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_chip, parent, false));
+        return new ImageHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chip, parent, false));
     }
 
     @Override

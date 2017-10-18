@@ -1,7 +1,6 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,9 +84,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         if (viewType == 0)
-            return new ViewHolderSender(LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_sender, parent, false));
+            return new ViewHolderSender(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_sender, parent, false));
         else
-            return new ViewHolderRecipient(LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_recipient, parent, false));
+            return new ViewHolderRecipient(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_recipient, parent, false));
     }
 
     @Override

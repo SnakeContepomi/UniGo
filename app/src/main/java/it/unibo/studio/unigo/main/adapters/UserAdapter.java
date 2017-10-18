@@ -106,7 +106,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> im
     public UserHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.user_item, parent, false);
+                .inflate(R.layout.item_user, parent, false);
 
         return new UserHolder(v);
     }

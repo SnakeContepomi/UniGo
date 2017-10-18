@@ -73,7 +73,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
     public ChatRoomAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.chat_room_item, parent, false);
+                .inflate(R.layout.item_chatroom, parent, false);
 
         return new ViewHolder(v);
     }

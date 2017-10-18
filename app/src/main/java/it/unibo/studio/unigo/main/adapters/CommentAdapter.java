@@ -20,7 +20,7 @@ import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Comment;
-import static it.unibo.studio.unigo.R.layout.comment;
+import static it.unibo.studio.unigo.R.layout.item_comment;
 
 class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
 {
@@ -57,7 +57,7 @@ class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder>
     public CommentAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
-                .inflate(comment, parent, false);
+                .inflate(item_comment, parent, false);
 
         return new ViewHolder(v);
     }

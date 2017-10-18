@@ -181,9 +181,9 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         if (viewType == 1)
-            return new questionHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.question_detail, parent, false));
+            return new questionHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_question_detail_layout, parent, false));
         else
-            return new answerHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.card_answer, parent, false));
+            return new answerHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_card_answer, parent, false));
     }
 
     @Override
@@ -605,7 +605,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Metodo per aggiungere una risposta ad una determinata domanda
     private void openAnswerDialog()
     {
-        final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
+        final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.dialog_reply, null);
 
         Picasso.with(activity.getApplicationContext()).load(getCurrentUser().getPhotoUrl()).placeholder(empty_profile_pic).fit().into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto), new Callback() {
             @Override
@@ -671,7 +671,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Metodo per aggiungere un commento alla risposta corrente
     private void openCommentDialog(final String answerKey)
     {
-        final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.alert_reply_layout, null);
+        final View dialogLayout = activity.getLayoutInflater().inflate(R.layout.dialog_reply, null);
 
         Picasso.with(activity.getApplicationContext()).load(getCurrentUser().getPhotoUrl()).placeholder(empty_profile_pic).fit().into((MaterialLetterIcon) dialogLayout.findViewById(R.id.reply_userPhoto), new Callback() {
             @Override

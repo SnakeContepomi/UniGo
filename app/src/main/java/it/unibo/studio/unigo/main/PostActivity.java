@@ -161,7 +161,9 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 {
                     File camFile = new File(currentPhotoPath);
                     File compressedFile = compressFile(camFile);
+                    //noinspection ResultOfMethodCallIgnored
                     camFile.delete();
+                    assert compressedFile != null;
                     photoAdapter.addElement(compressedFile.getAbsolutePath());
                 }
                 break;
@@ -180,6 +182,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                         if ((file.length() / 1024) > IMAGE_SIZE_TO_COMPRESS_KB)
                         {
                             File compressedFile = compressFile(file);
+                            assert compressedFile != null;
                             photoAdapter.addElement(compressedFile.getAbsolutePath());
                         }
                         else
@@ -294,7 +297,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 onBackPressed();
             }
         });
-        toolbar.inflateMenu(R.menu.post_activity_toolbar);
+        toolbar.inflateMenu(R.menu.toolbar_newpost);
         toolbar.inflateMenu(R.menu.menu_item_attachment);
         toolbar.setOnMenuItemClickListener(this);
 
@@ -454,6 +457,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         {
             File[] children = dir.listFiles();
             for (File child : children)
+                //noinspection ResultOfMethodCallIgnored
                 child.delete();
         }
     }
