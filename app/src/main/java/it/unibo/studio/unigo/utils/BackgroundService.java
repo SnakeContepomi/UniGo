@@ -91,7 +91,8 @@ public class BackgroundService extends Service
         Log.d("prova", "BackgroundService, user: " + FirebaseAuth.getInstance().getCurrentUser());
         FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+            {
                 if (FirebaseAuth.getInstance().getCurrentUser() == null)
                     Log.d("prova", "Logged out");
                 else
@@ -1300,12 +1301,6 @@ public class BackgroundService extends Service
             else
             {
                 mBuilder.setContentTitle(getResources().getString(R.string.app_name));
-
-                // Numero nuove domande
-                /*if (chatRoomCount == 1)
-                    mBuilder.setSubText("1 nuovo messaggio");
-                else
-                    mBuilder.setSubText(chatRoomCount+ " nuovi messaggi");*/
 
                 // Numero di utenti che hanno inviato almeno un messaggio
                 if (chatRoomList.size() == 1)

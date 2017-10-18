@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -180,9 +179,6 @@ class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
             fos.flush();
             fos.close();
         }
-        catch (IOException e)
-        {
-            Log.d("DownloadManager", "Error: " + e);
-        }
+        catch (IOException e) { e.printStackTrace(); }
     }
 }
