@@ -43,6 +43,7 @@
             android:src="@drawable/ic_file_download_black_24dp"
             android:contentDescription="@null"
             android:tint="@color/colorIconGray"
+            android:clickable="true"
             android:background="?android:attr/selectableItemBackgroundBorderless"/>
     </LinearLayout>
 

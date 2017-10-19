@@ -1,10 +1,14 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -28,6 +32,7 @@ import it.unibo.studio.unigo.R;
 class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
 {
     private List<String> docList;
+    private Context context;
 
     class ImageHolder extends RecyclerView.ViewHolder
     {
@@ -47,9 +52,10 @@ class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
         }
     }
 
-    DocAdapter(List<String> docList)
+    DocAdapter(List<String> docList, Context context)
     {
         this.docList = docList;
+        this.context = context;
     }
 
     @Override
@@ -94,25 +100,21 @@ class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
             @Override
             public void onClick(View view)
             {
-                new AsyncDownload(docList.get(holder.getAdapterPosition()), fileName, holder.context).execute();
-                // Prova con un file di 14MB
-                //new AsyncDownload("https://firebasestorage.googleapis.com/v0/b/unigo-569da.appspot.com/o/Avenged%20Sevenfold%20-%20This%20Means%20War.mp3?alt=media&token=c87a7433-224b-490a-b0ae-64627246d2b1", fileName, holder.context).execute();
+                new AsyncDownload(docList.get(holder.getAdapterPosition()), fileName).execute();
             }
         });
     }
 
-    private class AsyncDownload extends AsyncTask<Void, Void, Void>
+    private class AsyncDownload extends AsyncTask<Void, Void, String>
     {
         private NotificationManager mNotifyManager;
         private NotificationCompat.Builder mBuilder;
         private String downloadUrl, fileName;
-        private Context context;
 
-        AsyncDownload(String downloadUrl, String fileName, Context context)
+        AsyncDownload(String downloadUrl, String fileName)
         {
             this.downloadUrl = downloadUrl;
             this.fileName = fileName;
-            this.context = context;
         }
 
         @Override
@@ -132,37 +134,42 @@ class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
             mNotifyManager.notify(0, mBuilder.build());
         }
 
-        protected Void doInBackground(Void... params)
+        protected String doInBackground(Void... params)
         {
-            downloadFromUrl(downloadUrl, fileName);
-            return null;
+            return downloadFromUrl(downloadUrl, fileName);
         }
 
         @Override
-        protected void onPostExecute(Void aVoid)
+        protected void onPostExecute(String params)
         {
-            super.onPostExecute(aVoid);
-            mBuilder.setOngoing(false)
+            super.onPostExecute(params);
+            mBuilder.setAutoCancel(true)
+                    .setOngoing(false)
                     .setContentText("Download completato")
                     .setSmallIcon(R.drawable.ic_done_black_24dp)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_done_black_24dp));
+
+            // Al click della notifica viene aperta una finestra per scegliere con quale applicazione visionare il contenuto della cartella download
+            // (si consiglia di avere installato un file manager)
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()+ "/" + Environment.DIRECTORY_DOWNLOADS);
+            intent.setDataAndType(uri, "text/csv");
+            PendingIntent pIntent = PendingIntent.getActivity(context, 0, Intent.createChooser(intent, "Open folder"), PendingIntent.FLAG_CANCEL_CURRENT);
+            mBuilder.setContentIntent(pIntent);
             mNotifyManager.notify(0, mBuilder.build());
         }
     }
 
-    private void downloadFromUrl(String DownloadUrl, String fileName)
+    private String downloadFromUrl(String DownloadUrl, String fileName)
     {
+        File dir = new File (Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + Environment.DIRECTORY_DOWNLOADS);
+        if(!dir.exists())
+            //noinspection ResultOfMethodCallIgnored
+            dir.mkdirs();
+        File file = new File(dir, fileName);
         try
         {
-            File root = android.os.Environment.getExternalStorageDirectory();
-
-            File dir = new File (root.getAbsolutePath() + "/Downloads");
-            if(!dir.exists())
-                //noinspection ResultOfMethodCallIgnored
-                dir.mkdirs();
-
             URL url = new URL(DownloadUrl);
-            File file = new File(dir, fileName);
 
             URLConnection ucon = url.openConnection();
             InputStream is = ucon.getInputStream();
@@ -180,5 +187,7 @@ class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
             fos.close();
         }
         catch (IOException e) { e.printStackTrace(); }
+
+        return file.getAbsolutePath();
     }
 }
