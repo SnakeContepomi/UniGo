@@ -63,6 +63,25 @@ public class ChatActivity extends AppCompatActivity
     }
 
     @Override
+    protected  void onResume()
+    {
+        super.onResume();
+        if (recipient != null)
+        {
+            BackgroundService.resetChatNotification(recipient.name + " " + recipient.lastName);
+            Util.CURRENT_CHAT_KEY = recipientEmail;
+        }
+    }
+
+    @Override
+    protected void onPause()
+    {
+        BackgroundService.resetChatNotification(recipient.name + " " + recipient.lastName);
+        Util.CURRENT_CHAT_KEY = "";
+        super.onPause();
+    }
+
+    @Override
     protected void onDestroy()
     {
         Util.getDatabase().getReference("ChatRoom").child(chatId).child("messages").orderByKey().removeEventListener(chatListener);
@@ -75,8 +94,6 @@ public class ChatActivity extends AppCompatActivity
 
     private void initializeComponents()
     {
-        BackgroundService.resetChatNotification();
-
         toolbar = (Toolbar) findViewById(R.id.chatToolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,6 +208,8 @@ public class ChatActivity extends AppCompatActivity
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 recipient = dataSnapshot.getValue(User.class);
+                BackgroundService.resetChatNotification(recipient.name + " " + recipient.lastName);
+                Util.CURRENT_CHAT_KEY = recipientEmail;
                 toolbar.setTitle(formatName(recipient.name, recipient.lastName));
                 mAdapter = new MessageAdapter(recipient.photoUrl, recipient.name);
                 mRecyclerView.setAdapter(mAdapter);
@@ -266,7 +285,7 @@ public class ChatActivity extends AppCompatActivity
     // Aggiornamento dell'ultimo messaggio letto da parte del mittente
     private void createMsg()
     {
-        Message msg = new Message(Util.encodeEmail(Util.getCurrentUser().getEmail()), txtMessage.getText().toString(), Util.getDate());
+        final Message msg = new Message(Util.encodeEmail(Util.getCurrentUser().getEmail()), txtMessage.getText().toString(), Util.getDate());
         txtMessage.getText().clear();
 
         // Inserimento messaggio in Chat
@@ -280,15 +299,15 @@ public class ChatActivity extends AppCompatActivity
             public void onDataChange(DataSnapshot dataSnapshot)
             {
                 userChatReference.setValue(dataSnapshot.getValue(Integer.class) + 1);
+
+                // Aggiornamento dell'ultimo messaggio della ChatRoom
+                Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message").setValue(msg.message);
+                Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_time").setValue(msg.date);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
         });
-
-        // Aggiornamento dell'ultimo messaggio della ChatRoom
-        Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_message").setValue(msg.message);
-        Util.getDatabase().getReference("ChatRoom").child(chatId).child("last_time").setValue(msg.date);
     }
 
     // Metodo che recupera il numero di messaggi scambiati tra i due utenti (nel caso di conversazione già esistente),

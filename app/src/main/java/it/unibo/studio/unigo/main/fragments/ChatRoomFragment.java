@@ -18,7 +18,6 @@ import java.util.HashMap;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapteritems.ChatRoomAdapterItem;
 import it.unibo.studio.unigo.main.adapters.ChatRoomAdapter;
-import it.unibo.studio.unigo.utils.BackgroundService;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 
@@ -53,8 +52,6 @@ public class ChatRoomFragment extends android.support.v4.app.Fragment
 
     private void initComponents(View v)
     {
-        BackgroundService.resetChatNotification();
-
         // HashMap utilizzata per memorizzare le referenze dei listener di ciascuna ChatRoom esistente
         updateListenerMap = new HashMap<>();
 

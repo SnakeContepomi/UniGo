@@ -20,6 +20,7 @@ import it.unibo.studio.unigo.main.fragments.HomeFragment;
 public class Util
 {
     public static String CURRENT_COURSE_KEY;
+    public static String CURRENT_CHAT_KEY;
     public static final int EXP_START = 0;
     public static final int EXP_ANSWER = 10;
     public static final int EXP_LIKE = 2;
@@ -29,7 +30,7 @@ public class Util
     // Crediti richiesti per effettuare una domanda
     public static final int CREDITS_QUESTION = 10;
     // Moltiplicatore di exp utilizzato nella formula per calcolare l'exp necessaria per il livelo successivo
-    public static final int EXP_MULTIPLIER = 3;
+    private static final int EXP_MULTIPLIER = 3;
     public static final int MAX_LEVEL = 30;
 
     private static FirebaseDatabase database;

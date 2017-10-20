@@ -66,7 +66,8 @@ public class BackgroundService extends Service
     private static int commentAnswerCount = 0;
     private static int ratingCount = 0;
     private static int likeCount = 0;
-    private static int chatRoomCount = 0;
+    // Per separare il numero di messaggi contenuti in ciascuna chatroom, occorre utilizzare una lista
+    private static List<Integer> chatRoomCount = new ArrayList<>();
     private SharedPreferences prefs;
     /*
         Tipi di Notifiche in base al valore della variabile notifyID:
@@ -718,7 +719,8 @@ public class BackgroundService extends Service
 
                                             if (!chatRoomList.contains(name))
                                                 chatRoomList.add(name);
-                                            chatRoomCount++;
+                                            int pos = chatRoomList.indexOf(name);
+                                            chatRoomCount.set(pos, chatRoomCount.get(pos) + 1);
 
                                             Util.getDatabase().getReference("User").child(mail).child("photoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
@@ -773,7 +775,14 @@ public class BackgroundService extends Service
 
                                                 if (!chatRoomList.contains(name))
                                                     chatRoomList.add(name);
-                                                chatRoomCount++;
+                                                int pos = chatRoomList.indexOf(name);
+                                                // Se la condizione è vera, è stato aggiunto un altro mittente, quindi
+                                                // bisogna creare l'elemento anche in chatRoomCount, altrmenti si modifica
+                                                // quello esistente
+                                                if (chatRoomCount.size() < chatRoomList.size())
+                                                    chatRoomCount.add(1);
+                                                else
+                                                    chatRoomCount.set(pos, chatRoomCount.get(pos) + 1);
 
                                                 Util.getDatabase().getReference("User").child(mail).child("photoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
@@ -1252,7 +1261,7 @@ public class BackgroundService extends Service
     }
 
     // Metodo per creare notifiche relative alla parte della Chat (non avendo questionKey, funzionano in modo diverso)
-    private void sendNotification(NotificationType type, Bitmap profilePic, String chatId, Message msg)
+    private void sendNotification(NotificationType type, Bitmap profilePic, String senderId, Message msg)
     {
         // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment (SwitchPreference)
         // e l'utente desidera essere informato di quel particolare evento (MultiSelectListPreference), in questo caso messaggi dalla chat
@@ -1274,7 +1283,7 @@ public class BackgroundService extends Service
                 if (chatRoomList.size() == 1)
                 {
                     mBuilder.setContentTitle(chatRoomList.get(0));
-                    if (chatRoomCount == 1)
+                    if (chatRoomCount.get(0) == 1)
                     {
                         mBuilder.setContentText(msg.message);
                         mBuilder.setStyle(new Notification.BigTextStyle()
@@ -1282,19 +1291,24 @@ public class BackgroundService extends Service
                     }
                     else
                     {
-                        mBuilder.setContentText(chatRoomCount + " nuovi messaggi");
+                        mBuilder.setContentText(chatRoomCount.get(0) + " nuovi messaggi");
                         mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(chatRoomCount + " nuovi messaggi"));
+                                .bigText(chatRoomCount.get(0) + " nuovi messaggi"));
                     }
                     mBuilder.setLargeIcon(profilePic);
                 }
                 else
                 {
+                    // somma del numero di messaggi non letti nelle varie conversazioni
+                    int msgCount = 0;
+                    for(int msgPerChat : chatRoomCount)
+                        msgCount += msgPerChat;
+
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
                     mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                    mBuilder.setContentText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni");
+                    mBuilder.setContentText(msgCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni");
                     mBuilder.setStyle(new Notification.BigTextStyle()
-                            .bigText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni"));
+                            .bigText(msgCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni"));
                 }
             }
             // Versione precedente a Nougat
@@ -1306,7 +1320,7 @@ public class BackgroundService extends Service
                 if (chatRoomList.size() == 1)
                 {
                     mBuilder.setContentTitle(chatRoomList.get(0));
-                    if (chatRoomCount == 1)
+                    if (chatRoomCount.get(0) == 1)
                     {
                         mBuilder.setContentText(msg.message);
                         mBuilder.setStyle(new Notification.BigTextStyle()
@@ -1314,49 +1328,60 @@ public class BackgroundService extends Service
                     }
                     else
                     {
-                        mBuilder.setContentText(chatRoomCount + " nuovi messaggi");
+                        mBuilder.setContentText(chatRoomCount.get(0) + " nuovi messaggi");
                         mBuilder.setStyle(new Notification.BigTextStyle()
-                                .bigText(chatRoomCount + " nuovi messaggi"));
+                                .bigText(chatRoomCount.get(0) + " nuovi messaggi"));
                     }
                     mBuilder.setLargeIcon(profilePic);
                 }
                 else
                 {
+                    // somma del numero di messaggi non letti nelle varie conversazioni
+                    int msgCount = 0;
+                    for(int msgPerChat : chatRoomCount)
+                        msgCount += msgPerChat;
+
                     mBuilder.setContentTitle(getResources().getString(R.string.app_name));
                     mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                    mBuilder.setContentText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni");
+                    mBuilder.setContentText(msgCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni");
                     mBuilder.setStyle(new Notification.BigTextStyle()
-                            .bigText(chatRoomCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni"));
+                            .bigText(msgCount + " nuovi messaggi in " + chatRoomList.size() + " conversazioni"));
                 }
             }
 
             Intent resultIntent;
             if (chatRoomList.size() == 1)
             {
-                resultIntent = new Intent(BackgroundService.this, ChatActivity.class);
-                resultIntent.putExtra("user_key", chatId);
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-                stackBuilder.addParentStack(ChatActivity.class);
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                mBuilder.setContentIntent(resultPendingIntent);
+                if (!senderId.equals(Util.CURRENT_CHAT_KEY))
+                {
+                    resultIntent = new Intent(BackgroundService.this, ChatActivity.class);
+                    resultIntent.putExtra("user_key", senderId);
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                    stackBuilder.addParentStack(ChatActivity.class);
+                    stackBuilder.addNextIntent(resultIntent);
+                    PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                    mBuilder.setContentIntent(resultPendingIntent);
 
-                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+                }
             }
             // Se si ricevono messaggi da più di una chat
             else
             {
-                resultIntent = new Intent(BackgroundService.this, MainActivity.class);
-                resultIntent.putExtra("open_chatroom_fragment", true);
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-                stackBuilder.addParentStack(MainActivity.class);
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                mBuilder.setContentIntent(resultPendingIntent);
+                if (!senderId.equals(Util.CURRENT_CHAT_KEY))
+                {
+                    resultIntent = new Intent(BackgroundService.this, MainActivity.class);
+                    resultIntent.putExtra("open_chatroom_fragment", true);
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+                    stackBuilder.addParentStack(MainActivity.class);
+                    stackBuilder.addNextIntent(resultIntent);
+                    PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                    mBuilder.setContentIntent(resultPendingIntent);
 
-                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+                }
             }
         }
     }
@@ -1403,11 +1428,15 @@ public class BackgroundService extends Service
         likeCount = 0;
     }
 
-    public static void resetChatNotification()
+    public static void resetChatNotification(String recipientName)
     {
-        chatRoomList.clear();
+        int pos = chatRoomList.indexOf(recipientName);
 
-        chatRoomCount = 0;
+        if (pos != -1)
+        {
+            chatRoomList.remove(pos);
+            chatRoomCount.remove(pos);
+        }
     }
 
     // Metodo per modificare la forma dell'immagine utente, rendendola circolare
