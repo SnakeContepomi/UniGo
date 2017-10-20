@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
@@ -28,10 +29,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import it.unibo.studio.unigo.R;
+import it.unibo.studio.unigo.main.DetailActivity;
 
-class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
+public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
 {
     private List<String> docList;
+    // Indice dell'elemento che ha richiesto i permessi di scrittura sulla memoria interna
+    // (utilizzato per riprendere il download dell'elemento una volta ottenuti i permessi di scrittura
+    //  da DetailActivity)
+    private int elementRequestPermission;
     private Context context;
 
     class ImageHolder extends RecyclerView.ViewHolder
@@ -100,9 +106,24 @@ class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
             @Override
             public void onClick(View view)
             {
-                new AsyncDownload(docList.get(holder.getAdapterPosition()), fileName).execute();
+                if (context.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+                    new AsyncDownload(docList.get(holder.getAdapterPosition()), fileName).execute();
+                else
+                {
+                    elementRequestPermission = holder.getAdapterPosition();
+                    ((DetailActivity)context).getWritePermission();
+                }
             }
         });
+    }
+
+    // Metodo che permette di scaricare l'elemento selezionato, una volta ottenuti i permessi di scrittura sulla memoria interna
+    // (viene utilizzato solamente la prima volta che vengono richiesti i permessi)
+    public void downloadFileAfterPermissions()
+    {
+        String fileName = docList.get(elementRequestPermission).substring(docList.get(elementRequestPermission).lastIndexOf("%2F") + 3, docList.get(elementRequestPermission).lastIndexOf("?"));
+        new AsyncDownload(docList.get(elementRequestPermission), fileName).execute();
+        elementRequestPermission = -1;
     }
 
     private class AsyncDownload extends AsyncTask<Void, Void, String>

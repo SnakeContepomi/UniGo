@@ -143,8 +143,32 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 break;
 
             case R.id.menuListItemFile:
-                openFilePicker();
+                if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_FILE_PICKER);
+                else
+                    openFilePicker();
                 break;
+        }
+        return true;
+    }
+
+    // Viene verificato se l'app possiede dei permessi per accedere alla fotocamera (CAMERA e WRITE_EXTERNAL_STORAGE)
+    private boolean getCameraPermissions()
+    {
+        // Permessi di cui si ha bisogno
+        List<String> listPermissionsNeeded = new ArrayList<>();
+
+        // Permessi CAMERA
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+            listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
+        // Permessi WRITE_EXTERNAL_STORAGE
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (!listPermissionsNeeded.isEmpty())
+        {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_CAMERA_PERMISSION);
+            return false;
         }
         return true;
     }
@@ -262,28 +286,18 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                     permissionDialog.show();
                 }
                 break;
+
+            case REQUEST_FILE_PICKER:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    openFilePicker();
+                // Viene controllato se l'utente ha selezionato la voce 'non mostrare più questo messaggio' nel momento in cui
+                // ha negato il permesso richiesto, per ricordare di fornire manualmente i permessi richiesti
+                else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE))
+                {
+                    buildPermissionDialog(getString(R.string.permission_needed_read));
+                    permissionDialog.show();
+                }
         }
-    }
-
-    // Viene verificato se l'app possiede dei permessi per accedere alla fotocamera (CAMERA e WRITE_EXTERNAL_STORAGE)
-    private boolean getCameraPermissions()
-    {
-        // Permessi di cui si ha bisogno
-        List<String> listPermissionsNeeded = new ArrayList<>();
-
-        // Permessi CAMERA
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
-            listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
-        // Permessi WRITE_EXTERNAL_STORAGE
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-            listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (!listPermissionsNeeded.isEmpty())
-        {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_CAMERA_PERMISSION);
-            return false;
-        }
-        return true;
     }
 
     private void initComponents()

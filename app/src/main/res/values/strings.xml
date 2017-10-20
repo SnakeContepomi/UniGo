@@ -34,7 +34,9 @@
     <string name="permission_needed_camera">Non disponi dei permessi necessari per utilizzare questa funzionalità.
         \nPer continuare, consentire al dispositivo di accedere alla fotocamera.</string>
     <string name="permission_needed_storage">Non disponi dei permessi necessari per utilizzare questa funzionalità.
-        \nPer continuare, consentire al dispositivo di accedere all\'Archiviazione del sistema fornendo l\'autorizzazione necessaria.</string>
+        \nPer continuare, consentire al dispositivo di accedere all\'archiviazione del sistema fornendo l\'autorizzazione necessaria.</string>
+    <string name="permission_needed_read">Non disponi dei permessi necessari per utilizzare questa funzionalità.
+        \nPer continuare, consentire al dispositivo di accedere all\'archiviazione del sistema fornendo l\'autorizzazione necessaria.</string>
 
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>

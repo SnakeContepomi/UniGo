@@ -1,13 +1,22 @@
 package it.unibo.studio.unigo.main;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,6 +32,7 @@ import it.unibo.studio.unigo.utils.firebase.Question;
 
 public class DetailActivity extends AppCompatActivity
 {
+    private final static int REQUEST_FILE_PERMISSION = 1;
     private Question question;
     private DetailAdapter mAdapter;
     private RecyclerView recyclerViewQuestionDetail;
@@ -222,5 +232,48 @@ public class DetailActivity extends AppCompatActivity
     {
         DetailAdapter.answerHolder holder = (DetailAdapter.answerHolder) recyclerViewQuestionDetail.findViewHolderForAdapterPosition(position);
         holder.closeCommentList();
+    }
+
+    // Metodo che consente di verificare ed eventualmente richiedere i permessi di scrittura su memoria di massa,
+    // necessari per scaricare gli allegati delle domande
+    public void getWritePermission()
+    {
+        if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_FILE_PERMISSION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        if (requestCode == REQUEST_FILE_PERMISSION)
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                mAdapter.docAdapter.downloadFileAfterPermissions();
+            else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE))
+            {
+                new MaterialDialog.Builder(this)
+                        .title(getString(R.string.permission_denied))
+                        .content(getString(R.string.permission_needed_read))
+                        .positiveText(getString(R.string.drawer_impostazioni))
+                        .positiveColor(ContextCompat.getColor(this, R.color.colorAccent))
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.setData(Uri.fromParts(getString(R.string.intent_package), getPackageName(), null));
+                                startActivity(intent);
+                            }
+                        })
+                        .negativeText(getString(R.string.alert_dialog_cancel))
+                        .negativeColor(ContextCompat.getColor(this, R.color.colorAccent))
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .build()
+                        .show();
+            }
     }
 }

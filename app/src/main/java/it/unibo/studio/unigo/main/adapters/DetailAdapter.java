@@ -65,6 +65,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private Comment newComment;
     private String questionKey, answerNotSent, commentNotSent, newCommentKey;
     private Activity activity;
+    public DocAdapter docAdapter;
 
     private static class questionHolder extends RecyclerView.ViewHolder
     {
@@ -333,8 +334,8 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             for(Map.Entry<String, String> entry : question.attachments.entrySet())
                 fileUrlList.add(entry.getValue());
 
-            DocAdapter mAdapter = new DocAdapter(fileUrlList, activity);
-            qh.rvDocs.setAdapter(mAdapter);
+            docAdapter = new DocAdapter(fileUrlList, activity);
+            qh.rvDocs.setAdapter(docAdapter);
         }
     }
 
