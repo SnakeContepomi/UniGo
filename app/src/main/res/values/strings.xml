@@ -100,8 +100,8 @@
     <string name="spinner_school_hint">Scuola</string>
     <string name="spinner_course_hint">Corso</string>
 
-    <string name="toolbar_search_hint">Cerca...</string>
-    <string name="toolbar_option_hint">Opzioni...</string>
+    <string name="toolbar_search_hint">Cerca…</string>
+    <string name="toolbar_option_hint">Opzioni…</string>
     <string name="toolbar_attachment">Invia allegato</string>
     <string name="toolbar_attachment_picture">Scatta foto</string>
     <string name="toolbar_attachment_gallery">Scegli da galleria</string>
@@ -114,6 +114,7 @@
     <string name="drawer_tutte">Tutte le domande</string>
     <string name="drawer_domande">Le mie domande</string>
     <string name="drawer_preferiti">Preferiti</string>
+    <string name="drawer_sondaggi">Sondaggi</string>
     <string name="drawer_chat">Chat</string>
     <string name="drawer_social">Iscritti al corso</string>
     <string name="drawer_impostazioni">Impostazioni</string>
@@ -163,7 +164,7 @@
 
     <string name="empty_section">Nessuna domanda in questa sezione</string>
     <string name="empty_chat">Nessun messaggio da visualizzare</string>
-    <string name="chat_message_hint">Inserisci un messaggio...</string>
+    <string name="chat_message_hint">Inserisci un messaggio…</string>
     <!-- notification strings -->
     <string name="no_ringtone">Silenzioso</string>
     <string name="pref_category">Notifiche</string>
@@ -180,7 +181,7 @@
     <string name="pref_notificationPriority_defVal">2</string>
     <string name="pref_notificationColor_defVal">2</string>
 
-    <string name="alert_dialog_confirm">Ok</string>
+    <string name="alert_dialog_confirm">OK</string>
     <string name="alert_dialog_max_picture">Non è possibile selezionare altre immagini</string>
     <string name="alert_dialog_max_file">Non è possibile selezionare altri file</string>
     <string name="alert_dialog_max_file_size">Dimensione file troppo grande (Max. 10MB)</string>
@@ -190,4 +191,9 @@
     <string name="imgpicker_select_img">Seleziona</string>
     <string name="trans_image">Transizione immagine</string>
     <string name="storage_profile_attachment_folder">question_attachments</string>
+
+    <string name="survey_title">Scrivi qui…</string>
+    <string name="survey_desc">Informazioni aggiuntive…</string>
+    <string name="survey_rv_header">Imposta scelte sondaggio</string>
+    <string name="survey_add">Aggiungi voce</string>
 </resources>

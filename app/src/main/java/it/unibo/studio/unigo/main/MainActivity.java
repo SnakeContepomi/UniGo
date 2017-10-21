@@ -41,6 +41,7 @@ import it.unibo.studio.unigo.main.fragments.InfoFragment;
 import it.unibo.studio.unigo.main.fragments.MyQuestionFragment;
 import it.unibo.studio.unigo.main.fragments.SettingsFragment;
 import it.unibo.studio.unigo.main.fragments.SocialFragment;
+import it.unibo.studio.unigo.main.fragments.SurveyFragment;
 import it.unibo.studio.unigo.utils.BackgroundService;
 import it.unibo.studio.unigo.utils.Util;
 import rx.android.schedulers.AndroidSchedulers;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private final String FRAGMENT_HOME = "home";
     private final String FRAGMENT_QUESTION = "question";
     private final String FRAGMENT_FAVORITE = "favorite";
+    private final String FRAGMENT_SURVEY = "survey";
     private final String FRAGMENT_CHAT = "chat";
     private final String FRAGMENT_SOCIAL = "social";
     private final String FRAGMENT_SETTINGS = "settings";
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     private HomeFragment fragmentHome;
     private FavoriteFragment fragmentFavorite;
     private MyQuestionFragment fragmentQuestion;
+    private SurveyFragment fragmentSurvey;
     private ChatRoomFragment fragmentChat;
     private SocialFragment fragmentSocial;
     private SettingsFragment fragmentSettings;
@@ -179,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         if (getCurrentFragment() instanceof ChatRoomFragment)
             startActivityForResult(new Intent(this, ContactActivity.class), REQUEST_CODE_CHAT);
         else
-            startActivityForResult(new Intent(this, PostActivity.class), REQUEST_CODE_POST);
+            startActivityForResult(new Intent(this, NewPostActivity.class), REQUEST_CODE_POST);
     }
 
     private void initComponents()
@@ -289,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         fragmentHome = new HomeFragment();
         fragmentFavorite = new FavoriteFragment();
         fragmentQuestion = new MyQuestionFragment();
+        fragmentSurvey = new SurveyFragment();
         fragmentChat = new ChatRoomFragment();
         fragmentSocial = new SocialFragment();
         fragmentSettings = new SettingsFragment();
@@ -325,10 +329,11 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         PrimaryDrawerItem nav_home = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_tutte).withLevel(2).withIcon(R.drawable.ic_inbox_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_favorite  = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_preferiti).withLevel(2).withIcon(R.drawable.ic_star_black_24dp).withIconTintingEnabled(true);
         PrimaryDrawerItem nav_question = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_domande).withLevel(2).withIcon(R.drawable.ic_label_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_chat = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_chat).withIcon(R.drawable.ic_chat_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
-        PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(7).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_survey = new PrimaryDrawerItem().withIdentifier(4).withName(R.string.drawer_sondaggi).withIcon(R.drawable.ic_chart_pie).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_chat = new PrimaryDrawerItem().withIdentifier(5).withName(R.string.drawer_chat).withIcon(R.drawable.ic_chat_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_social = new PrimaryDrawerItem().withIdentifier(6).withName(R.string.drawer_social).withIcon(R.drawable.ic_group_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_settings  = new PrimaryDrawerItem().withIdentifier(7).withName(R.string.drawer_impostazioni).withIcon(R.drawable.ic_settings_black_24dp).withIconTintingEnabled(true);
+        PrimaryDrawerItem nav_info  = new PrimaryDrawerItem().withIdentifier(8).withName(R.string.drawer_guida).withIcon(R.drawable.ic_info_black_24dp).withIconTintingEnabled(true);
         final ExpandableBadgeDrawerItem nav_expandable = new ExpandableBadgeDrawerItem()
                 .withName(R.string.drawer_principale)
                 .withIcon(R.drawable.ic_home_black_24dp)
@@ -359,6 +364,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                 // withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700)).withBadge("100").
                 .addDrawerItems(
                         nav_expandable,
+                        nav_survey,
                         nav_chat,
                         nav_social,
                         new DividerDrawerItem(),
@@ -398,35 +404,44 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
                                 showFab();
                                 break;
                             case 4:
+                                loadFragment(fragmentSurvey, FRAGMENT_SURVEY);
+                                toolbar.setTitle(R.string.drawer_sondaggi);
+                                toolbar.getMenu().getItem(0).setVisible(false);
+                                subItemSelection = 3;
+                                navDrawer.closeDrawer();
+                                fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_add_black_24dp));
+                                showFab();
+                                break;
+                            case 5:
                                 loadFragment(fragmentChat, FRAGMENT_CHAT);
                                 toolbar.setTitle(R.string.drawer_chat);
                                 toolbar.getMenu().getItem(0).setVisible(false);
-                                subItemSelection = 3;
+                                subItemSelection = 4;
                                 navDrawer.closeDrawer();
                                 fab.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_chat_black_24dp));
                                 showFab();
                                 break;
-                            case 5:
+                            case 6:
                                 loadFragment(fragmentSocial, FRAGMENT_SOCIAL);
                                 toolbar.setTitle(R.string.drawer_social);
                                 toolbar.getMenu().getItem(0).setVisible(true);
-                                subItemSelection = 4;
-                                navDrawer.closeDrawer();
-                                hideFab();
-                                break;
-                            case 6:
-                                loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
-                                toolbar.setTitle(R.string.drawer_impostazioni);
-                                toolbar.getMenu().getItem(0).setVisible(false);
                                 subItemSelection = 5;
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;
                             case 7:
+                                loadFragment(fragmentSettings, FRAGMENT_SETTINGS);
+                                toolbar.setTitle(R.string.drawer_impostazioni);
+                                toolbar.getMenu().getItem(0).setVisible(false);
+                                subItemSelection = 6;
+                                navDrawer.closeDrawer();
+                                hideFab();
+                                break;
+                            case 8:
                                 loadFragment(fragmentInfo, FRAGMENT_INFO);
                                 toolbar.setTitle(R.string.drawer_guida);
                                 toolbar.getMenu().getItem(0).setVisible(false);
-                                subItemSelection = 6;
+                                subItemSelection = 7;
                                 navDrawer.closeDrawer();
                                 hideFab();
                                 break;

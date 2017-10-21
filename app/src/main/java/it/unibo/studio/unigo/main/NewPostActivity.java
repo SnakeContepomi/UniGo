@@ -57,7 +57,7 @@ import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.User;
 
-public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
+public class NewPostActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
 {
     // Dimensione massima consentita per ciascuna immagine e file (in KiloBytes)
     private static final int IMAGE_SIZE_TO_COMPRESS_KB = 750;
@@ -94,7 +94,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     {
         overridePendingTransition(R.anim.activity_open_translate_from_bottom, R.anim.activity_no_animation);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post);
+        setContentView(R.layout.activity_new_post);
         initComponents();
     }
 
@@ -331,7 +331,7 @@ public class PostActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         photoAdapter = new DetailPictureAdapter();
         recyclerViewPhoto.setAdapter(photoAdapter);
 
-        dialog = new MaterialDialog.Builder(PostActivity.this)
+        dialog = new MaterialDialog.Builder(this)
                 .progress(true, 0)
                 .cancelable(false)
                 .build();

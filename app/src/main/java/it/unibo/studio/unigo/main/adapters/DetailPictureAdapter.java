@@ -22,7 +22,7 @@ import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.main.FullSizeImageActivity;
-import it.unibo.studio.unigo.main.PostActivity;
+import it.unibo.studio.unigo.main.NewPostActivity;
 
 public class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHolder>
 {
@@ -32,7 +32,7 @@ public class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHold
     private final String LOAD_FROM_FILE = "fromFile";
     private List<String> pictureList;
     // Variabile che stabilisce se attribuire l'icona di rimozione alle immagini o meno. L'adapter viene utilizzato in due contesti differenti:
-    // - PostActivity, type = UPLOAD, le immagini avranno l'icona 'rimuovi' per annullare l'upload del file
+    // - NewPostActivity, type = UPLOAD, le immagini avranno l'icona 'rimuovi' per annullare l'upload del file
     // - DetailActivity, type = DOWNLOAD, le immagini non avranno l'icona per rimuovere l'immagine in quanto è già caricata su Firebase Storage
     private int type;
 
@@ -61,7 +61,7 @@ public class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHold
         type = DOWNLOAD;
     }
 
-    // Costruttore richiamato da PostActivity, le immagini vengono caricare man mano che vengono selezionate dall'utente
+    // Costruttore richiamato da NewPostActivity, le immagini vengono caricare man mano che vengono selezionate dall'utente
     public DetailPictureAdapter()
     {
         this.pictureList = new ArrayList<>();
@@ -138,7 +138,7 @@ public class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHold
                         Intent intent = new Intent(holder.context, FullSizeImageActivity.class);
                         intent.putExtra(IMAGE_PATH, pictureList.get(holder.getAdapterPosition()));
                         intent.putExtra(LOAD_FROM_FILE, true);
-                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((PostActivity) holder.context, holder.detailPic, holder.detailPic.getTransitionName());
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((NewPostActivity) holder.context, holder.detailPic, holder.detailPic.getTransitionName());
                         holder.context.startActivity(intent, options.toBundle());
                     }
                 });
