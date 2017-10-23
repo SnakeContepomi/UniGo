@@ -50,9 +50,8 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SheetLayout.OnFabAnimationEndListener
 {
-    public static final int REQUEST_CODE_POST = 1;
+    public static final int REQUEST_CODE_NORMAL = 1;
     public static final int REQUEST_CODE_DETAIL = 2;
-    public static final int REQUEST_CODE_CHAT = 3;
     private final String FRAGMENT_HOME = "home";
     private final String FRAGMENT_QUESTION = "question";
     private final String FRAGMENT_FAVORITE = "favorite";
@@ -159,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode)
         {
-            case REQUEST_CODE_POST:
+            case REQUEST_CODE_NORMAL:
                 sheetLayout.contractFab();
                 break;
 
@@ -167,10 +166,6 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             case REQUEST_CODE_DETAIL:
                 if (getCurrentFragment() instanceof HomeFragment)
                     Util.getHomeFragment().refreshFavorite(data.getStringExtra("question_key"));
-                break;
-
-            case REQUEST_CODE_CHAT:
-                sheetLayout.contractFab();
                 break;
         }
     }
@@ -180,9 +175,12 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
     public void onFabAnimationEnd()
     {
         if (getCurrentFragment() instanceof ChatRoomFragment)
-            startActivityForResult(new Intent(this, ContactActivity.class), REQUEST_CODE_CHAT);
+            startActivityForResult(new Intent(this, ContactActivity.class), REQUEST_CODE_NORMAL);
+        else if (getCurrentFragment() instanceof  SurveyFragment)
+            startActivityForResult(new Intent(this, NewSurveyActivity.class), REQUEST_CODE_NORMAL);
+        // HomeFragment, FavoriteFragment e MyQuestionFragment
         else
-            startActivityForResult(new Intent(this, NewPostActivity.class), REQUEST_CODE_POST);
+            startActivityForResult(new Intent(this, NewPostActivity.class), REQUEST_CODE_NORMAL);
     }
 
     private void initComponents()
@@ -477,6 +475,8 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
             return fragmentFavorite;
         if (fragment instanceof MyQuestionFragment)
             return fragmentQuestion;
+        if (fragment instanceof SurveyFragment)
+            return fragmentSurvey;
         if (fragment instanceof ChatRoomFragment)
             return fragmentChat;
         if (fragment instanceof SocialFragment)

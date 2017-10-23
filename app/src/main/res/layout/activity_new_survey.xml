@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
     android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        style="@style/PostToolbar"
+        android:id="@+id/toolbarSurvey"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
+        app:popupTheme="@style/AppTheme"
+        app:title="@string/survey_toolbar"
+        app:titleTextAppearance="@style/ToolbarTitleTextAppearanceMedium" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:gravity="center_vertical"
         android:text="@string/post_title"
         android:textSize="14sp"
@@ -19,8 +32,6 @@
         android:id="@+id/etSurvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
         android:inputType="textCapSentences"
         android:hint="@string/survey_title"
         android:textSize="16sp"
@@ -29,6 +40,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:gravity="center_vertical"
         android:layout_marginTop="8dp"
         android:text="@string/post_description"
@@ -40,8 +53,6 @@
         android:id="@+id/etSurvDesc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
         android:inputType="textCapSentences|textMultiLine"
         android:hint="@string/survey_desc"
         android:textSize="16sp"
@@ -50,6 +61,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:gravity="center_vertical"
         android:layout_marginTop="8dp"
         android:text="@string/survey_rv_header"
@@ -60,7 +73,8 @@
         android:id="@+id/rvSurv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:overScrollMode="never"
         android:scrollbars="none" />
 
@@ -68,9 +82,12 @@
         android:id="@+id/rlSurvAddChoice"
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground">
         <ImageView
+            android:id="@+id/btnSurvAddChoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"

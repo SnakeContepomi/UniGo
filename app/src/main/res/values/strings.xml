@@ -196,4 +196,9 @@
     <string name="survey_desc">Informazioni aggiuntive…</string>
     <string name="survey_rv_header">Imposta scelte sondaggio</string>
     <string name="survey_add">Aggiungi voce</string>
+    <string name="survey_toolbar">Nuovo Sondaggio</string>
+    <string name="survey_dialog_add_choice">Inserire qui la nuova voce</string>
+    <string name="survey_dialog_more_choices_needed">Inserire almeno 2 opzioni per il sondaggio</string>
+    <string name="survey_dialog_sending">Caricamento sondaggio in corso…</string>
+    <string name="survey_toast_sent">Sondaggio creato!</string>
 </resources>
