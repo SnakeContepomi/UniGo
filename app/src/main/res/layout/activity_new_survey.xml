@@ -95,6 +95,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:src="@drawable/ic_add_black_24dp"
+            android:tint="@color/colorPrimary"
             android:contentDescription="@null"
             android:clickable="true"
             android:background="?android:attr/selectableItemBackgroundBorderless"/>
