@@ -71,7 +71,7 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
 
         etTitle = (EditText) findViewById(R.id.etSurvTitle);
         etDesc = (EditText) findViewById(R.id.etSurvDesc);
-        RecyclerView rvChoice = (RecyclerView) findViewById(R.id.rvSurv);
+        RecyclerView rvChoice = (RecyclerView) findViewById(R.id.rvNewSurv);
         rvChoice.setHasFixedSize(true);
         rvChoice.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
         surveyAdapter = new SurveyChoiceAdapter();
