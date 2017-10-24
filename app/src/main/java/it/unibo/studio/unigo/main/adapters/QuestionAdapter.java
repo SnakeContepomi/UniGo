@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.DetailActivity;
+import it.unibo.studio.unigo.main.QuestionDetailActivity;
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.adapteritems.QuestionAdapterItem;
 import it.unibo.studio.unigo.utils.Util;
@@ -145,7 +145,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
             @Override
             public void onClick(View view)
             {
-                Intent intent = new Intent(holder.context, DetailActivity.class);
+                Intent intent = new Intent(holder.context, QuestionDetailActivity.class);
                 intent.putExtra("question_key", qItem.getQuestionKey());
                 activity.startActivityForResult(intent, MainActivity.REQUEST_CODE_DETAIL);
             }

@@ -83,6 +83,7 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
             @Override
             public void onClick(View view)
             {
+                view.clearFocus();
                 openNewChoiceDialog();
             }
         };

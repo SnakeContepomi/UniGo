@@ -30,7 +30,7 @@ import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Question;
 
-public class DetailActivity extends AppCompatActivity
+public class QuestionDetailActivity extends AppCompatActivity
 {
     private final static int REQUEST_FILE_PERMISSION = 1;
     private Question question;

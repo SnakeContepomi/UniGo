@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.ChatActivity;
-import it.unibo.studio.unigo.main.DetailActivity;
+import it.unibo.studio.unigo.main.QuestionDetailActivity;
 import it.unibo.studio.unigo.main.MainActivity;
 import it.unibo.studio.unigo.main.fragments.SettingsFragment;
 import it.unibo.studio.unigo.utils.firebase.Answer;
@@ -1247,10 +1247,10 @@ public class BackgroundService extends Service
                     break;
             }
 
-            Intent resultIntent = new Intent(BackgroundService.this, DetailActivity.class);
+            Intent resultIntent = new Intent(BackgroundService.this, QuestionDetailActivity.class);
             resultIntent.putExtra("question_key", questionKey);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-            stackBuilder.addParentStack(DetailActivity.class);
+            stackBuilder.addParentStack(QuestionDetailActivity.class);
             stackBuilder.addNextIntent(resultIntent);
             PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
             mBuilder.setContentIntent(resultPendingIntent);

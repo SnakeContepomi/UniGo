@@ -29,14 +29,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.DetailActivity;
+import it.unibo.studio.unigo.main.QuestionDetailActivity;
 
 public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
 {
     private List<String> docList;
     // Indice dell'elemento che ha richiesto i permessi di scrittura sulla memoria interna
     // (utilizzato per riprendere il download dell'elemento una volta ottenuti i permessi di scrittura
-    //  da DetailActivity)
+    //  da QuestionDetailActivity)
     private int elementRequestPermission;
     private Context context;
 
@@ -111,7 +111,7 @@ public class DocAdapter extends RecyclerView.Adapter<DocAdapter.ImageHolder>
                 else
                 {
                     elementRequestPermission = holder.getAdapterPosition();
-                    ((DetailActivity)context).getWritePermission();
+                    ((QuestionDetailActivity)context).getWritePermission();
                 }
             }
         });

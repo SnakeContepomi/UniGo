@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.DetailActivity;
+import it.unibo.studio.unigo.main.QuestionDetailActivity;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
 import it.unibo.studio.unigo.utils.firebase.Comment;
@@ -576,7 +576,7 @@ public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 {
                     if (layoutExpanded != -1)
                     {
-                        ((DetailActivity) activity).collapseCommentList(layoutExpanded);
+                        ((QuestionDetailActivity) activity).collapseCommentList(layoutExpanded);
                         layoutExpanded = -1;
                     }
 
