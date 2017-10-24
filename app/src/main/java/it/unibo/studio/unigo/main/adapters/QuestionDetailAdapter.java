@@ -47,7 +47,7 @@ import static it.unibo.studio.unigo.R.drawable.empty_profile_pic;
 import static it.unibo.studio.unigo.utils.Util.getCurrentUser;
 
 
-public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class QuestionDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private static final int TYPE_QUESTION = 1;
     private static final int TYPE_ANSWER = 2;
@@ -146,7 +146,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    public DetailAdapter(Question question, String questionKey, Activity activity)
+    public QuestionDetailAdapter(Question question, String questionKey, Activity activity)
     {
         this.question = question;
         this.questionKey = questionKey;
@@ -323,7 +323,7 @@ public class DetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             for(Map.Entry<String, String> entry : question.images.entrySet())
                 imgUrlList.add(entry.getValue());
 
-            DetailPictureAdapter mAdapter = new DetailPictureAdapter(imgUrlList);
+            QuestionDetailPictureAdapter mAdapter = new QuestionDetailPictureAdapter(imgUrlList);
             qh.rvPicture.setAdapter(mAdapter);
         }
 

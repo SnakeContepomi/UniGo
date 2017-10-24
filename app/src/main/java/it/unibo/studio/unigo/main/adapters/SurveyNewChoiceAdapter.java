@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 
-public class SurveyChoiceAdapter extends Adapter<SurveyChoiceAdapter.ChoiceHolder>
+public class SurveyNewChoiceAdapter extends Adapter<SurveyNewChoiceAdapter.ChoiceHolder>
 {
     private List<String> choiceList;
 
@@ -31,7 +31,7 @@ public class SurveyChoiceAdapter extends Adapter<SurveyChoiceAdapter.ChoiceHolde
         }
     }
 
-    public SurveyChoiceAdapter()
+    public SurveyNewChoiceAdapter()
     {
         choiceList = new ArrayList<>();
     }

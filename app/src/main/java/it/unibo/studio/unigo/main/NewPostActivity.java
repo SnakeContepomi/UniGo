@@ -50,7 +50,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.adapters.DetailPictureAdapter;
+import it.unibo.studio.unigo.main.adapters.QuestionDetailPictureAdapter;
 import it.unibo.studio.unigo.main.adapters.ChipAdapter;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.Util;
@@ -75,7 +75,7 @@ public class NewPostActivity extends AppCompatActivity implements Toolbar.OnMenu
     private EditText etTitle, etCourse, etDesc;
     private ChipAdapter chipAdapter;
     // Adapter utilizzato da StaticGridViewer per la rappresentazione delle immagini allegate
-    private DetailPictureAdapter photoAdapter;
+    private QuestionDetailPictureAdapter photoAdapter;
     private MaterialDialog dialog, permissionDialog;
     // Percorso dell'immagine attualmente scattata dalla fotocamera
     private String currentPhotoPath;
@@ -328,7 +328,7 @@ public class NewPostActivity extends AppCompatActivity implements Toolbar.OnMenu
         RecyclerView recyclerViewPhoto = (RecyclerView) findViewById(R.id.recyclerViewPhoto);
         recyclerViewPhoto.setHasFixedSize(true);
         recyclerViewPhoto.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false));
-        photoAdapter = new DetailPictureAdapter();
+        photoAdapter = new QuestionDetailPictureAdapter();
         recyclerViewPhoto.setAdapter(photoAdapter);
 
         dialog = new MaterialDialog.Builder(this)

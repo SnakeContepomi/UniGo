@@ -164,6 +164,7 @@
 
     <string name="empty_section">Nessuna domanda in questa sezione</string>
     <string name="empty_chat">Nessun messaggio da visualizzare</string>
+    <string name="empty_survey">Nessun sondaggio da visualizzare</string>
     <string name="chat_message_hint">Inserisci un messaggio…</string>
     <!-- notification strings -->
     <string name="no_ringtone">Silenzioso</string>
@@ -201,4 +202,5 @@
     <string name="survey_dialog_more_choices_needed">Inserire almeno 2 opzioni per il sondaggio</string>
     <string name="survey_dialog_sending">Caricamento sondaggio in corso…</string>
     <string name="survey_toast_sent">Sondaggio creato!</string>
+    <string name="survey_list_open">Visualizza</string>
 </resources>

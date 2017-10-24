@@ -23,7 +23,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.adapters.DetailAdapter;
+import it.unibo.studio.unigo.main.adapters.QuestionDetailAdapter;
 import it.unibo.studio.unigo.utils.BackgroundService;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Answer;
@@ -34,7 +34,7 @@ public class DetailActivity extends AppCompatActivity
 {
     private final static int REQUEST_FILE_PERMISSION = 1;
     private Question question;
-    private DetailAdapter mAdapter;
+    private QuestionDetailAdapter mAdapter;
     private RecyclerView recyclerViewQuestionDetail;
 
     @Override
@@ -91,7 +91,7 @@ public class DetailActivity extends AppCompatActivity
         recyclerViewQuestionDetail = (RecyclerView) findViewById(R.id.recyclerViewAnswer);
         recyclerViewQuestionDetail.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
-        mAdapter = new DetailAdapter(question, getIntent().getStringExtra("question_key"), this);
+        mAdapter = new QuestionDetailAdapter(question, getIntent().getStringExtra("question_key"), this);
 
         recyclerViewQuestionDetail.setAdapter(mAdapter);
     }
@@ -230,7 +230,7 @@ public class DetailActivity extends AppCompatActivity
 
     public void collapseCommentList(int position)
     {
-        DetailAdapter.answerHolder holder = (DetailAdapter.answerHolder) recyclerViewQuestionDetail.findViewHolderForAdapterPosition(position);
+        QuestionDetailAdapter.answerHolder holder = (QuestionDetailAdapter.answerHolder) recyclerViewQuestionDetail.findViewHolderForAdapterPosition(position);
         holder.closeCommentList();
     }
 

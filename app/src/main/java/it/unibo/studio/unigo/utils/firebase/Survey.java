@@ -13,7 +13,7 @@ public class Survey
     public String date;
     public String user_key;
     public String course_key;
-    public HashMap<String, List<String>> choices;
+    public HashMap<String, HashMap<String,Boolean>> choices;
 
     public Survey() { }
 

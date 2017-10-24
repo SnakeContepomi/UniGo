@@ -24,7 +24,7 @@ import it.unibo.studio.unigo.main.DetailActivity;
 import it.unibo.studio.unigo.main.FullSizeImageActivity;
 import it.unibo.studio.unigo.main.NewPostActivity;
 
-public class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHolder>
+public class QuestionDetailPictureAdapter extends Adapter<QuestionDetailPictureAdapter.ImageHolder>
 {
     private final int UPLOAD = 0;
     private final int DOWNLOAD = 1;
@@ -55,14 +55,14 @@ public class DetailPictureAdapter extends Adapter<DetailPictureAdapter.ImageHold
     }
 
     // Costruttore richiamato da DetailActivity, contiene la lista di tutte le immagini da scaricare
-    DetailPictureAdapter(List<String> pictureList)
+    QuestionDetailPictureAdapter(List<String> pictureList)
     {
         this.pictureList = pictureList;
         type = DOWNLOAD;
     }
 
     // Costruttore richiamato da NewPostActivity, le immagini vengono caricare man mano che vengono selezionate dall'utente
-    public DetailPictureAdapter()
+    public QuestionDetailPictureAdapter()
     {
         this.pictureList = new ArrayList<>();
         type = UPLOAD;

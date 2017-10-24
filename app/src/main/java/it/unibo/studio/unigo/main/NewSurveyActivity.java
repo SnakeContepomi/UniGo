@@ -23,7 +23,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import java.util.List;
 import it.unibo.studio.unigo.R;
-import it.unibo.studio.unigo.main.adapters.SurveyChoiceAdapter;
+import it.unibo.studio.unigo.main.adapters.SurveyNewChoiceAdapter;
 import it.unibo.studio.unigo.utils.Error;
 import it.unibo.studio.unigo.utils.Util;
 import it.unibo.studio.unigo.utils.firebase.Survey;
@@ -31,7 +31,7 @@ import it.unibo.studio.unigo.utils.firebase.Survey;
 public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener
 {
     private EditText etTitle, etDesc;
-    private SurveyChoiceAdapter surveyAdapter;
+    private SurveyNewChoiceAdapter surveyAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -74,7 +74,7 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
         RecyclerView rvChoice = (RecyclerView) findViewById(R.id.rvNewSurv);
         rvChoice.setHasFixedSize(true);
         rvChoice.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
-        surveyAdapter = new SurveyChoiceAdapter();
+        surveyAdapter = new SurveyNewChoiceAdapter();
         rvChoice.setAdapter(surveyAdapter);
 
         RelativeLayout addChoiceLayout = (RelativeLayout) findViewById(R.id.rlSurvAddChoice);
@@ -153,7 +153,7 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
             {
                 List<String> choiceList = surveyAdapter.getChoiceList();
                 for(String option : choiceList)
-                    Util.getDatabase().getReference("Survey").child(key).child("choices").child(option).setValue("");
+                    Util.getDatabase().getReference("Survey").child(key).child("choices").child(option).child("empty").setValue(true);
 
                 Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("surveys").child(key).setValue(true);
                 Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("surveys").child(key).setValue(survey.date);
