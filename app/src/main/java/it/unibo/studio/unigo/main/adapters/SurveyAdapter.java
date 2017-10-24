@@ -8,8 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -94,11 +92,12 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             public void onCancelled(DatabaseError databaseError) { }
         });
 
+        // Pulsante che permette di votare un sondaggio (1 voto per sondaggio)
         holder.survBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                Toast.makeText(holder.context, "Helloh!", Toast.LENGTH_SHORT).show();
+
             }
         });
     }
