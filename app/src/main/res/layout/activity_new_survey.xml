@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorLightGray"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
@@ -14,7 +15,7 @@
         android:paddingStart="0dp"
         android:paddingEnd="0dp"
         app:popupTheme="@style/AppTheme"
-        app:title="@string/survey_toolbar"
+        app:title="@string/survey_toolbar_new"
         app:titleTextAppearance="@style/ToolbarTitleTextAppearanceMedium" />
 
     <TextView
