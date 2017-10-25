@@ -203,4 +203,5 @@
     <string name="survey_dialog_sending">Caricamento sondaggio in corso…</string>
     <string name="survey_toast_sent">Sondaggio creato!</string>
     <string name="survey_list_open">Visualizza</string>
+    <string name="survey_list_close">Nascondi</string>
 </resources>

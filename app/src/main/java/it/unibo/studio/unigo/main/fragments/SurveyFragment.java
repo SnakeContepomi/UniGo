@@ -46,7 +46,7 @@ public class SurveyFragment extends android.support.v4.app.Fragment
         rvSurv = (RecyclerView) v.findViewById(R.id.rvSurv);
         rvSurv.setHasFixedSize(true);
         rvSurv.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext(), LinearLayoutManager.VERTICAL, false));
-        survAdapter = new SurveyAdapter();
+        survAdapter = new SurveyAdapter(getActivity());
         rvSurv.setAdapter(survAdapter);
         setRecyclerViewVisibility(false);
 
@@ -63,22 +63,6 @@ public class SurveyFragment extends android.support.v4.app.Fragment
                         survAdapter.addElement(new SurveyAdapterItem(dataSnapshot.getKey(), dataSnapshot.getValue(Survey.class)));
                         setRecyclerViewVisibility(true);
                     }
-
-                    /*Survey survey = dataSnapshot.getValue(Survey.class);
-                    int opzione = 1;
-                    for (Map.Entry<String, HashMap<String, Boolean>> choice : survey.choices.entrySet())
-                    {
-                        int utente = 1;
-                        System.out.println("Opzione " + opzione + ": " + choice.getKey());
-
-                        for (Map.Entry<String, Boolean> users : choice.getValue().entrySet())
-                        {
-                            System.out.println("  user " + utente + ": " + users.getKey() + ", valore inutile - " + users.getValue());
-                            utente++;
-                        }
-
-                        opzione++;
-                    }*/
                 }
             }
 

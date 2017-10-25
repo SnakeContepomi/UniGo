@@ -78,6 +78,8 @@ dependencies {
     compile 'com.github.esafirm.android-image-picker:imagepicker:1.7.5'
     // Material File Picker
     compile 'com.nbsp:library:1.8'
+    // Material Graph
+    compile 'com.github.lecho:hellocharts-library:1.5.8@aar'
 }
 
 apply plugin: 'com.google.gms.google-services'
