@@ -178,6 +178,8 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
                 return Error.Type.TITLE_IS_EMPTY;
             if (surveyAdapter.getItemCount() < 2)
                 return Error.Type.NOT_ENOUGH_SURVEY_CHOICES;
+            if (surveyAdapter.getItemCount() > 14)
+                return Error.Type.TOO_MANY_SURVEY_CHOICES;
             if (etDesc.getText().toString().equals(""))
                 return Error.Type.DESC_IS_EMPTY;
             return null;
@@ -247,6 +249,18 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
                                 dialog.dismiss();
                             }
                         });
+                break;
+            case TOO_MANY_SURVEY_CHOICES:
+                builder.setMessage(getString(R.string.survey_dialog_too_may_choices));
+                builder.setPositiveButton(getString(android.R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
+                            }
+                        });
+                break;
         }
 
         // Visualizzazione alertDialog

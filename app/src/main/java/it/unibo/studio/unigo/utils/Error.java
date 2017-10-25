@@ -25,7 +25,8 @@ public class Error
         DESC_IS_EMPTY,
         NOT_ENOUGH_CREDITS,
 
-        NOT_ENOUGH_SURVEY_CHOICES
+        NOT_ENOUGH_SURVEY_CHOICES,
+        TOO_MANY_SURVEY_CHOICES
     }
 
     public static void resetError(TextInputLayout layout)

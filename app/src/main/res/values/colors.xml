@@ -37,6 +37,7 @@
     <color name="icon_letter_orange">#ffa726</color>
     <color name="icon_letter_deep_orange">#ffa270</color>
     <color name="icon_letter_brown">#be9c91</color>
+    <color name="icon_letter_dark_red">#FF4444</color>
 
     <array name="colors">
         <item>@color/icon_letter_red</item>
@@ -52,5 +53,6 @@
         <item>@color/icon_letter_orange</item>
         <item>@color/icon_letter_deep_orange</item>
         <item>@color/icon_letter_brown</item>
+        <item>@color/icon_letter_dark_red</item>
     </array>
 </resources>

@@ -200,6 +200,7 @@
     <string name="survey_toolbar_new">Nuovo Sondaggio</string>
     <string name="survey_dialog_add_choice">Inserire qui la nuova voce</string>
     <string name="survey_dialog_more_choices_needed">Inserire almeno 2 opzioni per il sondaggio</string>
+    <string name="survey_dialog_too_may_choices">Inserire al massimo 14 opzioni per il sondaggio</string>
     <string name="survey_dialog_sending">Caricamento sondaggio in corso…</string>
     <string name="survey_toast_sent">Sondaggio creato!</string>
     <string name="survey_list_open">Visualizza</string>

@@ -1,14 +1,17 @@
 package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
@@ -17,9 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
 import net.cachapa.expandablelayout.ExpandableLayout;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,8 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         TextView survName, survDate, survTitle, survDesc;
         ExpandableLayout expandableLayout;
         PieChartView survChart;
-        Button survBtn;
+        LinearLayout survLegendLayout;
+        Button survCardVoteBtn, survBtnExpandToggle;
 
         SurveyHolder(View v)
         {
@@ -59,7 +61,9 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             survDesc = (TextView) v.findViewById(R.id.survCardDesc);
             expandableLayout = (ExpandableLayout) v.findViewById(R.id.survExpandableLayout);
             survChart = (PieChartView) v.findViewById(R.id.survChart);
-            survBtn = (Button) v.findViewById(R.id.survCardBtn);
+            survLegendLayout = (LinearLayout) v.findViewById(R.id.survLegendLayout);
+            survCardVoteBtn = (Button) v.findViewById(R.id.survCardVoteBtn);
+            survBtnExpandToggle = (Button) v.findViewById(R.id.survCardExpandableBtn);
         }
     }
 
@@ -114,32 +118,32 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
 
         // Grafico a torta
         holder.survChart.setChartRotationEnabled(false);
-        generateData(holder.survChart, position);
+        generateData(holder, position);
         holder.survChart.setOnValueTouchListener(new PieChartOnValueSelectListener() {
             @Override
             public void onValueSelected(int arcIndex, SliceValue value)
             {
-                Toast.makeText(holder.context, "Selected: " + value, Toast.LENGTH_SHORT).show();
+                Toast.makeText(holder.context,"Votata da " + (int) value.getValue()+" persone", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onValueDeselected() { }
         });
 
-        // Pulsante che permette di votare un sondaggio (1 voto per sondaggio)
-        holder.survBtn.setOnClickListener(new View.OnClickListener() {
+        // Pulsante che permette di espandere e ridurre la card-sondaggio
+        holder.survBtnExpandToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
                 if (holder.expandableLayout.isExpanded())
                 {
                     holder.expandableLayout.collapse();
-                    holder.survBtn.setText(context.getString(R.string.survey_list_open));
+                    holder.survBtnExpandToggle.setText(context.getString(R.string.survey_list_open));
                 }
                 else
                 {
                     holder.expandableLayout.expand();
-                    holder.survBtn.setText(context.getString(R.string.survey_list_close));
+                    holder.survBtnExpandToggle.setText(context.getString(R.string.survey_list_close));
                 }
             }
         });
@@ -160,7 +164,7 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         return -1;
     }
 
-    private void generateData(PieChartView chart, int pos)
+    private void generateData(SurveyHolder holder, int pos)
     {
         // Sondaggio preso in esame
         Survey survey = surveyList.get(pos).getSurvey();
@@ -170,11 +174,10 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         int totalVotes = 0;
         // Lista dei possibili colori da assegnare alle varie opzioni di un sondaggio (max. 5 opzioni)
         List<Integer> colorList = new ArrayList<>();
-        colorList.add(Color.parseColor("#33B5E5"));
-        colorList.add(Color.parseColor("#AA66CC"));
-        colorList.add(Color.parseColor("#99CC00"));
-        colorList.add(Color.parseColor("#FFBB33"));
-        colorList.add(Color.parseColor("#FF4444"));
+        int[] colors = context.getResources().getIntArray(R.array.colors);
+        for(int i : colors)
+            colorList.add(i);
+
 
         // Per ciascuna opzione del sondaggio, viene contato il numero di persone che hanno votato, ricordando che:
         // Chiave della HashMap = testo dell'opzione del sondaggio
@@ -197,13 +200,39 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             // Viene assegnata una porzione di grafico solamente se esiste almeno un voto per quell'opzione
             if (nVotes != 0)
             {
+                // Viene assegnato un colore casuale tra quelli disponibili
                 int randomColor = (int) (Math.random() * colorList.size());
                 values.add(new SliceValue(nVotes,colorList.get(randomColor)));
+
+                // Container della legenda
+                LinearLayout horizontalContainer = new LinearLayout(context);
+                horizontalContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                horizontalContainer.setOrientation(LinearLayout.HORIZONTAL);
+                horizontalContainer.setGravity(Gravity.CENTER);
+
+                // Viene aggiunto un elemento nella legenda per indicare a cosa corrisponde
+                // la porzione di grafico con quel determinato colore
+                LinearLayout legendItem = new LinearLayout(context);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, context.getResources().getDisplayMetrics()),
+                        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, context.getResources().getDisplayMetrics()));
+                params.setMargins(0, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, context.getResources().getDisplayMetrics()), 0);
+                legendItem.setLayoutParams(params);
+                legendItem.setBackgroundColor(colorList.get(randomColor));
+                TextView legendName = new TextView(context);
+                legendName.setText(choice.getKey());
+                legendName.setLines(1);
+                legendName.setEllipsize(TextUtils.TruncateAt.END);
+
+                horizontalContainer.addView(legendItem);
+                horizontalContainer.addView(legendName);
+                holder.survLegendLayout.addView(horizontalContainer);
+                // Viene rimosso il colore utilizzato, in modo da utilizzarlo una sola volta per grafico
                 colorList.remove(randomColor);
             }
         }
 
-        // Se non è stato espresso nessun voto per nessuna opzione, viene nascosto il grafico
+        // Se almeno una persona ha votato nel sondaggio, viene preparato il grafico da visualizzare
         if (values.size() != 0)
         {
             // Le informazioni ricavate dai voti vengono memorizzate in una classe di tipo PiechartData
@@ -226,9 +255,10 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
                 data.setCenterText2FontSize(14);
             }
 
-            chart.setPieChartData(data);
+            holder.survChart.setPieChartData(data);
         }
+        // Se non è stato espresso nessun voto per nessuna opzione, viene nascosto il grafico
         else
-            chart.setVisibility(View.GONE);
+            holder.survChart.setVisibility(View.GONE);
     }
 }

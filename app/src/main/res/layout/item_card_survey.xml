@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/empty_profile_pic" />
+                android:src="@drawable/empty_profile_pic"/>
 
                 <TextView
                     android:id="@+id/survCardName"
@@ -38,17 +38,16 @@
                     android:fontFamily="sans"
                     android:lines="1"
                     android:textColor="@color/ms_black"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"/>
 
                 <TextView
                     android:id="@+id/survCardDate"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:fontFamily="sans-serif"
-                    android:gravity="top"
                     android:textColor="@color/md_grey_500"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"/>
         </LinearLayout>
 
         <TextView
@@ -62,41 +61,67 @@
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/ms_black"
-            android:textSize="20sp" />
+            android:textSize="20sp"/>
 
         <net.cachapa.expandablelayout.ExpandableLayout
             android:id="@+id/survExpandableLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             app:el_duration="1000"
             app:el_expanded="false"
             app:el_parallax="0.5">
-            <TextView
-                android:id="@+id/survCardDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:fontFamily="sans-serif"
-                android:textColor="@color/colorDarkGray"
-                android:textSize="14sp"/>
-            <lecho.lib.hellocharts.view.PieChartView
-                android:id="@+id/survChart"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:layout_marginTop="16dp"/>
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/survCardDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:fontFamily="sans-serif"
+                    android:textColor="@color/colorDarkGray"
+                    android:textSize="14sp"/>
+                <lecho.lib.hellocharts.view.PieChartView
+                    android:id="@+id/survChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"/>
+                <LinearLayout
+                    android:id="@+id/survLegendLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="vertical">
+                </LinearLayout>
+            </LinearLayout>
+            <Button
+                android:id="@+id/survCardVoteBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="16dp"
+                android:layout_gravity="bottom|end"
+                android:theme="@style/FlatButton"
+                android:text="Vota"
+                android:textAlignment="textEnd"
+                android:textColor="@color/colorPrimary"/>
         </net.cachapa.expandablelayout.ExpandableLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@color/colorDividerGray"/>
 
         <Button
-            android:id="@+id/survCardBtn"
+            android:id="@+id/survCardExpandableBtn"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="48dp"
