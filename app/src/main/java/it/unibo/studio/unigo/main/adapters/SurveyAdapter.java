@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.akashandroid90.imageletter.MaterialLetterIcon;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -145,7 +146,27 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             @Override
             public void onClick(View view)
             {
+                new MaterialDialog.Builder(context)
+                        .title(R.string.survey_alert_title)
+                        .items(surveyList.get(holder.getAdapterPosition()).getSurvey().choices.keySet())
+                        .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                            @Override
+                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                // Viene aggiunto il voto nella voce selezionata del relativo sondaggio
+                                Util.getDatabase().getReference("Survey").child(surveyList.get(holder.getAdapterPosition()).getSurveyKey())
+                                        .child("choices").child(text.toString()).child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
+                                // Viene memorizzato nella tabella User il sondaggio a cui è stato inserito il voto
+                                Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("surveys_voted")
+                                        .child(surveyList.get(holder.getAdapterPosition()).getSurveyKey()).setValue(true);
+                                Toast.makeText(context, R.string.survey_vote_confirmed, Toast.LENGTH_SHORT).show();
 
+                                holder.survCardVoteBtn.setEnabled(false);
+                                holder.survCardVoteBtn.setTextColor(ContextCompat.getColor(context, R.color.md_grey_500));
+                                return true;
+                            }
+                        })
+                        .positiveText(R.string.survey_alert_confirm)
+                        .show();
             }
         });
 
