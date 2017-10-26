@@ -99,18 +99,6 @@
                     android:orientation="vertical">
                 </LinearLayout>
             </LinearLayout>
-            <Button
-                android:id="@+id/survCardVoteBtn"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginStart="0dp"
-                android:layout_marginEnd="16dp"
-                android:layout_gravity="bottom|end"
-                android:theme="@style/FlatButton"
-                android:text="Vota"
-                android:textAlignment="textEnd"
-                android:textColor="@color/colorPrimary"/>
         </net.cachapa.expandablelayout.ExpandableLayout>
 
         <View
@@ -120,15 +108,35 @@
             android:layout_marginEnd="16dp"
             android:background="@color/colorDividerGray"/>
 
-        <Button
-            android:id="@+id/survCardExpandableBtn"
-            style="@style/Widget.AppCompat.Button.Borderless"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginStart="13dp"
-            android:layout_marginEnd="13dp"
-            android:theme="@style/FlatButton"
-            android:text="@string/survey_list_open"
-            android:textColor="@color/colorPrimary"/>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/survCardVoteBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:theme="@style/FlatButton"
+                android:text="@string/survey_vote"
+                android:textColor="@color/colorPrimary"/>
+
+            <Button
+                android:id="@+id/survCardExpandableBtn"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="13dp"
+                android:theme="@style/FlatButton"
+                android:text="@string/survey_list_open"
+                android:textColor="@color/colorPrimary"/>
+        </LinearLayout>
+
     </LinearLayout>
 </android.support.v7.widget.CardView>

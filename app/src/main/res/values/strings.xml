@@ -205,4 +205,5 @@
     <string name="survey_toast_sent">Sondaggio creato!</string>
     <string name="survey_list_open">Visualizza</string>
     <string name="survey_list_close">Nascondi</string>
+    <string name="survey_vote">Vota</string>
 </resources>

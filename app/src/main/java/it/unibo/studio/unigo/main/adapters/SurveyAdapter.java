@@ -130,6 +130,25 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             public void onValueDeselected() { }
         });
 
+        if (checkIsAnswered(surveyList.get(position).getSurvey().choices))
+        {
+            holder.survCardVoteBtn.setEnabled(false);
+            holder.survCardVoteBtn.setTextColor(ContextCompat.getColor(context, R.color.md_grey_500));
+        }
+        else
+        {
+            holder.survCardVoteBtn.setEnabled(true);
+            holder.survCardVoteBtn.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+        }
+        // Pulsante che permette di votare in un sondaggio
+        holder.survCardVoteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+
+            }
+        });
+
         // Pulsante che permette di espandere e ridurre la card-sondaggio
         holder.survBtnExpandToggle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -260,5 +279,15 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         // Se non è stato espresso nessun voto per nessuna opzione, viene nascosto il grafico
         else
             holder.survChart.setVisibility(View.GONE);
+    }
+
+    // Metodo che verifica se l'utente ha votato una delle opzioni del sondaggio
+    private boolean checkIsAnswered(HashMap<String, HashMap<String, Boolean>> choices)
+    {
+        for (Map.Entry<String, HashMap<String, Boolean>> choice : choices.entrySet())
+            for (Map.Entry<String, Boolean> user : choice.getValue().entrySet())
+                if (Util.decodeEmail(user.getKey()).equals(Util.getCurrentUser().getEmail()))
+                    return true;
+        return false;
     }
 }
