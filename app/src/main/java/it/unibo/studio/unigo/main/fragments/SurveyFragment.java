@@ -41,7 +41,7 @@ public class SurveyFragment extends android.support.v4.app.Fragment
 
     private void initComponents(View v)
     {
-        wheel = (LinearLayout) v.findViewById(R.id.favoriteWheelLayout);
+        wheel = (LinearLayout) v.findViewById(R.id.surveyWheelLayout);
 
         rvSurv = (RecyclerView) v.findViewById(R.id.rvSurv);
         rvSurv.setHasFixedSize(true);
