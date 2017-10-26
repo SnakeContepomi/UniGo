@@ -123,11 +123,12 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         // Grafico a torta
         holder.survChart.setChartRotationEnabled(false);
         generateData(holder, position);
+        // Alla pressione di una fetta del grafico, vengono indicati tutti i nomi dei relativi votanti
         holder.survChart.setOnValueTouchListener(new PieChartOnValueSelectListener() {
             @Override
             public void onValueSelected(int arcIndex, SliceValue value)
             {
-                Toast.makeText(holder.context,"Votata da " + (int) value.getValue()+" persone", Toast.LENGTH_SHORT).show();
+                getUsersVotes(sliceList.get(holder.getAdapterPosition()), value.getColor(), holder.getAdapterPosition());
             }
 
             @Override
@@ -309,10 +310,11 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
     private void updateGraphData(SurveyHolder holder, int pos, String choice)
     {
         SliceValue slice = sliceList.get(pos).get(choice);
-        slice.setValue(slice.getValue() + 1);
-        slice.setLabel(String.valueOf((int) slice.getValue()));
+        slice.setLabel(String.valueOf((int) slice.getValue() + 1));
+        slice.setTarget(slice.getValue() + 1);
 
         holder.survChart.getPieChartData().setValues(new ArrayList<>(sliceList.get(pos).values()));
+        holder.survChart.startDataAnimation(750);
 
         // Se un sondaggio riceve il primo voto in assoluto,
         // bisognerà rendere visibile il grafico e la relativa legenda
@@ -324,7 +326,6 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         }
         else
             holder.survChart.getPieChartData().setCenterText2(String.valueOf(Integer.valueOf(holder.survChart.getPieChartData().getCenterText2()) + 1));
-        holder.survChart.startDataAnimation();
     }
 
     // Metodo che verifica se l'utente ha votato una delle opzioni del sondaggio
@@ -335,5 +336,55 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
                 if (Util.decodeEmail(user.getKey()).equals(Util.getCurrentUser().getEmail()))
                     return true;
         return false;
+    }
+
+    // Metodo che restituisce la lista di tutti gli utenti che hanno votato la scelta selezionata
+    // Nota: il colore viene utilizzato come identificativo della scelta selezionata, dato che è univoco nel grafico
+    private void getUsersVotes(HashMap<String, SliceValue> sliceMap, int color, int pos)
+    {
+        String choiceKey = "";
+
+        for(Map.Entry<String,SliceValue> slice : sliceMap.entrySet())
+            if (slice.getValue().getColor() == color)
+            {
+                choiceKey = slice.getKey();
+                break;
+            }
+
+        final String finalChoiceKey = choiceKey;
+        Util.getDatabase().getReference("Survey").child(surveyList.get(pos).getSurveyKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                Survey survey = dataSnapshot.getValue(Survey.class);
+                final List<String> mailList = new ArrayList<>(survey.choices.get(finalChoiceKey).keySet());
+                final List<String> nameList = new ArrayList<>();
+                if (mailList.contains("empty"))
+                    mailList.remove("empty");
+
+                for(String mail : mailList)
+                {
+                    Util.getDatabase().getReference("User").child(mail).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot)
+                        {
+                            nameList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                            if (mailList.size() == nameList.size())
+                                new MaterialDialog.Builder(context)
+                                        .title("Risposta votata da:")
+                                        .items(nameList)
+                                        .positiveText(R.string.alert_dialog_confirm)
+                                        .show();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) { }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
     }
 }
