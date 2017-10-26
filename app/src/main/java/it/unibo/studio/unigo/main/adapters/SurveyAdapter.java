@@ -39,6 +39,8 @@ import lecho.lib.hellocharts.view.PieChartView;
 public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
 {
     private List<SurveyAdapterItem> surveyList;
+    // Lista che memorizza l'associazione tra opzione del sondaggio e valore-colore nel grafico
+    private List<HashMap<String, SliceValue>> sliceList;
     private Context context;
 
     class SurveyHolder extends RecyclerView.ViewHolder
@@ -71,6 +73,7 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
     public SurveyAdapter(Context context)
     {
         surveyList = new ArrayList<>();
+        sliceList = new ArrayList<>();
         this.context = context;
     }
 
@@ -87,7 +90,7 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
     }
 
     @Override
-    public void onBindViewHolder(final SurveyHolder holder, final int position)
+    public void onBindViewHolder(final SurveyHolder holder, int position)
     {
         // Viene recuperata l'immagine profilo dell'utente che ha effettauto il sondaggio
         Util.getDatabase().getReference("User").child(surveyList.get(position).getSurvey().user_key).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -162,6 +165,7 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
 
                                 holder.survCardVoteBtn.setEnabled(false);
                                 holder.survCardVoteBtn.setTextColor(ContextCompat.getColor(context, R.color.md_grey_500));
+                                updateGraphData(holder, holder.getAdapterPosition(), text.toString());
                                 return true;
                             }
                         })
@@ -208,8 +212,6 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
     {
         // Sondaggio preso in esame
         Survey survey = surveyList.get(pos).getSurvey();
-        // Lista del nuemro di voti per ciascuna opzione del sondaggio
-        List<SliceValue> values = new ArrayList<>();
         // Numero di voti totale su tutte le opzioni
         int totalVotes = 0;
         // Lista dei possibili colori da assegnare alle varie opzioni di un sondaggio (max. 5 opzioni)
@@ -217,7 +219,8 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         int[] colors = context.getResources().getIntArray(R.array.colors);
         for(int i : colors)
             colorList.add(i);
-
+        // Mappa usata per associare il  numero di voti (e il colore utilizzato) con l'opzione del sondaggio
+        HashMap<String, SliceValue> sliceMap = new HashMap<>();
 
         // Per ciascuna opzione del sondaggio, viene contato il numero di persone che hanno votato, ricordando che:
         // Chiave della HashMap = testo dell'opzione del sondaggio
@@ -237,69 +240,91 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
                     totalVotes++;
                 }
 
-            // Viene assegnata una porzione di grafico solamente se esiste almeno un voto per quell'opzione
-            if (nVotes != 0)
-            {
-                // Viene assegnato un colore casuale tra quelli disponibili
-                int randomColor = (int) (Math.random() * colorList.size());
-                values.add(new SliceValue(nVotes,colorList.get(randomColor)));
+            // Viene assegnata una porzione di grafico:
+            // viene assegnato un colore casuale tra quelli disponibili
+            int randomColor = (int) (Math.random() * colorList.size());
+            SliceValue slice = new SliceValue(nVotes,colorList.get(randomColor));
+            if (nVotes == 0)
+                slice.setLabel("");
+            sliceMap.put(choice.getKey(), slice);
 
-                // Container della legenda
-                LinearLayout horizontalContainer = new LinearLayout(context);
-                horizontalContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                horizontalContainer.setOrientation(LinearLayout.HORIZONTAL);
-                horizontalContainer.setGravity(Gravity.CENTER);
+            // Container della legenda
+            LinearLayout horizontalContainer = new LinearLayout(context);
+            horizontalContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            horizontalContainer.setOrientation(LinearLayout.HORIZONTAL);
+            horizontalContainer.setGravity(Gravity.CENTER);
 
-                // Viene aggiunto un elemento nella legenda per indicare a cosa corrisponde
-                // la porzione di grafico con quel determinato colore
-                LinearLayout legendItem = new LinearLayout(context);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, context.getResources().getDisplayMetrics()),
-                        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, context.getResources().getDisplayMetrics()));
-                params.setMargins(0, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, context.getResources().getDisplayMetrics()), 0);
-                legendItem.setLayoutParams(params);
-                legendItem.setBackgroundColor(colorList.get(randomColor));
-                TextView legendName = new TextView(context);
-                legendName.setText(choice.getKey());
-                legendName.setLines(1);
-                legendName.setEllipsize(TextUtils.TruncateAt.END);
+            // Viene aggiunto un elemento nella legenda per indicare a cosa corrisponde
+            // la porzione di grafico con quel determinato colore
+            LinearLayout legendItem = new LinearLayout(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, context.getResources().getDisplayMetrics()),
+                    (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, context.getResources().getDisplayMetrics()));
+            params.setMargins(0, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, context.getResources().getDisplayMetrics()), 0);
+            legendItem.setLayoutParams(params);
+            legendItem.setBackgroundColor(colorList.get(randomColor));
+            TextView legendName = new TextView(context);
+            legendName.setText(choice.getKey());
+            legendName.setLines(1);
+            legendName.setEllipsize(TextUtils.TruncateAt.END);
 
-                horizontalContainer.addView(legendItem);
-                horizontalContainer.addView(legendName);
-                holder.survLegendLayout.addView(horizontalContainer);
-                // Viene rimosso il colore utilizzato, in modo da utilizzarlo una sola volta per grafico
-                colorList.remove(randomColor);
-            }
+            horizontalContainer.addView(legendItem);
+            horizontalContainer.addView(legendName);
+            holder.survLegendLayout.addView(horizontalContainer);
+
+            // Viene rimosso il colore utilizzato, in modo da utilizzarlo una sola volta per grafico
+            colorList.remove(randomColor);
         }
 
-        // Se almeno una persona ha votato nel sondaggio, viene preparato il grafico da visualizzare
-        if (values.size() != 0)
-        {
-            // Le informazioni ricavate dai voti vengono memorizzate in una classe di tipo PiechartData
-            PieChartData data = new PieChartData(values);
+        sliceList.add(pos, sliceMap);
 
-            // Personalizzazione grafica del diagramma a torta
-            data.setHasLabels(true);
-            data.setValueLabelBackgroundAuto(false);
-            data.setValueLabelBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
-            data.setHasCenterCircle(true);
-            //data.setHasLabelsOnlyForSelected(false);  //default false
-            //data.setHasLabelsOutside(false);          //default false
-            //data.setSlicesSpacing(24);                // Distanzia le porzioni di grafico tra loro
+        // Le informazioni ricavate dai voti vengono memorizzate in una classe di tipo PiechartData
+        PieChartData data = new PieChartData(new ArrayList<>(sliceList.get(pos).values()));
 
-            if (totalVotes != 0)
-            {
-                data.setCenterText1("Totale");
-                data.setCenterText1FontSize(14);
-                data.setCenterText2(String.valueOf(totalVotes));
-                data.setCenterText2FontSize(14);
-            }
+        // Personalizzazione grafica del diagramma a torta
+        data.setHasLabels(true);
+        data.setValueLabelBackgroundAuto(false);
+        data.setValueLabelBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
+        data.setHasCenterCircle(true);
+        //data.setHasLabelsOnlyForSelected(false);  // default false
+        //data.setHasLabelsOutside(false);          // default false
+        //data.setSlicesSpacing(24);                // Distanzia le porzioni di grafico tra loro
 
-            holder.survChart.setPieChartData(data);
-        }
+        data.setCenterText1("Totale");
+        data.setCenterText1FontSize(14);
+        data.setCenterText2(String.valueOf(totalVotes));
+        data.setCenterText2FontSize(14);
+
+        holder.survChart.setPieChartData(data);
+
         // Se non è stato espresso nessun voto per nessuna opzione, viene nascosto il grafico
-        else
+        if (totalVotes == 0)
+        {
             holder.survChart.setVisibility(View.GONE);
+            holder.survLegendLayout.setVisibility(View.GONE);
+        }
+    }
+
+    // Metodo che permette di aggiornare il grafico non appena
+    private void updateGraphData(SurveyHolder holder, int pos, String choice)
+    {
+        SliceValue slice = sliceList.get(pos).get(choice);
+        slice.setValue(slice.getValue() + 1);
+        slice.setLabel(String.valueOf((int) slice.getValue()));
+
+        holder.survChart.getPieChartData().setValues(new ArrayList<>(sliceList.get(pos).values()));
+
+        // Se un sondaggio riceve il primo voto in assoluto,
+        // bisognerà rendere visibile il grafico e la relativa legenda
+        if (holder.survChart.getPieChartData().getCenterText2().equals("0"))
+        {
+            holder.survChart.getPieChartData().setCenterText2("1");
+            holder.survChart.setVisibility(View.VISIBLE);
+            holder.survLegendLayout.setVisibility(View.VISIBLE);
+        }
+        else
+            holder.survChart.getPieChartData().setCenterText2(String.valueOf(Integer.valueOf(holder.survChart.getPieChartData().getCenterText2()) + 1));
+        holder.survChart.startDataAnimation();
     }
 
     // Metodo che verifica se l'utente ha votato una delle opzioni del sondaggio
