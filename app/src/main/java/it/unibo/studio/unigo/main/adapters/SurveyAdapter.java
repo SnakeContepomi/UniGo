@@ -126,8 +126,9 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             holder.survChart.setPieChartData(surveyList.get(position).getPieChartData());
             surveyList.get(position).setInitialized();
         }
+
         // Se non è stato espresso nessun voto per nessuna opzione, viene nascosto il grafico
-        if (Integer.valueOf(holder.survChart.getPieChartData().getCenterText2()) == 0)
+        if (Integer.valueOf(surveyList.get(position).getPieChartData().getCenterText2()) == 0)
         {
             holder.survChart.setVisibility(View.GONE);
             holder.survLegendLayout.setVisibility(View.GONE);
@@ -137,13 +138,14 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             @Override
             public void onValueSelected(int arcIndex, SliceValue value)
             {
-                //getUsersVotes(sliceList.get(holder.getAdapterPosition()), value.getColor(), holder.getAdapterPosition());
+                getUsersVotes(holder.getAdapterPosition(), value.getColor());
             }
 
             @Override
             public void onValueDeselected() { }
         });
 
+        // Controllo iniziale per verificare se l'utente ha già votato un sondaggio
         if (checkIsAnswered(surveyList.get(position).getSurvey().choices))
         {
             holder.survCardVoteBtn.setEnabled(false);
@@ -341,5 +343,44 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         }
         else
             holder.survChart.getPieChartData().setCenterText2(String.valueOf(Integer.valueOf(holder.survChart.getPieChartData().getCenterText2()) + 1));
+    }
+
+    // Metodo che restituisce la lista di tutti gli utenti che hanno votato la scelta selezionata
+    // Nota: il colore viene utilizzato come identificativo della scelta selezionata, dato che è univoco nel grafico
+    private void getUsersVotes(int pos, int color)
+    {
+        String choiceKey = "";
+
+        for(Map.Entry<String,SliceValue> slice : surveyList.get(pos).getGraphSlice().entrySet())
+            if (slice.getValue().getColor() == color)
+            {
+                choiceKey = slice.getKey();
+                break;
+            }
+
+        final List<String> mailList = new ArrayList<>(surveyList.get(pos).getSurvey().choices.get(choiceKey).keySet());
+        final List<String> nameList = new ArrayList<>();
+        if (mailList.contains("empty"))
+            mailList.remove("empty");
+
+        for(String mail : mailList)
+        {
+            Util.getDatabase().getReference("User").child(mail).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot)
+                {
+                    nameList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                    if (mailList.size() == nameList.size())
+                        new MaterialDialog.Builder(context)
+                                .title("Risposta votata da:")
+                                .items(nameList)
+                                .positiveText(R.string.alert_dialog_confirm)
+                                .show();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) { }
+            });
+        }
     }
 }
