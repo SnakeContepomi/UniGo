@@ -39,8 +39,6 @@ import lecho.lib.hellocharts.view.PieChartView;
 public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
 {
     private List<SurveyAdapterItem> surveyList;
-    // Lista che memorizza l'associazione tra opzione del sondaggio e valore-colore nel grafico
-    private List<HashMap<String, SliceValue>> sliceList;
     private Context context;
 
     class SurveyHolder extends RecyclerView.ViewHolder
@@ -73,7 +71,6 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
     public SurveyAdapter(Context context)
     {
         surveyList = new ArrayList<>();
-        sliceList = new ArrayList<>();
         this.context = context;
     }
 
@@ -122,13 +119,25 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
 
         // Grafico a torta
         holder.survChart.setChartRotationEnabled(false);
-        generateData(holder, position);
+        if (!surveyList.get(position).isInitialized())
+        {
+            for(View v : surveyList.get(position).getGraphLegend())
+                holder.survLegendLayout.addView(v);
+            holder.survChart.setPieChartData(surveyList.get(position).getPieChartData());
+            surveyList.get(position).setInitialized();
+        }
+        // Se non è stato espresso nessun voto per nessuna opzione, viene nascosto il grafico
+        if (Integer.valueOf(holder.survChart.getPieChartData().getCenterText2()) == 0)
+        {
+            holder.survChart.setVisibility(View.GONE);
+            holder.survLegendLayout.setVisibility(View.GONE);
+        }
         // Alla pressione di una fetta del grafico, vengono indicati tutti i nomi dei relativi votanti
         holder.survChart.setOnValueTouchListener(new PieChartOnValueSelectListener() {
             @Override
             public void onValueSelected(int arcIndex, SliceValue value)
             {
-                getUsersVotes(sliceList.get(holder.getAdapterPosition()), value.getColor(), holder.getAdapterPosition());
+                //getUsersVotes(sliceList.get(holder.getAdapterPosition()), value.getColor(), holder.getAdapterPosition());
             }
 
             @Override
@@ -145,28 +154,34 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             holder.survCardVoteBtn.setEnabled(true);
             holder.survCardVoteBtn.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
         }
+
         // Pulsante che permette di votare in un sondaggio
         holder.survCardVoteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
+                // Vengono mappate in una lista temporanea tutte le opzioni del sondaggio
+                List<String> surveyChoices = new ArrayList<>();
+                for(String choice : surveyList.get(holder.getAdapterPosition()).getSurvey().choices.keySet())
+                    surveyChoices.add(Util.decodeEmail(choice));
                 new MaterialDialog.Builder(context)
                         .title(R.string.survey_alert_title)
-                        .items(surveyList.get(holder.getAdapterPosition()).getSurvey().choices.keySet())
+                        .items(surveyChoices)
                         .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
                             @Override
                             public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                                 // Viene aggiunto il voto nella voce selezionata del relativo sondaggio
                                 Util.getDatabase().getReference("Survey").child(surveyList.get(holder.getAdapterPosition()).getSurveyKey())
-                                        .child("choices").child(text.toString()).child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
+                                        .child("choices").child(Util.encodeEmail(text.toString())).child(Util.encodeEmail(Util.getCurrentUser().getEmail())).setValue(true);
                                 // Viene memorizzato nella tabella User il sondaggio a cui è stato inserito il voto
                                 Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("surveys_voted")
                                         .child(surveyList.get(holder.getAdapterPosition()).getSurveyKey()).setValue(true);
                                 Toast.makeText(context, R.string.survey_vote_confirmed, Toast.LENGTH_SHORT).show();
+                                surveyList.get(holder.getAdapterPosition()).getSurvey().choices.get(Util.encodeEmail(text.toString())).put(Util.encodeEmail(Util.getCurrentUser().getEmail()), true);
 
                                 holder.survCardVoteBtn.setEnabled(false);
                                 holder.survCardVoteBtn.setTextColor(ContextCompat.getColor(context, R.color.md_grey_500));
-                                updateGraphData(holder, holder.getAdapterPosition(), text.toString());
+                                updateGraphData(holder, holder.getAdapterPosition(), Util.encodeEmail(text.toString()));
                                 return true;
                             }
                         })
@@ -196,6 +211,7 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
 
     public void addElement(SurveyAdapterItem surveyItem)
     {
+        initializeGraphData(surveyItem);
         surveyList.add(0, surveyItem);
         notifyDataSetChanged();
     }
@@ -209,10 +225,10 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         return -1;
     }
 
-    private void generateData(SurveyHolder holder, int pos)
+    private void initializeGraphData(SurveyAdapterItem surveyItem)
     {
         // Sondaggio preso in esame
-        Survey survey = surveyList.get(pos).getSurvey();
+        Survey survey = surveyItem.getSurvey();
         // Numero di voti totale su tutte le opzioni
         int totalVotes = 0;
         // Lista dei possibili colori da assegnare alle varie opzioni di un sondaggio (max. 5 opzioni)
@@ -254,7 +270,6 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             horizontalContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             horizontalContainer.setOrientation(LinearLayout.HORIZONTAL);
             horizontalContainer.setGravity(Gravity.CENTER);
-
             // Viene aggiunto un elemento nella legenda per indicare a cosa corrisponde
             // la porzione di grafico con quel determinato colore
             LinearLayout legendItem = new LinearLayout(context);
@@ -265,22 +280,20 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
             legendItem.setLayoutParams(params);
             legendItem.setBackgroundColor(colorList.get(randomColor));
             TextView legendName = new TextView(context);
-            legendName.setText(choice.getKey());
+            legendName.setText(Util.decodeEmail(choice.getKey()));
             legendName.setLines(1);
             legendName.setEllipsize(TextUtils.TruncateAt.END);
-
             horizontalContainer.addView(legendItem);
             horizontalContainer.addView(legendName);
-            holder.survLegendLayout.addView(horizontalContainer);
+            surveyItem.setGraphLegend(horizontalContainer);
 
             // Viene rimosso il colore utilizzato, in modo da utilizzarlo una sola volta per grafico
             colorList.remove(randomColor);
         }
 
-        sliceList.add(pos, sliceMap);
-
+        surveyItem.setGraphSlice(sliceMap);
         // Le informazioni ricavate dai voti vengono memorizzate in una classe di tipo PiechartData
-        PieChartData data = new PieChartData(new ArrayList<>(sliceList.get(pos).values()));
+        PieChartData data = new PieChartData(new ArrayList<>(sliceMap.values()));
 
         // Personalizzazione grafica del diagramma a torta
         data.setHasLabels(true);
@@ -296,36 +309,7 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         data.setCenterText2(String.valueOf(totalVotes));
         data.setCenterText2FontSize(14);
 
-        holder.survChart.setPieChartData(data);
-
-        // Se non è stato espresso nessun voto per nessuna opzione, viene nascosto il grafico
-        if (totalVotes == 0)
-        {
-            holder.survChart.setVisibility(View.GONE);
-            holder.survLegendLayout.setVisibility(View.GONE);
-        }
-    }
-
-    // Metodo che permette di aggiornare il grafico non appena
-    private void updateGraphData(SurveyHolder holder, int pos, String choice)
-    {
-        SliceValue slice = sliceList.get(pos).get(choice);
-        slice.setLabel(String.valueOf((int) slice.getValue() + 1));
-        slice.setTarget(slice.getValue() + 1);
-
-        holder.survChart.getPieChartData().setValues(new ArrayList<>(sliceList.get(pos).values()));
-        holder.survChart.startDataAnimation(750);
-
-        // Se un sondaggio riceve il primo voto in assoluto,
-        // bisognerà rendere visibile il grafico e la relativa legenda
-        if (holder.survChart.getPieChartData().getCenterText2().equals("0"))
-        {
-            holder.survChart.getPieChartData().setCenterText2("1");
-            holder.survChart.setVisibility(View.VISIBLE);
-            holder.survLegendLayout.setVisibility(View.VISIBLE);
-        }
-        else
-            holder.survChart.getPieChartData().setCenterText2(String.valueOf(Integer.valueOf(holder.survChart.getPieChartData().getCenterText2()) + 1));
+        surveyItem.setPieChartData(data);
     }
 
     // Metodo che verifica se l'utente ha votato una delle opzioni del sondaggio
@@ -338,53 +322,24 @@ public class SurveyAdapter extends Adapter<SurveyAdapter.SurveyHolder>
         return false;
     }
 
-    // Metodo che restituisce la lista di tutti gli utenti che hanno votato la scelta selezionata
-    // Nota: il colore viene utilizzato come identificativo della scelta selezionata, dato che è univoco nel grafico
-    private void getUsersVotes(HashMap<String, SliceValue> sliceMap, int color, int pos)
+    // Metodo che permette di aggiornare il grafico non appena
+    private void updateGraphData(SurveyHolder holder, int pos, String choice)
     {
-        String choiceKey = "";
+        surveyList.get(pos).getGraphSlice().get(choice).setLabel(String.valueOf((int) surveyList.get(pos).getGraphSlice().get(choice).getValue() + 1));
+        surveyList.get(pos).getGraphSlice().get(choice).setTarget(surveyList.get(pos).getGraphSlice().get(choice).getValue() + 1);
 
-        for(Map.Entry<String,SliceValue> slice : sliceMap.entrySet())
-            if (slice.getValue().getColor() == color)
-            {
-                choiceKey = slice.getKey();
-                break;
-            }
+        holder.survChart.getPieChartData().setValues(new ArrayList<>(surveyList.get(pos).getGraphSlice().values()));
+        holder.survChart.startDataAnimation(750);
 
-        final String finalChoiceKey = choiceKey;
-        Util.getDatabase().getReference("Survey").child(surveyList.get(pos).getSurveyKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
-            {
-                Survey survey = dataSnapshot.getValue(Survey.class);
-                final List<String> mailList = new ArrayList<>(survey.choices.get(finalChoiceKey).keySet());
-                final List<String> nameList = new ArrayList<>();
-                if (mailList.contains("empty"))
-                    mailList.remove("empty");
-
-                for(String mail : mailList)
-                {
-                    Util.getDatabase().getReference("User").child(mail).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot)
-                        {
-                            nameList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
-                            if (mailList.size() == nameList.size())
-                                new MaterialDialog.Builder(context)
-                                        .title("Risposta votata da:")
-                                        .items(nameList)
-                                        .positiveText(R.string.alert_dialog_confirm)
-                                        .show();
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) { }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) { }
-        });
+        // Se un sondaggio riceve il primo voto in assoluto,
+        // bisognerà rendere visibile il grafico e la relativa legenda
+        if (holder.survChart.getPieChartData().getCenterText2().equals("0"))
+        {
+            holder.survChart.getPieChartData().setCenterText2("1");
+            holder.survChart.setVisibility(View.VISIBLE);
+            holder.survLegendLayout.setVisibility(View.VISIBLE);
+        }
+        else
+            holder.survChart.getPieChartData().setCenterText2(String.valueOf(Integer.valueOf(holder.survChart.getPieChartData().getCenterText2()) + 1));
     }
 }
