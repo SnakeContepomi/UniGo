@@ -41,6 +41,7 @@ import it.unibo.studio.unigo.utils.firebase.ChatRoom;
 import it.unibo.studio.unigo.utils.firebase.Comment;
 import it.unibo.studio.unigo.utils.firebase.Message;
 import it.unibo.studio.unigo.utils.firebase.Question;
+import it.unibo.studio.unigo.utils.firebase.Survey;
 
 
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
@@ -59,6 +60,7 @@ public class BackgroundService extends Service
     private static List<String> ratingList = new ArrayList<>();
     private static List<String> likeList = new ArrayList<>();
     private static List<String> chatRoomList = new ArrayList<>();
+    private static List<String> surveyList = new ArrayList<>();
     // Numero di notifiche di ciascun tipo
     private static int questionCount = 0;
     private static int answerCount = 0;
@@ -68,6 +70,7 @@ public class BackgroundService extends Service
     private static int likeCount = 0;
     // Per separare il numero di messaggi contenuti in ciascuna chatroom, occorre utilizzare una lista
     private static List<Integer> chatRoomCount = new ArrayList<>();
+    private static int surveyCount = 0;
     private SharedPreferences prefs;
     /*
         Tipi di Notifiche in base al valore della variabile notifyID:
@@ -79,7 +82,7 @@ public class BackgroundService extends Service
         6 - LIKE: like ricevuto ad una risposta del'utente
         7 - CHATROOM: nuovo messaggio all'interno di una ChatRoom
      */
-    private enum NotificationType {QUESTION, ANSWER, COMMENT_QUESTION, COMMENT_ANSWER, RATING, LIKE, CHATROOM}
+    private enum NotificationType {QUESTION, ANSWER, COMMENT_QUESTION, COMMENT_ANSWER, RATING, LIKE, CHATROOM, SURVEY}
 
     // Avvio del servizio in background
     @Override
@@ -223,6 +226,7 @@ public class BackgroundService extends Service
         addLikeCommentListener();
 
         addChatRoomListener();
+        addSurveyListener();
     }
 
     // Listener per notificare tutte le nuove domande inserite nel corso dell'utente
@@ -831,6 +835,56 @@ public class BackgroundService extends Service
         });
     }
 
+    private void addSurveyListener()
+    {
+        Util.getDatabase().getReference("Survey").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s)
+            {
+                // Sondaggio appartenente al proprio corso universitario
+                if (dataSnapshot.getValue(Survey.class).course_key.equals(Util.CURRENT_COURSE_KEY))
+                {
+                    // Nuovo sondaggio
+                    if (prefs.getString(dataSnapshot.getKey(), "").equals(""))
+                    {
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString(dataSnapshot.getKey(), dataSnapshot.getKey());
+                        editor.apply();
+
+                        final Survey survey = dataSnapshot.getValue(Survey.class);
+                        if (!survey.user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
+                            Util.getDatabase().getReference("User").child(survey.user_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot)
+                                {
+                                    if (!surveyList.contains(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class)))
+                                        surveyList.add(dataSnapshot.child("name").getValue(String.class) + " " + dataSnapshot.child("lastName").getValue(String.class));
+                                    surveyCount++;
+                                    new getBitmapFromUrl(survey.user_key).execute(dataSnapshot.child("photoUrl").getValue(String.class));
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) { }
+                            });
+                    }
+                }
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
     // Metodo per scaricare in background l'immagine profilo di un utente e inviare successivamente una notifica
     // del tipo desiderato
     private class getBitmapFromUrl extends AsyncTask<String, Void, Bitmap>
@@ -850,6 +904,13 @@ public class BackgroundService extends Service
             this.type = type;
             this.mail = mail;
             this.msg = msg;
+        }
+
+        // Costruttore per SurveyNotifications
+        getBitmapFromUrl(String mail)
+        {
+            this.type = NotificationType.SURVEY;
+            this.mail = mail;
         }
 
         protected Bitmap doInBackground(String... urls)
@@ -877,6 +938,8 @@ public class BackgroundService extends Service
         {
             if (type == NotificationType.CHATROOM)
                 sendNotification(type, result, mail, msg);
+            else if (type == NotificationType.SURVEY)
+                    sendNotification(type, result);
             else
                 sendNotification(type, result, questionKey);
         }
@@ -1386,6 +1449,102 @@ public class BackgroundService extends Service
         }
     }
 
+    // Metodo per creare notifiche relative alla parte dei sondaggi (non avendo questionKey o messageKey, funzionano in modo diverso)
+    private void sendNotification(NotificationType type, Bitmap profilePic)
+    {
+        // Le notifiche vengono create solamente se è abilitata l'opzione in SettingsFragment (SwitchPreference)
+        // e l'utente desidera essere informato di quel particolare evento (MultiSelectListPreference)
+        if (prefs.getBoolean(SettingsFragment.KEY_PREF_NOTIF, getResources().getBoolean(R.bool.pref_notification_defVal)) && isNotificationEventSelected(type))
+        {
+            Notification.Builder mBuilder = new Notification.Builder(getApplicationContext())
+                    .setColor(Color.RED)
+                    .setSmallIcon(R.drawable.ic_school_black_24dp)
+                    .setPriority(getNotificationPriority())
+                    //{Delay Iniziale, Durata Vibrazione 1, Pausa 1, ...}
+                    .setVibrate(getNotificationVibration())
+                    .setLights(getNotificationColor(), 800, 4000)
+                    .setSound(getNotificationRingtone())
+                    .setAutoCancel(true);
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+            {
+                // Numero nuovi sondaggi
+                if (surveyCount == 1)
+                    mBuilder.setContentTitle("1 nuovo sondaggio");
+                else
+                    mBuilder.setContentTitle(surveyCount + " nuovi sondaggi");
+
+                // Gestione degli autori dei sondaggi
+                if (surveyList.size() == 1)
+                {
+                    mBuilder.setContentText(surveyList.get(0) + " ha creato un nuovo sondaggio");
+                    mBuilder.setLargeIcon(profilePic);
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(surveyList.get(0) + " ha creato un nuovo sondaggio"));
+                }
+                else if (surveyList.size() == 2)
+                {
+                    mBuilder.setContentText(surveyList.get(0) + " e " + surveyList.get(1) + " hanno creato " +  surveyCount + " sondaggi");
+                    mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(surveyList.get(0) + " e " + surveyList.get(1) + " hanno creato " + surveyCount + " sondaggi"));
+                }
+                else
+                {
+                    mBuilder.setContentText(surveyList.get(0) + " e altre " + (surveyList.size() - 1) + " persone hanno creato " + surveyCount + " sondaggi");
+                    mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(surveyList.get(0) + " e altre " + (surveyList.size() - 1) + " persone hanno creato " + surveyCount + " sondaggi"));
+                }
+            }
+            // Versione precedente a Nougat
+            else
+            {
+                mBuilder.setContentTitle(getResources().getString(R.string.app_name));
+
+                // Numero nuove domande
+                if (surveyCount == 1)
+                    mBuilder.setSubText("1 nuovo sondaggio");
+                else
+                    mBuilder.setSubText(surveyCount + " nuovi sondaggi");
+
+                // Gestione degli autori delle domande
+                if (surveyList.size() == 1)
+                {
+                    mBuilder.setContentText(surveyList.get(0) + " ha creato un nuovo sondaggio");
+                    mBuilder.setLargeIcon(profilePic);
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(surveyList.get(0) + " ha creato un nuovo sondaggio"));
+                }
+                else if (surveyList.size() == 2)
+                {
+                    mBuilder.setContentText(surveyList.get(0) + " e " + surveyList.get(1) + " hanno creato " + surveyCount + " sondaggi");
+                    mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(surveyList.get(0) + " e " + surveyList.get(1) + " hanno creato " + surveyCount + " sondaggi"));
+                }
+                else
+                {
+                    mBuilder.setContentText(surveyList.get(0) + " e altre " + (surveyList.size() - 1) + " persone hanno creato " + surveyCount + " sondaggi");
+                    mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    mBuilder.setStyle(new Notification.BigTextStyle()
+                            .bigText(surveyList.get(0) + " e altre " + (surveyList.size() - 1) + " persone hanno creato " + surveyCount + " sondaggi"));
+                }
+            }
+
+            Intent resultIntent = new Intent(BackgroundService.this, MainActivity.class);
+            resultIntent.putExtra("open_survey_fragment", true);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+            stackBuilder.addParentStack(MainActivity.class);
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(resultPendingIntent);
+
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(getNotificationID(type), mBuilder.build());
+        }
+    }
+
     // Metodo per restituire l'identificativo della notifica, dato il tipo
     private int getNotificationID(NotificationType type)
     {
@@ -1405,6 +1564,8 @@ public class BackgroundService extends Service
                 return 6;
             case CHATROOM:
                 return 7;
+            case SURVEY:
+                return 8;
             default:
                 return 0;
         }
@@ -1488,7 +1649,6 @@ public class BackgroundService extends Service
     // false --> l'evento viene scartato (non produce nessuna notifica)
     private boolean isNotificationEventSelected(NotificationType type)
     {
-
         String[] array = getResources().getStringArray(R.array.pref_notificationEvents_values);
         Set<String> set = new HashSet<>();
         Collections.addAll(set, array);
@@ -1513,6 +1673,8 @@ public class BackgroundService extends Service
                 return (value.contains("5"));
             case CHATROOM:
                 return (value.contains("6"));
+            case SURVEY:
+                return (value.contains("7"));
             default:
                 return false;
         }

@@ -259,11 +259,16 @@ public class MainActivity extends AppCompatActivity implements SheetLayout.OnFab
 
         if (getIntent().getBooleanExtra("open_chatroom_fragment", false))
         {
-            // Viene caricato il Fragment 'ChatRoom' quadno viene selezionata una notifica relativa ad una ChatRoom
+            // Viene caricato il Fragment 'ChatRoom' quando viene selezionata una notifica relativa ad una ChatRoom
+            navDrawer.setSelection(navDrawer.getDrawerItem(5));
+            subItemSelection = 4;
+        }
+        else if (getIntent().getBooleanExtra("open_survey_fragment", false))
+        {
+            // Viene caricato il Fragment 'Survey' quando viene aperta una notifica relativa ai sondaggi
             navDrawer.setSelection(navDrawer.getDrawerItem(4));
             subItemSelection = 3;
         }
-
     }
 
     // Inizializzazione della Toolbar e del NavDrawer
