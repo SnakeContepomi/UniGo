@@ -24,5 +24,6 @@ public class Survey
         this.date = Util.getDate();
         this.user_key = user_key;
         this.course_key = course_key;
+        choices = new HashMap<>();
     }
 }

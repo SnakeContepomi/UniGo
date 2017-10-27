@@ -10,7 +10,8 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -21,6 +22,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import java.util.HashMap;
 import java.util.List;
 import it.unibo.studio.unigo.R;
 import it.unibo.studio.unigo.main.adapters.SurveyNewChoiceAdapter;
@@ -120,16 +122,21 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
                 .build();
         dialog.show();
 
-        txt.setOnKeyListener(new View.OnKeyListener() {
+        txt.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent)
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
             {
                 if (txt.getText().toString().equals(""))
                     dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
                 else
                     dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
-                return false;
             }
+
+            @Override
+            public void afterTextChanged(Editable editable) { }
         });
         dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
     }
@@ -146,16 +153,19 @@ public class NewSurveyActivity extends AppCompatActivity implements Toolbar.OnMe
 
         final String key = Util.getDatabase().getReference("Survey").push().getKey();
         final Survey survey = new Survey(etTitle.getText().toString(), etDesc.getText().toString(), Util.encodeEmail(Util.getCurrentUser().getEmail()), Util.CURRENT_COURSE_KEY);
-
+        List<String> choiceList = surveyAdapter.getChoiceList();
+        for(String option : choiceList)
+        {
+            option = Util.encodeEmail(option);
+            HashMap<String, Boolean> initialMap = new HashMap<>();
+            initialMap.put("empty", true);
+            survey.choices.put(option, initialMap);
+        }
         // Creazione sondaggio. Una volta creato, vengono aggiunte tutte le opzioni desiderate
         Util.getDatabase().getReference("Survey").child(key).setValue(survey).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
-                List<String> choiceList = surveyAdapter.getChoiceList();
-                for(String option : choiceList)
-                    Util.getDatabase().getReference("Survey").child(key).child("choices").child(option).child("empty").setValue(true);
-
                 Util.getDatabase().getReference("User").child(Util.encodeEmail(Util.getCurrentUser().getEmail())).child("surveys").child(key).setValue(true);
                 Util.getDatabase().getReference("Course").child(Util.CURRENT_COURSE_KEY).child("surveys").child(key).setValue(survey.date);
 

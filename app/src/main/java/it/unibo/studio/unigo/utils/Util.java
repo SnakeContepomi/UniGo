@@ -138,13 +138,31 @@ public class Util
     // Metodo per memorizzare l'indirizzo email in Firebase rimpiazzando i punti con un carattere consentito
     public static String encodeEmail(String email)
     {
-        return email.replace(".", "%2E");
+        String encodedString = email;
+
+        encodedString = encodedString.replace(".", "%2E");
+        encodedString = encodedString.replace("#", "%3E");
+        encodedString = encodedString.replace("$", "%4E");
+        encodedString = encodedString.replace("[", "%5E");
+        encodedString = encodedString.replace("]", "%6E");
+        encodedString = encodedString.replace("/", "%7E");
+
+        return encodedString;
     }
 
     // Metodo che restituisce l'indirizzo email rimpiazzando i caratteri speciali con "."
     public static String decodeEmail(String email)
     {
-        return email.replace("%2E", ".");
+        String decodedString = email;
+
+        decodedString = decodedString.replace("%2E", ".");
+        decodedString = decodedString.replace("%3E", "#");
+        decodedString = decodedString.replace("%4E", "$");
+        decodedString = decodedString.replace("%5E", "[");
+        decodedString = decodedString.replace("%6E", "]");
+        decodedString = decodedString.replace("%7E", "/");
+
+        return decodedString;
     }
 
     // Metodo per ottenere il colore di sfondo per la lettera material, scelto in base alla prima lettera della stringa passata
