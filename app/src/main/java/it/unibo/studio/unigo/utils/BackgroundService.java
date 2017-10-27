@@ -724,7 +724,13 @@ public class BackgroundService extends Service
                                             if (!chatRoomList.contains(name))
                                                 chatRoomList.add(name);
                                             int pos = chatRoomList.indexOf(name);
-                                            chatRoomCount.set(pos, chatRoomCount.get(pos) + 1);
+                                            // Se la condizione è vera, è stato aggiunto un altro mittente, quindi
+                                            // bisogna creare l'elemento anche in chatRoomCount, altrmenti si modifica
+                                            // quello esistente
+                                            if (chatRoomCount.size() < chatRoomList.size())
+                                                chatRoomCount.add(1);
+                                            else
+                                                chatRoomCount.set(pos, chatRoomCount.get(pos) + 1);
 
                                             Util.getDatabase().getReference("User").child(mail).child("photoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
@@ -746,6 +752,9 @@ public class BackgroundService extends Service
                             }
                             else
                             {
+                                // Se esiste già una SharedPreference associata alla ChatRoom,
+                                // viene controllato se il messaggio letto è più recente dell'ultimo notificato
+                                // (questo controllo evita di notificare all'utente tutti i messaggi sin dall'inizio)
                                 if (msgId.compareTo(prefs.getString(chatId, "")) > 0)
                                 {
                                     SharedPreferences.Editor editor = prefs.edit();
@@ -799,7 +808,6 @@ public class BackgroundService extends Service
                                                     public void onCancelled(DatabaseError databaseError) { }
                                                 });
                                             }
-
                                         }
 
                                         @Override
