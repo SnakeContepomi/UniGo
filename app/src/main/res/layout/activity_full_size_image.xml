@@ -24,6 +24,5 @@
         android:layout_centerInParent="true"
         android:contentDescription="@null"
         android:background="@android:color/black"
-        android:src="@drawable/avd_progress_indeterminate_circular"
         android:transitionName="@string/trans_image" />
 </RelativeLayout>

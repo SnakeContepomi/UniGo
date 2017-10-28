@@ -2,7 +2,6 @@ package it.unibo.studio.unigo.main.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Animatable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +83,6 @@ public class QuestionDetailPictureAdapter extends Adapter<QuestionDetailPictureA
         switch (type)
         {
             case DOWNLOAD:
-                // Inizio dell'animazione di attesa del download dell'immagine da Internet
-                ((Animatable) holder.detailPic.getDrawable()).start();
 
                 // Caricamento immagine da Internet
                 Picasso.with(holder.context).load(pictureList.get(holder.getAdapterPosition())).noPlaceholder().into(holder.detailPic, new Callback() {
@@ -96,7 +92,6 @@ public class QuestionDetailPictureAdapter extends Adapter<QuestionDetailPictureA
                     @Override
                     public void onError()
                     {
-                        Toast.makeText(holder.context, "Holy Fuuuck!", Toast.LENGTH_SHORT).show();
                         holder.detailPic.setVisibility(View.GONE);
                     }
                 });
