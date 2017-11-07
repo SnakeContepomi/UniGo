@@ -43,13 +43,13 @@ import it.unibo.studio.unigo.utils.firebase.Message;
 import it.unibo.studio.unigo.utils.firebase.Question;
 import it.unibo.studio.unigo.utils.firebase.Survey;
 
-
 // Servizio in background che viene fatto partire al boot del telefono o all'avvio dell'app, che recupera
 // i cambiamenti da Firebase
 public class BackgroundService extends Service
 {
     static final String CURRENT_COURSE_KEY = "course_key";
     static final String LAST_QUESTION_READ = "last_key";
+    static final String LAST_SURVEY_READ = "last_survey";
 
     public static boolean isRunning = false;
     // Liste dei nomi degli utenti che hanno generato una notifica di ciascun tipo
@@ -226,7 +226,7 @@ public class BackgroundService extends Service
         addLikeCommentListener();
 
         addChatRoomListener();
-        addSurveyListener();
+        initSurveyListener();
     }
 
     // Listener per notificare tutte le nuove domande inserite nel corso dell'utente
@@ -843,6 +843,43 @@ public class BackgroundService extends Service
         });
     }
 
+    private void initSurveyListener()
+    {
+        Util.getDatabase().getReference("Survey").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                if (dataSnapshot.getChildrenCount() > 0)
+                {
+                    Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+                    DataSnapshot child;
+
+                    while (iterator.hasNext())
+                    {
+                        child = iterator.next();
+                        updateLastSurveyRead(child.getKey());
+
+                        if (!iterator.hasNext())
+                            addSurveyListener();
+                    }
+                }
+                else
+                    addSurveyListener();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+    }
+
+    // Metodo per memorizzare nelle shared preferences la chiave dell'ultimo sondaggio letto
+    private void updateLastSurveyRead(String key)
+    {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(LAST_SURVEY_READ, key);
+        editor.apply();
+    }
+
     private void addSurveyListener()
     {
         Util.getDatabase().getReference("Survey").addChildEventListener(new ChildEventListener() {
@@ -851,13 +888,10 @@ public class BackgroundService extends Service
             {
                 // Sondaggio appartenente al proprio corso universitario
                 if (dataSnapshot.getValue(Survey.class).course_key.equals(Util.CURRENT_COURSE_KEY))
-                {
                     // Nuovo sondaggio
-                    if (prefs.getString(dataSnapshot.getKey(), "").equals(""))
+                    if (dataSnapshot.getKey().compareTo(prefs.getString(LAST_SURVEY_READ, "")) > 0)
                     {
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString(dataSnapshot.getKey(), dataSnapshot.getKey());
-                        editor.apply();
+                        updateLastSurveyRead(dataSnapshot.getKey());
 
                         final Survey survey = dataSnapshot.getValue(Survey.class);
                         if (!survey.user_key.equals(Util.encodeEmail(Util.getCurrentUser().getEmail())))
@@ -875,8 +909,6 @@ public class BackgroundService extends Service
                                 public void onCancelled(DatabaseError databaseError) { }
                             });
                     }
-                }
-
             }
 
             @Override
